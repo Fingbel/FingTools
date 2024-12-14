@@ -1,16 +1,20 @@
 {
   "name": "com.fingcorp.fingtools",
   "version": "0.0.1",
-  "displayName": "fingtools",
-  "description": "A suite of tools to integrate Limezu assets seamlessly with Unity",
+  "displayName": "Fingbel's Tools",
+  "description": "This is a comprehensive Unity package providing a system for character importing and sprite management for the Modern Interiors collection by Limezu.(https://limezu.itch.io)",
   "unity": "2022.3",
   "keywords": [
     "unity",
     "plugin",
-    "example"
+    "assets"
   ],
   "author": {
     "name": "Fingbel",
-    "email": "fingbel@gmail.com"
+    "email": "fingbel@gmail.com",
+    "url": "https://github.com/Fingbel/FingTools"
+  },
+  "repository": {
+    "url": "https://github.com/Fingbel/FingTools"
   }
 }

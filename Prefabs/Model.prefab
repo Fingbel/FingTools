@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3949687823201475712}
-  - component: {fileID: 5255985611915511428}
+  - component: {fileID: 159109948985230343}
   - component: {fileID: 7133334797318960639}
   - component: {fileID: 7252726687790018628}
   - component: {fileID: 8160715466857805394}
@@ -35,7 +35,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4964099723771836383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5255985611915511428
+--- !u!114 &159109948985230343
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 278461018738136226}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3286efe233ad6244081e1d0ed8baaf28, type: 3}
+  m_Script: {fileID: 11500000, guid: b85b1636646156546837c73704cd21e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 7133334797318960639}
@@ -67,6 +67,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -141,7 +144,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 787899289735122039}
-  - component: {fileID: 8901656992649136459}
+  - component: {fileID: 8729159508045606023}
   - component: {fileID: 6432913486910722370}
   - component: {fileID: 6435531777414882069}
   - component: {fileID: 487856903147887341}
@@ -167,7 +170,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4964099723771836383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8901656992649136459
+--- !u!114 &8729159508045606023
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,7 +179,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3311545628965318978}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3286efe233ad6244081e1d0ed8baaf28, type: 3}
+  m_Script: {fileID: 11500000, guid: b85b1636646156546837c73704cd21e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 6432913486910722370}
@@ -199,6 +202,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -273,7 +279,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2928626470878619157}
-  - component: {fileID: 6884097935589231289}
+  - component: {fileID: 7291598946601813141}
   - component: {fileID: 7708349285152330034}
   - component: {fileID: 1053362349919725187}
   - component: {fileID: 6383059071130902011}
@@ -299,7 +305,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4964099723771836383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6884097935589231289
+--- !u!114 &7291598946601813141
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -308,7 +314,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3507955520724774733}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3286efe233ad6244081e1d0ed8baaf28, type: 3}
+  m_Script: {fileID: 11500000, guid: b85b1636646156546837c73704cd21e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 7708349285152330034}
@@ -331,6 +337,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -405,7 +414,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8977012848156644581}
-  - component: {fileID: 1070487956435589922}
+  - component: {fileID: 3122505578524656468}
   - component: {fileID: 335737828376879652}
   - component: {fileID: 7265127050948904830}
   - component: {fileID: 3292295689279084382}
@@ -431,7 +440,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4964099723771836383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1070487956435589922
+--- !u!114 &3122505578524656468
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -440,7 +449,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4871271748057171922}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3286efe233ad6244081e1d0ed8baaf28, type: 3}
+  m_Script: {fileID: 11500000, guid: b85b1636646156546837c73704cd21e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 335737828376879652}
@@ -463,6 +472,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -537,7 +549,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3672164717958315608}
-  - component: {fileID: 6236886010930465602}
+  - component: {fileID: 6381150393144165883}
   - component: {fileID: 1264231178899476604}
   - component: {fileID: 1117206716969755763}
   - component: {fileID: 6625995776953036301}
@@ -563,7 +575,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4964099723771836383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6236886010930465602
+--- !u!114 &6381150393144165883
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -572,7 +584,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7647443299539294689}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3286efe233ad6244081e1d0ed8baaf28, type: 3}
+  m_Script: {fileID: 11500000, guid: b85b1636646156546837c73704cd21e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 1264231178899476604}
@@ -595,6 +607,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -669,7 +684,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4964099723771836383}
-  - component: {fileID: 8763210763157834988}
+  - component: {fileID: 2190285501227698948}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -697,7 +712,7 @@ Transform:
   - {fileID: 3949687823201475712}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8763210763157834988
+--- !u!114 &2190285501227698948
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -706,12 +721,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 8420369144933142276}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f162a87f06c94140ab15968e28c7cb0, type: 3}
+  m_Script: {fileID: 11500000, guid: 03866aadc9b11b74b887b8fa4858bf21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actor_SO: {fileID: 11400000, guid: a9333d5356e7dd64ba65a136490153c0, type: 2}
-  bodySpriteController: {fileID: 8901656992649136459}
-  hairstyleSpriteController: {fileID: 6884097935589231289}
-  outfitSpriteController: {fileID: 6236886010930465602}
-  eyeSpriteController: {fileID: 1070487956435589922}
-  accessorySpriteController: {fileID: 5255985611915511428}
+  actor_SO: {fileID: 0}
+  bodySpriteController: {fileID: 0}
+  hairstyleSpriteController: {fileID: 0}
+  outfitSpriteController: {fileID: 0}
+  eyeSpriteController: {fileID: 0}
+  accessorySpriteController: {fileID: 0}
