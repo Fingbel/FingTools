@@ -1,0 +1,16 @@
+{
+  "name": "com.fingcorp.fingtools",
+  "version": "0.0.1",
+  "displayName": "fingtools",
+  "description": "A suite of tools to integrate Limezu assets seamlessly with Unity",
+  "unity": "2022.3",
+  "keywords": [
+    "unity",
+    "plugin",
+    "example"
+  ],
+  "author": {
+    "name": "Fingbel",
+    "email": "fingbel@gmail.com"
+  }
+}
