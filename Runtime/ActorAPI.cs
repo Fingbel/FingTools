@@ -47,7 +47,7 @@ namespace FingTools{
         {
             if(type == ActorPartType.Bodies)
             {
-                Debug.LogError("FingTools API call RemoveBodyPart : Cannot remove the body, use SetBodyPart directly instead to change it.");
+                Debug.LogError("ActorAPI call RemoveBodyPart : Cannot remove the body, use SetBodyPart directly instead to change it.");
             }
             else
             {
@@ -68,7 +68,7 @@ namespace FingTools{
             }
             else
             {
-                Debug.LogError($"FingTools API call ChangeBodyPart : Part {partName} not found or is not of type {spriteType}.");
+                Debug.LogError($"ActorAPI call ChangeBodyPart : Part {partName} not found or is not of type {spriteType}.");
             }
             
         }

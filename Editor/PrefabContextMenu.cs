@@ -6,7 +6,7 @@ namespace FingTools.Internal
 #if UNITY_EDITOR
 public class PrefabContextMenu
 {
-    [MenuItem("GameObject/FingTools/Model Controller", false, 0)]
+    [MenuItem("GameObject/FingTools/ActorAPI", false, 0)]
     private static void AddMyPrefab()
     {
         string prefabPath = "Packages/com.fingcorp.fingtools/Prefabs/Model.prefab";
@@ -37,7 +37,7 @@ public class PrefabContextMenu
     }
 
     // This method ensures the menu item is only available when a GameObject is selected
-    [MenuItem("GameObject/FingTools/Model Controller", true)]
+    [MenuItem("GameObject/FingTools/ActorAPI", true)]
     private static bool ValidateAddMyPrefab()
     {
         return Selection.activeGameObject != null; // Enable the menu item only if a GameObject is selected
