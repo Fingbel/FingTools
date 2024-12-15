@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.U2D.Animation;
 using System.Collections;
 
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
 public class SpritePartController : MonoBehaviour
 {    
@@ -49,6 +49,7 @@ public class SpritePartController : MonoBehaviour
         if (spriteLibraryAsset == null)
         {
             spriteLibrary.spriteLibraryAsset = null;
+            spriteRenderer.sprite = null;
         }
         else
         {

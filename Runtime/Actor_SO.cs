@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-namespace FingTools.Lime{
+namespace FingTools.Internal{
     public class Actor_SO : ScriptableObject {
         [Header("Sprites")]
         public SpritePart_SO body;

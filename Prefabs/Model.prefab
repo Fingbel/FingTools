@@ -684,6 +684,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4964099723771836383}
+  - component: {fileID: 5674502452391023305}
   - component: {fileID: 2190285501227698948}
   m_Layer: 0
   m_Name: Model
@@ -712,6 +713,18 @@ Transform:
   - {fileID: 3949687823201475712}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5674502452391023305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8420369144933142276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc7c3e92f16b3dc4db118627fe19d1d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &2190285501227698948
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -725,8 +738,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actor_SO: {fileID: 0}
-  bodySpriteController: {fileID: 0}
-  hairstyleSpriteController: {fileID: 0}
-  outfitSpriteController: {fileID: 0}
-  eyeSpriteController: {fileID: 0}
-  accessorySpriteController: {fileID: 0}
+  bodySpriteController: {fileID: 8729159508045606023}
+  hairstyleSpriteController: {fileID: 7291598946601813141}
+  outfitSpriteController: {fileID: 6381150393144165883}
+  eyeSpriteController: {fileID: 3122505578524656468}
+  accessorySpriteController: {fileID: 159109948985230343}

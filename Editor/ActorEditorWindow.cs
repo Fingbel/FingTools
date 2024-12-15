@@ -6,7 +6,7 @@ using System.Linq;
 using System;
 
 #if UNITY_EDITOR
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
 public class ActorEditorWindow : EditorWindow
 {

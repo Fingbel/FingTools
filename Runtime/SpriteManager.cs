@@ -3,39 +3,52 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
 [System.Serializable]
 public class SpriteManager : ScriptableObject 
 {
+    private static SpriteManager _instance;
+     public static SpriteManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    // Load the Singleton instance from Resources or create one if not found
+                    _instance = Resources.Load<SpriteManager>("FingTools/SpriteManager");
+                    if (_instance == null)
+                    {
+                        Debug.LogError("SpriteManager asset not found in Resources. Please create it.");
+                    }
+                }
+                return _instance;
+            }
+        }
     public List<SpritePart_SO> accessoryParts = new();
     public List<SpritePart_SO> bodyParts = new();
     public List<SpritePart_SO> outfitParts = new();
     public List<SpritePart_SO> hairstyleParts = new();
-    public List<SpritePart_SO> eyeParts = new();
-            
+    public List<SpritePart_SO> eyeParts = new();           
     private int selectedSizeIndex;
-
     public int SelectedSizeIndex { get => selectedSizeIndex; set => selectedSizeIndex = value;}
-
-
-    private Dictionary<CharSpriteType, int> spriteCounts = new Dictionary<CharSpriteType, int>(); //TODO : remove this dictionary and use the scriptable list to count
+    private Dictionary<ActorPartType, int> spriteCounts = new Dictionary<ActorPartType, int>(); //TODO : remove this dictionary and use the scriptable list to count
 
     // Method to set the count for a specific CharSpriteType
-    public void SetSpriteCount(CharSpriteType type, int count)
+    public void SetSpriteCount(ActorPartType type, int count)
     {
         spriteCounts[type] = count; // Update the count
     }
 
-    public int GetSpriteCount(CharSpriteType type)
+    public int GetSpriteCount(ActorPartType type)
     {
         return type switch
         {
-            CharSpriteType.Accessories => accessoryParts.Count,
-            CharSpriteType.Bodies => bodyParts.Count,
-            CharSpriteType.Outfits => outfitParts.Count,
-            CharSpriteType.Eyes => eyeParts.Count,
-            CharSpriteType.Hairstyles => hairstyleParts.Count,
+            ActorPartType.Accessories => accessoryParts.Count,
+            ActorPartType.Bodies => bodyParts.Count,
+            ActorPartType.Outfits => outfitParts.Count,
+            ActorPartType.Eyes => eyeParts.Count,
+            ActorPartType.Hairstyles => hairstyleParts.Count,
             _ => 0,
         };
     }
@@ -49,15 +62,15 @@ public class SpriteManager : ScriptableObject
         eyeParts?.Count > 0;
     }
 
-    public SpritePart_SO GetSpritePart(CharSpriteType type,string name)
+    public SpritePart_SO GetSpritePart(ActorPartType type,string name)
     {
         return type switch
         {
-            CharSpriteType.Accessories => accessoryParts.Find(x => x.name == name),
-            CharSpriteType.Bodies => bodyParts.Find(x => x.name == name),
-            CharSpriteType.Outfits => outfitParts.Find(x => x.name == name),
-            CharSpriteType.Eyes => eyeParts.Find(x => x.name == name),
-            CharSpriteType.Hairstyles => hairstyleParts.Find(x => x.name == name),
+            ActorPartType.Accessories => accessoryParts.Find(x => x.name == name),
+            ActorPartType.Bodies => bodyParts.Find(x => x.name == name),
+            ActorPartType.Outfits => outfitParts.Find(x => x.name == name),
+            ActorPartType.Eyes => eyeParts.Find(x => x.name == name),
+            ActorPartType.Hairstyles => hairstyleParts.Find(x => x.name == name),
             _ => null,
         };
     }
@@ -77,7 +90,7 @@ public class SpriteManager : ScriptableObject
         foreach (string bodyPartFolder in bodyPartFolders)
         {
             string bodyPartName = Path.GetFileName(bodyPartFolder);
-            CharSpriteType type = GetSpriteTypeFromPath(bodyPartFolder);
+            ActorPartType type = GetSpriteTypeFromPath(bodyPartFolder);
 
             // Load all textures in the folder
             Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/Sprites/" + bodyPartName);
@@ -105,19 +118,19 @@ public class SpriteManager : ScriptableObject
                 // Add the SpritePart to the appropriate list
                 switch (type)
                 {
-                    case CharSpriteType.Accessories:
+                    case ActorPartType.Accessories:
                         accessoryParts.Add(spritePart);
                         break;
-                    case CharSpriteType.Bodies:
+                    case ActorPartType.Bodies:
                         bodyParts.Add(spritePart);
                         break;
-                    case CharSpriteType.Outfits:
+                    case ActorPartType.Outfits:
                         outfitParts.Add(spritePart);
                         break;
-                    case CharSpriteType.Hairstyles:
+                    case ActorPartType.Hairstyles:
                         hairstyleParts.Add(spritePart);
                         break;
-                    case CharSpriteType.Eyes:
+                    case ActorPartType.Eyes:
                         eyeParts.Add(spritePart);
                         break;
                 }
@@ -130,22 +143,37 @@ public class SpriteManager : ScriptableObject
         AssetDatabase.Refresh();        
     }
     #endif
-    private static CharSpriteType GetSpriteTypeFromPath(string folderPath)
+    public ActorPartType GetSpriteTypeFromPath(string folderPath)
 {
     if (folderPath.Contains("Accessories"))
-        return CharSpriteType.Accessories;
+        return ActorPartType.Accessories;
     if (folderPath.Contains("Bodies"))
-        return CharSpriteType.Bodies;
+        return ActorPartType.Bodies;
     if (folderPath.Contains("Outfits"))
-        return CharSpriteType.Outfits;
+        return ActorPartType.Outfits;
     if (folderPath.Contains("Hairstyles"))
-        return CharSpriteType.Hairstyles;
+        return ActorPartType.Hairstyles;
     if (folderPath.Contains("Eyes"))
-        return CharSpriteType.Eyes;
+        return ActorPartType.Eyes;
     
-    return CharSpriteType.Accessories; // Default case
+    return ActorPartType.Accessories; // Default case
+}
+public ActorPartType GetSpriteTypeFromAssetName(string assetName)
+{
+    if (assetName.Contains("Accessory"))
+        return ActorPartType.Accessories;
+    if (assetName.Contains("Body"))
+        return ActorPartType.Bodies;
+    if (assetName.Contains("Outfit"))
+        return ActorPartType.Outfits;
+    if (assetName.Contains("Hairstyle"))
+        return ActorPartType.Hairstyles;
+    if (assetName.Contains("Eyes"))
+        return ActorPartType.Eyes;
+    
+    return ActorPartType.Accessories; // Default case
 }
 }
 
-public enum CharSpriteType {Accessories,Bodies,Outfits,Hairstyles,Eyes}
+
 }

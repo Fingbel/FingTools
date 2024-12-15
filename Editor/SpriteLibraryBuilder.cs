@@ -1,11 +1,11 @@
 using System;
-using FingTools.Lime;
+using FingTools.Internal;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
 
 #if UNITY_EDITOR
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
     public class SpriteLibraryBuilder : Editor
     {
@@ -43,8 +43,6 @@ namespace FingTools.Lime
                     // Assign the library to the SpritePart_SO
                     spritePart.spriteLibraryAsset = AssetDatabase.LoadAssetAtPath<SpriteLibraryAsset>(libraryPath);
                     EditorUtility.SetDirty(spritePart);
-
-                    Debug.Log($"Built and saved SpriteLibraryAsset for {spritePart.name} at {libraryPath}.");
                 }
             }
 

@@ -41,10 +41,8 @@ https://github.com/Fingbel/FingTools.git
 * To use in conjonction with the API calls, you can use the auto-generated Enums to find any asset.
 
 ## Basic PlayerController example
-This is a basic PlayerController making use of the ActorAPI functionalities
+This is an example of a basic PlayerController making use of the ActorAPI functionalities
 ```C#
-//This is an example of a basic PlayerController making use of the ActorAPI functionalities
-
 using UnityEngine;
 using FingTools;
 
@@ -101,6 +99,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 }
+
+```
+## Credits 🙌
+
+Special thanks to the creators of **Modern Interiors**, [Limezu](https://limezu.itch.io/)
 
 ```
 ## Credits 🙌

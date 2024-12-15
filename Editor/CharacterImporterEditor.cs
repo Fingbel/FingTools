@@ -4,12 +4,10 @@ using System.IO;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
-using System;
-
 
 #if UNITY_EDITOR
 using UnityEditor.U2D.Sprites;
-namespace FingTools.Lime
+namespace FingTools.Internal
 {  
 public class CharacterImporterEditor : EditorWindow
 {
@@ -20,21 +18,17 @@ public class CharacterImporterEditor : EditorWindow
     private readonly List<string> validSizes = new () { "16", "32"};
     private SpriteManager spriteManager;
     private int unzipedAssets = 0;
-    
-    //HARDCODED SPRITES PER ROW per LIMEZU assets
+    private bool enableMaxAssetsPerType = false;   
     private readonly List<int>  spritesPerRowList = new List<int> { 4, 24, 24, 6, 12, 12, 12, 12, 24, 48, 40, 56, 56, 24, 24, 24, 16, 24, 12, 12 };
-
-    //DEBUG ONLY - REMOVE THIS BEFORE RELEASE
     private int maxAssetsPerType = 3;
-    private Dictionary<CharSpriteType, int> processedAssetsPerType = new Dictionary<CharSpriteType, int>()
+    private Dictionary<ActorPartType, int> processedAssetsPerType = new Dictionary<ActorPartType, int>()
     {
-        { CharSpriteType.Accessories, 0 },
-        { CharSpriteType.Bodies, 0 },
-        { CharSpriteType.Eyes, 0 },
-        { CharSpriteType.Hairstyles, 0 },
-        { CharSpriteType.Outfits, 0 }
+        { ActorPartType.Accessories, 0 },
+        { ActorPartType.Bodies, 0 },
+        { ActorPartType.Eyes, 0 },
+        { ActorPartType.Hairstyles, 0 },
+        { ActorPartType.Outfits, 0 }
     };
-    //DEBUG END - REMOVE THIS BEFORE RELEASE
 
     [MenuItem("FingTools/Importer/Character Importer",false,99)]
     public static void ShowWindow()
@@ -66,63 +60,83 @@ public class CharacterImporterEditor : EditorWindow
     }
 
     private void OnGUI()
-    {
-        EditorGUILayout.HelpBox(
-            "This tool imports sprites from Limezu's Modern Interior pack into Unity.\n\n" +
-            "To use this tool:\n" +
-            "1. Select the Modern Interior zip file below.\n" +
-            "2. Choose a sprite size to import.\n" +
-            "3. Click 'Import Assets'.\n\n" +
-            "WARNING: This process may take a while depending on your hardware(~20 minutes). \n "+
-            "However this is a one-time operation.",
-            MessageType.Info
-        );
-        GUILayout.Space(15);
-        if (GUILayout.Button("Select Modern Interior zip file")) 
-        {            
-            zipFilePath = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
-        }        
-        EditorGUILayout.LabelField("Selected Zip File:", zipFilePath ?? "None"); // Display the selected folder path or "None" if not set
+{
+    EditorGUILayout.HelpBox(
+        "This tool imports sprites from Limezu's Modern Interior pack into Unity.\n\n" +
+        "To use this tool:\n" +
+        "1. Select the Modern Interior zip.\n" +
+        "2. Choose a sprite size to import.\n" +
+        "3. Click 'Import Assets'.\n\n" +
+        "WARNING: This process may take a while depending on your hardware (~20 minutes). \n" +
+        "However, this is a one-time operation.",
+        MessageType.Info
+    );
 
-        if(spriteManager != null)
-        {
-            bool assetsImported = spriteManager.HasAssetsImported();
-            EditorGUI.BeginDisabledGroup(assetsImported); // Disable controls if assets have been imported
-        }
-        
-        // Size selection
-        EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("Select the sprite size to import: (48x48 is not available at the moment)", EditorStyles.wordWrappedLabel);
-        selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());        
-        if(spriteManager != null)
-        {
-            spriteManager.SelectedSizeIndex = selectedSizeIndex; // Update in SpriteManager
-        }
-        EditorGUI.EndDisabledGroup();
-        
-        if(zipFilePath == "") 
-        {
-            EditorGUI.BeginDisabledGroup(true);
-        }
-        EditorGUILayout.Space(10);
-        if(GUILayout.Button("Import Assets"))
-        {
-            spriteManager = LoadSpriteManager();
-            if(ValidateZipFile(zipFilePath))
-            {
-                UnzipSprites(zipFilePath,validSizes[selectedSizeIndex]);
-                AssetDatabase.Refresh();
-                ProcessImportedAssets();
-                spriteManager.PopulateSpriteLists(resourcesFolderPath);
-                SpriteLibraryBuilder.BuildAllSpriteLibraries();
-            }
-            else
-            {
-                Debug.Log("Zip file is not valid.");
-            }
-        }
-        EditorGUI.EndDisabledGroup();
+    GUILayout.Space(15);
+
+    if (GUILayout.Button("Select Modern Interior zip file")) 
+    {            
+        zipFilePath = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
     }
+
+    EditorGUILayout.LabelField("Selected Zip File:", zipFilePath ?? "None");
+
+    // Checkbox to enable maxAssetsPerType
+    enableMaxAssetsPerType = EditorGUILayout.Toggle("DEBUG-Test Mode", enableMaxAssetsPerType);
+
+    if (enableMaxAssetsPerType)
+    {
+        maxAssetsPerType = EditorGUILayout.IntField("Assets per bodyPart", maxAssetsPerType);
+        maxAssetsPerType = Mathf.Max(1, maxAssetsPerType);  // Ensure it's always a positive number
+    }
+
+    if (spriteManager != null)
+    {
+        bool assetsImported = spriteManager.HasAssetsImported();
+        EditorGUI.BeginDisabledGroup(assetsImported);
+    }
+
+    // Size selection
+    EditorGUILayout.Space(10);
+    EditorGUILayout.LabelField("Select the sprite size to import: (48x48 is not available at the moment)", EditorStyles.wordWrappedLabel);
+    selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
+
+    if (spriteManager != null)
+    {
+        spriteManager.SelectedSizeIndex = selectedSizeIndex;
+    }
+
+    EditorGUI.EndDisabledGroup();
+
+    if (zipFilePath == "")
+    {
+        EditorGUI.BeginDisabledGroup(true);
+    }
+
+    EditorGUILayout.Space(10);
+
+    if (GUILayout.Button("Import Assets"))
+    {
+        spriteManager = LoadSpriteManager();
+
+        if (ValidateZipFile(zipFilePath))
+        {
+            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
+            UnzipSprites(zipFilePath, validSizes[selectedSizeIndex]);
+            AssetDatabase.Refresh();
+            ProcessImportedAssets();
+            spriteManager.PopulateSpriteLists(resourcesFolderPath);
+            SpriteLibraryBuilder.BuildAllSpriteLibraries();
+            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
+            AssetEnumGenerator.GenerateAssetEnum();
+        }
+        else
+        {
+            Debug.Log("Zip file is not valid.");
+        }
+    }
+    EditorGUI.EndDisabledGroup();
+}
 
     private void UnzipSprites(string zipFilePath, string spriteSize)
     {
@@ -131,22 +145,22 @@ public class CharacterImporterEditor : EditorWindow
         
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
-            CharSpriteType? type = validBodyParts.FirstOrDefault(x => entry.FullName.Contains(x)) switch
+            ActorPartType? type = validBodyParts.FirstOrDefault(x => entry.FullName.Contains(x)) switch
             {
-                "Accessories" => CharSpriteType.Accessories,
-                "Bodies"     => CharSpriteType.Bodies,
-                "Eyes"       => CharSpriteType.Eyes,
-                "Hairstyles" => CharSpriteType.Hairstyles,
-                "Outfits"    => CharSpriteType.Outfits,
+                "Accessories" => ActorPartType.Accessories,
+                "Bodies"     => ActorPartType.Bodies,
+                "Eyes"       => ActorPartType.Eyes,
+                "Hairstyles" => ActorPartType.Hairstyles,
+                "Outfits"    => ActorPartType.Outfits,
                 _            => null
             };
 
             if (type == null)
                 continue;
 
-            if (processedAssetsPerType[type.Value] >= maxAssetsPerType)
+            if (enableMaxAssetsPerType && processedAssetsPerType[type.Value] >= maxAssetsPerType)
             {
-                Debug.Log($"Reached the limit for {type.Value}");
+                //Debug.Log($"Reached the limit for {type.Value}");
                 continue;
             }
 

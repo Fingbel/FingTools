@@ -1,17 +1,10 @@
+using System;
 using System.Collections.Generic;
+using FingTools;
 using UnityEngine;
-using FingTools.Lime;
 
-namespace FingTools
+namespace FingTools.Internal
 {
-    public enum CardinalDirection { E, N, W, S }
-    public enum ActorAnimation
-    {
-        Idle, Walking, Sleeping, Sitting, Phone_Out, Phoning, Phone_In, Reading, BookTurning,
-        Pushing, Picking, Gifting, Lifting, Throwing, Hitting, Punching, Stabbing,
-        GunGrabbing, GunIdling, GunShooting, Hurting
-    }
-
     public class ActorModelController : MonoBehaviour
     {
         [SerializeField] private Actor_SO actor_SO = null;
@@ -21,43 +14,44 @@ namespace FingTools
         [SerializeField] private SpritePartController eyeSpriteController;
         [SerializeField] private SpritePartController accessorySpriteController;
 
-        private Dictionary<CharSpriteType, SpritePartController> partControllers = new();
+        private Dictionary<ActorPartType, SpritePartController> partControllers = new();
         private float maxAnimationTick = 0.13f;
         private float animationTick;
-        private int currentAnimationFrame;
+        private int currentAnimationFrame;        
         private CardinalDirection lastCurrentDirection;
-        private bool isWalking;
         private bool isActive = true;
         private readonly int previewSpriteSouthIndex = 3;
-
-        public bool IsActive { get => isActive; set => isActive = value; }
+        public string currentAnimation;
         public CardinalDirection CurrentDirection { get => lastCurrentDirection; set => lastCurrentDirection = value; }
-        public bool IsWalking { get => isWalking; set => isWalking = value; }
         public float MaxAnimationTick { get => maxAnimationTick; set => maxAnimationTick = value; }
-
+        private Dictionary<string, (int spritesPerDirection, bool fixedDirection)> animationConfigMap;
+        private Action onAnimationCompleteCallback;
+        private string baseAnimationName;
+        private bool isLocked = false;
+        
         private void Awake()
         {
+            currentAnimation = "Idle";
             if (transform.parent == null)
             {
                 Debug.LogError("Actor model controller must be a child of a transform!");
                 return;
             }
 
+            InitializeAnimationConfigs();
             // Map sprite controllers to sprite types
-            partControllers.Add(CharSpriteType.Bodies, bodySpriteController);
-            partControllers.Add(CharSpriteType.Hairstyles, hairstyleSpriteController);
-            partControllers.Add(CharSpriteType.Outfits, outfitSpriteController);
-            partControllers.Add(CharSpriteType.Eyes, eyeSpriteController);
-            partControllers.Add(CharSpriteType.Accessories, accessorySpriteController);
+            partControllers.Add(ActorPartType.Bodies, bodySpriteController);
+            partControllers.Add(ActorPartType.Hairstyles, hairstyleSpriteController);
+            partControllers.Add(ActorPartType.Outfits, outfitSpriteController);
+            partControllers.Add(ActorPartType.Eyes, eyeSpriteController);
+            partControllers.Add(ActorPartType.Accessories, accessorySpriteController);
 
             if (actor_SO != null)
             {
                 ApplyPrebuiltLibraries(actor_SO);
             }
-
             lastCurrentDirection = CardinalDirection.S;
         }
-
         private void Update()
         {
             if (actor_SO != null && isActive)
@@ -65,24 +59,53 @@ namespace FingTools
                 animationTick -= Time.deltaTime;
                 if (animationTick <= 0)
                 {
-                    // Determine animation category and label for the next animation frame
-                    string label = lastCurrentDirection.ToString();
-                    string category = isWalking ? "Walking" : "Idle";
-
-                    // Update animation category and label
-                    label = $"{label}_{currentAnimationFrame}";
-
-                    // And now we resolve
-                    foreach (var controller in partControllers.Values)
-                    {
-                        controller.Resolve(category, label);
-                    }
-                    animationTick = maxAnimationTick;
-                    currentAnimationFrame = currentAnimationFrame == 5 ? 0 : currentAnimationFrame + 1;
+                    AnimationTick();
                 }
             }
         }
-        
+
+        public void AnimationTick()
+        {
+            // Lookup animation configuration
+            if (!animationConfigMap.TryGetValue(currentAnimation.ToString(), out var config))
+            {
+                Debug.LogWarning($"Animation config not found for: {currentAnimation}");
+                return;
+            }
+
+            // Use the correct direction for fixed-direction animations
+            string directionLabel = config.fixedDirection ? "S" : lastCurrentDirection.ToString();
+
+            // Generate the sprite label for the current frame
+            string label = $"{directionLabel}_{currentAnimationFrame}";
+
+            // Resolve animations for all sprite controllers
+            foreach (var controller in partControllers.Values)
+            {
+                controller.Resolve(currentAnimation, label);
+            }
+
+            // Reset tick
+            animationTick = maxAnimationTick;
+
+            // Update the current animation frame, wrapping around
+            currentAnimationFrame = (currentAnimationFrame + 1) % config.spritesPerDirection;
+
+            if (currentAnimationFrame >= config.spritesPerDirection - 1)
+            {
+                onAnimationCompleteCallback?.Invoke(); // Trigger the callback   
+            }
+        }
+
+        private void InitializeAnimationConfigs()
+        {
+            animationConfigMap = new Dictionary<string, (int spritesPerDirection, bool fixedDirection)>();
+            
+            foreach (var config in animationConfigs)
+            {
+                animationConfigMap[config.category] = (config.spritesPerDirection, config.fixedDirection);
+            }
+        }
         private void OnValidate()
         {
             SetPreviewSprites();
@@ -122,11 +145,68 @@ namespace FingTools
             }
             // Assign prebuilt libraries to sprite controllers
             bodySpriteController?.UpdateLibrary(actorSO.body?.spriteLibraryAsset);
-            hairstyleSpriteController?.UpdateLibrary(actorSO.hairstyle?.spriteLibraryAsset);
-            outfitSpriteController?.UpdateLibrary(actorSO.outfit?.spriteLibraryAsset);
-            eyeSpriteController?.UpdateLibrary(actorSO.eyes?.spriteLibraryAsset);
-            accessorySpriteController?.UpdateLibrary(actorSO.accessory?.spriteLibraryAsset);
+            hairstyleSpriteController?.UpdateLibrary(actorSO.hairstyle?.spriteLibraryAsset ?? null);
+            outfitSpriteController?.UpdateLibrary(actorSO.outfit?.spriteLibraryAsset ?? null);
+            eyeSpriteController?.UpdateLibrary(actorSO.eyes?.spriteLibraryAsset ?? null);
+            accessorySpriteController?.UpdateLibrary(actorSO.accessory?.spriteLibraryAsset ?? null);
             
         }
+
+        public void UpdatePart(ActorPartType type, SpritePart_SO spritePart) 
+        {
+            partControllers[type].UpdateLibrary(spritePart?.spriteLibraryAsset ?? null);
+        }
+
+        //Maybe we should implement a state machine to handle animations
+        //
+        public void SetLoopingAnimation(LoopingAnimation animation)
+        {
+            if(isLocked) return;
+            currentAnimation = animation.ToString();
+        }
+
+        public void PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
+        {
+            if (isLocked) return;
+            isLocked = locked;
+            baseAnimationName = currentAnimation.ToString();
+            currentAnimationFrame = 0;
+            currentAnimation = animation.ToString();
+            onAnimationCompleteCallback += onAnimationComplete;
+            onAnimationCompleteCallback += () => 
+            {
+                currentAnimation = baseAnimationName;
+                isLocked = false;
+                onAnimationCompleteCallback = null;
+            };
+            
+        }
+
+
+        public readonly (string category, int spritesPerDirection, bool fixedDirection,bool isLooping)[] animationConfigs =
+        {
+            ("Fixed", 1, false,true),
+            ("Idle", 6, false,true),
+            ("Walking", 6, false,true),
+            ("Sleeping", 6, true,true),
+            ("Sitting", 6, false,true),
+            ("Phone_Out", 3, true,false),
+            ("Phoning", 6, true,true),
+            ("Phone_In", 3, true,false),
+            ("Reading", 6, true,true),
+            ("BookTurning", 6, true,true),
+            ("Pushing", 6, false,true),
+            ("Picking", 12, false,false),
+            ("Gifting", 10, false,false),
+            ("Lifting", 14, false,false),
+            ("Throwing", 14, false,false),
+            ("Hitting", 6, false,false),
+            ("Punching", 6, false,false),
+            ("Stabbing", 6, false,false),
+            ("GunGrabbing", 4, false,false),
+            ("GunIdling", 6, false,true),
+            ("GunShooting", 3, false,false),
+            ("Hurting", 3, false,false),
+        };
     }
 }

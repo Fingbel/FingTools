@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
     public class NPCSpawner : MonoBehaviour
     {

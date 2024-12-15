@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.U2D.Animation;
 
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
 [System.Serializable]
 public class SpritePart_SO : ScriptableObject
 {
-    public CharSpriteType type;
+    public ActorPartType type;
     public Sprite[] sprites;
     public SpriteLibraryAsset spriteLibraryAsset; 
 } 

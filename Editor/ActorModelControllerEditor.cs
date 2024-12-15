@@ -3,7 +3,7 @@ using UnityEngine;
 using System;
 
 #if UNITY_EDITOR
-namespace FingTools.Lime
+namespace FingTools.Internal
 {
     [CustomEditor(typeof(ActorModelController))]
     public class ActorModelControllerEditor : Editor

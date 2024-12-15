@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using FingTools.Lime;
+using FingTools.Internal;
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(NPCSpawner))]
