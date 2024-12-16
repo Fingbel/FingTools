@@ -82,10 +82,11 @@ public class CharacterImporterEditor : EditorWindow
     EditorGUILayout.LabelField("Selected Zip File:", zipFilePath ?? "None");
 
     // Checkbox to enable maxAssetsPerType
-    enableMaxAssetsPerType = EditorGUILayout.Toggle("DEBUG-Test Mode", enableMaxAssetsPerType);
+    enableMaxAssetsPerType = EditorGUILayout.Toggle("Test Mode", enableMaxAssetsPerType);
 
     if (enableMaxAssetsPerType)
     {
+        EditorGUILayout.LabelField("This option is there if you want to test the tool without importing all the assets, set the number of assets per body part you want to import:",EditorStyles.wordWrappedLabel);
         maxAssetsPerType = EditorGUILayout.IntField("Assets per bodyPart", maxAssetsPerType);
         maxAssetsPerType = Mathf.Max(1, maxAssetsPerType);  // Ensure it's always a positive number
     }
