@@ -1,6 +1,6 @@
 {
   "name": "com.fingcorp.fingtools",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "displayName": "Fingbel's Tools",
   "description": "This is a comprehensive Unity package providing a system for character importing and sprite management for the Modern Interiors collection by Limezu.(https://limezu.itch.io)",
   "unity": "2022.3",
