@@ -22,6 +22,8 @@ namespace FingTools{
     public class ActorAPI : MonoBehaviour
     {
         private ActorModelController modelController;
+        private void LogError(string message) => Debug.LogError($"ActorAPI Error: {message}");
+        private void LogWarning(string message) => Debug.LogWarning($"ActorAPI Warning: {message}");
 
         private void Awake() {
             modelController = GetComponent<ActorModelController>();
@@ -30,12 +32,17 @@ namespace FingTools{
         /// <summary>
         /// Set the actor's current direction (North, South, East, West).
         /// </summary>
-        public void SetDirection(CardinalDirection direction)
+        public bool SetDirection(CardinalDirection direction)
         {
             if(modelController.CurrentDirection != direction)
             {
                 modelController.CurrentDirection = direction;
                 modelController.AnimationTick(); // Tick immediatly to avoid waiting for the next one
+                return true;
+            }
+            else
+            {                
+                return false;
             }
             
         }
@@ -44,15 +51,17 @@ namespace FingTools{
         /// The Body part cannot be removed, use SetBodyPart directly instead.
         /// </summary>
         /// <param name="type"></param>
-        public void RemoveBodyPart(ActorPartType type)
+        public bool RemoveBodyPart(ActorPartType type)
         {
-            if(type == ActorPartType.Bodies)
-            {
-                Debug.LogError("ActorAPI call RemoveBodyPart : Cannot remove the body, use SetBodyPart directly instead to change it.");
-            }
-            else
+            if(type != ActorPartType.Bodies)
             {
                 modelController.UpdatePart(type,null);
+                return true;
+            }
+            else
+            {                
+                LogError("ActorAPI call RemoveBodyPart : Cannot remove the body, use SetBodyPart directly instead to change it.");
+                return false;
             }
         }
         /// <summary>
@@ -61,17 +70,19 @@ namespace FingTools{
         /// Example : EquipBodyPart(AccessoriesAssets.Accessory_01_Ladybug_01.ToString());
         /// </summary>
         /// <param name="partName"></param>
-        public void EquipBodyPart(string partName)
+        public bool EquipBodyPart(string partName)
         {
             var spriteType = SpriteManager.Instance.GetSpriteTypeFromAssetName(partName);
             var part = SpriteManager.Instance.GetSpritePart(spriteType, partName);
             if(part != null)
             {
                 modelController.UpdatePart(spriteType,part);    
+                return true;
             }
             else
             {
-                Debug.LogError($"ActorAPI call ChangeBodyPart : Part {partName} not found or is not of type {spriteType}.");
+                LogError($"ActorAPI call ChangeBodyPart : Part {partName} not found or is not of type {spriteType}.");
+                return false;
             }
             
         }
@@ -79,17 +90,36 @@ namespace FingTools{
         /// <summary>
         ///  Set the actor to a new looping animation.
         /// </summary>
-        public void SetLoopingAnimation(LoopingAnimation animation)
+        public bool SetLoopingAnimation(LoopingAnimation animation)
         {            
-            modelController.SetLoopingAnimation(animation);
+            if(animation.ToString() != modelController.currentAnimation)
+            {
+                modelController.SetLoopingAnimation(animation);
+                return true;
+            }
+            else
+            {                
+                return false;
+            }
         }   
 
         /// <summary>
         /// Play a one shot animation
         /// </summary>
-        public void PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
+        public bool PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
         {
-            modelController.PlayOneShotAnimation(animation,locked,onAnimationComplete);
+            if(!modelController.isLocked)
+            {
+                modelController.PlayOneShotAnimation(animation,locked,onAnimationComplete);
+                return true;
+                
+            }
+            else
+            {
+                LogWarning("ActorAPI call PlayOneShotAnimation : The actor is locked for animations,skipping.");
+                return false;
+            }
+            
         }        
     }
 }
