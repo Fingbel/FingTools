@@ -11,6 +11,3 @@
 *.csproj
 *.tmp
 
-
-# Package cache
-/Packages/manifest.json
