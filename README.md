@@ -17,6 +17,7 @@ https://github.com/Fingbel/FingTools.git
 ```
 6. Click **Add**.
 
+## How to Use
 Check the [Wiki](https://github.com/Fingbel/FingTools/wiki) for more informations on how to use the tool !
 
 ## Credits 🙌
