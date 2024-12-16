@@ -17,6 +17,8 @@ https://github.com/Fingbel/FingTools.git
 ```
 6. Click **Add**.
 
+Check the [Wiki](https://github.com/Fingbel/FingTools/wiki) for more informations on how to use the tool !
+
 ## Credits 🙌
 
 Special thanks to the creators of the Modern asset packs, **[Limezu](https://limezu.itch.io/)**
