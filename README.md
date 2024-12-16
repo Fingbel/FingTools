@@ -19,9 +19,4 @@ https://github.com/Fingbel/FingTools.git
 
 ## Credits 🙌
 
-Special thanks to the creators of **Modern Interiors**, [Limezu](https://limezu.itch.io/)
-
-```
-## Credits 🙌
-
-Special thanks to the creators of the Modern asset pack series, [Limezu](https://limezu.itch.io/)
+Special thanks to the creators of the Modern asset packs, **[Limezu](https://limezu.itch.io/)**
