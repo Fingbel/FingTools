@@ -1,5 +1,5 @@
 ## Overview
-This tool is intended to be a comprehensive Unity package providing a system for character import and sprite management for the Modern Interiors collection by Limezu.(https://limezu.itch.io)
+This tool is intended to be a comprehensive Unity package providing a system for character import and sprite management for the Modern Interiors collection by Limezu.(https://limezu.itch.io).  
 Currently the tool provide the following : 
 1. Automatic asset import
 2. Custom Character editor window
