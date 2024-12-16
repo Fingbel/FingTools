@@ -4,6 +4,9 @@ This tool is intended to be a comprehensive Unity package providing a system for
 2. Custom Character editor window
 3. Simple API-Like interface to handle animations
 
+## How to Use
+**Check the [Wiki](https://github.com/Fingbel/FingTools/wiki) for more informations on how to use the tool !**
+
 ## Installation 📥
 
 To include the **FingTools** in your Unity project:
@@ -16,9 +19,6 @@ To include the **FingTools** in your Unity project:
 https://github.com/Fingbel/FingTools.git
 ```
 6. Click **Add**.
-
-## How to Use
-Check the [Wiki](https://github.com/Fingbel/FingTools/wiki) for more informations on how to use the tool !
 
 ## Credits 🙌
 
