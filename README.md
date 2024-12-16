@@ -24,4 +24,4 @@ Special thanks to the creators of **Modern Interiors**, [Limezu](https://limezu.
 ```
 ## Credits 🙌
 
-Special thanks to the creators of **Modern Interiors**, [Limezu](https://limezu.itch.io/)
+Special thanks to the creators of the Modern asset pack series, [Limezu](https://limezu.itch.io/)
