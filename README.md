@@ -6,7 +6,7 @@ This tool is intended to be a comprehensive Unity package providing a system for
 
 ## Installation 📥
 
-To include **FingTools** in your Unity project:
+To include the **FingTools** in your Unity project:
 
 1. Open your Unity project.
 2. Go to **Window** > **Package Manager**.
