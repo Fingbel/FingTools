@@ -24,4 +24,4 @@ https://github.com/Fingbel/FingTools.git
 
 ## Credits 🙌
 
-Special thanks to the creators of the Modern asset packs, **[Limezu](https://limezu.itch.io/)**
+Special thanks to the creator of the Modern asset packs, **[Limezu](https://limezu.itch.io/)**
