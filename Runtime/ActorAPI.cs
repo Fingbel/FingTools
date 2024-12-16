@@ -35,12 +35,13 @@ namespace FingTools{
             if(modelController.CurrentDirection != direction)
             {
                 modelController.CurrentDirection = direction;
-                modelController.AnimationTick();
+                modelController.AnimationTick(); // Tick immediatly to avoid waiting for the next one
             }
             
         }
         /// <summary>
-        /// 
+        /// Remove a body part from the actor, you only need to pass the ActorPartType of the part. 
+        /// The Body part cannot be removed, use SetBodyPart directly instead.
         /// </summary>
         /// <param name="type"></param>
         public void RemoveBodyPart(ActorPartType type)
@@ -55,7 +56,9 @@ namespace FingTools{
             }
         }
         /// <summary>
-        /// 
+        /// Equip a body part to the actor, you only need to pass the name of the part. 
+        /// The easisest and safest way is to use the enums auto-generated at import. 
+        /// Example : EquipBodyPart(AccessoriesAssets.Accessory_01_Ladybug_01.ToString());
         /// </summary>
         /// <param name="partName"></param>
         public void EquipBodyPart(string partName)
