@@ -6,6 +6,11 @@ using System.Linq;
 using System.IO.Compression;
 using System.IO;
 using System.Collections.Generic;
+using UnityEditor.Build;
+using System.Reflection;
+using System;
+using UnityEditor.VersionControl;
+
 
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity.Editor;
@@ -135,8 +140,7 @@ public class TiledImporterEditorWindow : EditorWindow
             {
                 EditorUtility.DisplayDialog("Error", "Invalid Modern Interior zip file. Please select the correct file.", "OK");
                 return;
-            }
-            string interiorOutput = Path.Combine(outputPath, "Art/Interior/");
+            }            
             UnzipInteriorAssets(selectedInteriorZipFile, validSizes[selectedSizeIndex]);
         }
 
@@ -146,37 +150,35 @@ public class TiledImporterEditorWindow : EditorWindow
             {
                 EditorUtility.DisplayDialog("Error", "Invalid Modern Exterior zip file. Please select the correct file.", "OK");
                 return;
-            }
-            string exteriorOutput = Path.Combine(outputPath, "Art/Exterior/");
+            }            
             UnzipexteriorAssets(selectedExteriorZipFile, validSizes[selectedSizeIndex]);
         }
-
-        // Adjust texture import settings (resize if necessary)
-        if (importInterior && !string.IsNullOrEmpty(selectedInteriorZipFile))
-        {
-            string interiorOutput = Path.Combine(outputPath, "Art/Interior/");
-            AdjustTextureImportSettings(interiorOutput);
-        }
-
-        if (importExterior && !string.IsNullOrEmpty(selectedExteriorZipFile))
-        {
-            string exteriorOutput = Path.Combine(outputPath, "Art/Exterior/");
-            AdjustTextureImportSettings(exteriorOutput);
-        }
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        
 
         // After unzipping, now generate the TSX files for each tileset
         if (importInterior && !string.IsNullOrEmpty(selectedInteriorZipFile))
         {
-            string interiorOutput = Path.Combine(outputPath, "Art/Interior/");
-            GenerateTSXFilesForImportedTilesets(interiorOutput, "Interior", int.Parse(validSizes[selectedSizeIndex]));
-            AutoReimportTextures(interiorOutput);
+            string interiorArtOutput = Path.Combine(outputPath, "Art/Interior/");
+            string interiorTilesetOutputPath = Path.Combine(outputPath, "Tilesets/Interior");
+            
+            GenerateTSXFilesForImportedTilesets(interiorArtOutput, "Interior", int.Parse(validSizes[selectedSizeIndex]));  
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();          
+            AutoFixTextures(interiorTilesetOutputPath);
         }
 
         if (importExterior && !string.IsNullOrEmpty(selectedExteriorZipFile))
         {
-            string exteriorOutput = Path.Combine(outputPath, "Art/Exterior/");
-            GenerateTSXFilesForImportedTilesets(exteriorOutput, "Exterior", int.Parse(validSizes[selectedSizeIndex]));
-            AutoReimportTextures(exteriorOutput);
+            string exteriorArtOutput = Path.Combine(outputPath, "Art/Exterior/");
+            string exteriorTilesetOutputPath = Path.Combine(outputPath, "Tilesets/Exterior");
+            AdjustTextureImportSettings(exteriorArtOutput,4096);
+            GenerateTSXFilesForImportedTilesets(exteriorArtOutput, "Exterior", int.Parse(validSizes[selectedSizeIndex]));
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();    
+            AutoFixTextures(exteriorTilesetOutputPath);
+
         }
     }
     #endif
@@ -249,7 +251,7 @@ public class TiledImporterEditorWindow : EditorWindow
 
             // Release memory used by the texture
             DestroyImmediate(texture);
-
+            
             // Generate the TSX file
             GenerateTSXFile(
                 Path.Combine(tsxOutputPath, tsxFileName),
@@ -267,9 +269,6 @@ public class TiledImporterEditorWindow : EditorWindow
 
     private void GenerateTSXFile(string fileName, string tilesetName, string tileSet, int width, int height, int tileSize)
     {
-        // Fixed number of columns
-        int columns = 32;
-
         // Calculate tile count based on the image size and tile size
         int tileCount = width * height / (tileSize * tileSize);
 
@@ -277,7 +276,7 @@ public class TiledImporterEditorWindow : EditorWindow
         string content =
             $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             $"<tileset version=\"1.10\" tiledversion=\"1.11.0\" name=\"{tilesetName}\" " +
-            $"tilewidth=\"{tileSize}\" tileheight=\"{tileSize}\" tilecount=\"{tileCount}\" columns=\"{columns}\">\n" +
+            $"tilewidth=\"{tileSize}\" tileheight=\"{tileSize}\" tilecount=\"{tileCount}\" columns=\"{width/tileSize}\">\n" +
             $" <image source=\"{tileSet}\" width=\"{width}\" height=\"{height}\"/>\n" +
             $"</tileset>";
 
@@ -299,65 +298,99 @@ public class TiledImporterEditorWindow : EditorWindow
         }
     }
     #if SUPER_TILED2UNITY_INSTALLED
-    // Method to force the re-import of textures and trigger the missing sprite action
-    private void AutoReimportTextures(string tilesetDirectory)
-    {
-        // Get all PNG files from the tileset directory
-        string[] textureFiles = Directory.GetFiles(tilesetDirectory, "*.png", SearchOption.AllDirectories);
-        TsxAssetImporter tsxAssetImporter = new TsxAssetImporter();
-        
-        // Iterate over each texture and force re-import
-        foreach (string textureFile in textureFiles)
+        [MenuItem("FingTools/Importer/Error Autofixer",false,99)]
+        public static void AutoFixInteriorTextures()
         {
-            string assetPath = textureFile.Replace(Application.dataPath, "").Replace("\\", "/");
-            
-            // Check if texture exists in the asset database
-            if (AssetDatabase.IsValidFolder(assetPath))
-            {
-                continue; // Skip folders
+            AutoFixTextures("Assets/FingTools/Tiled/Tilesets/Interior");
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+        private static void AutoFixTextures(string tilesetPath)
+        {
+            // Get all .tsx files in the specified directory
+            string[] tsxFiles = Directory.GetFiles(tilesetPath, "*.tsx", SearchOption.TopDirectoryOnly);
+            AssetDatabase.StartAssetEditing();
+            // Iterate over the .tsx files and attempt to find ImportErrors
+            foreach (string tsxFile in tsxFiles)
+            {                
+                ImportErrors importErrors = AssetDatabase.LoadAssetAtPath(tsxFile, typeof(ImportErrors)) as ImportErrors;
+                if (importErrors != null)
+                {
+                    // Iterate over the missing sprites in the ImportErrors and handle them
+                    foreach (ImportErrors.MissingTileSprites missingTileSprite in importErrors.m_MissingTileSprites)
+                    {
+                        // Call method to add missing sprites
+                        CallAddSpritesToTexture(missingTileSprite.m_TextureAssetPath, missingTileSprite.m_MissingSprites.Select(m => m.m_Rect));                        
+                    }
+                }        
             }
-
-            // Reimport the texture to trigger the sprite checking process
-            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.StopAssetEditing();
             
-            // Optionally, you can log the texture files
-            Debug.Log($"Reimporting texture: {assetPath}");
+        }       
+    #endif
+
+    
+    public static void CallAddSpritesToTexture(string textureAssetPath, IEnumerable<Rect> missingSpritesRects)
+    {
+        Assembly targetAssembly = null;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        foreach (var assembly in assemblies)
+        {
+            if (assembly.FullName.Contains("Super Tiled2Unity Editor"))
+            {
+                targetAssembly = assembly;
+                break;
+            }
+        }
+        // Proceed if the assembly is found
+        if (targetAssembly != null)
+        {
+            Type targetType = targetAssembly.GetType("SuperTiled2Unity.Editor.AddST2USpritesToTexture");
+            if (targetType != null)
+            {
+                MethodInfo methodInfo = targetType.GetMethod("AddSpritesToTextureAsset", BindingFlags.NonPublic | BindingFlags.Static);
+                if (methodInfo != null)
+                {                    
+                    // Invoke the method using reflection
+                    methodInfo.Invoke(null, new object[] { textureAssetPath, missingSpritesRects });
+                }
+                else
+                {
+                    Debug.LogError("Method not found.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Class not found.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Assembly not found.");
         }
     }
-    #endif
-    private void AdjustTextureImportSettings(string textureDirectory)
+        
+    private void AdjustTextureImportSettings(string textureDirectory,int maxTextureSize)
     {
-        // Get all the PNG files from the texture directory
-        string[] textureFiles = Directory.GetFiles(textureDirectory, "*.png", SearchOption.AllDirectories);
-
+        Debug.Log(textureDirectory);
+        string[] textureFiles = Directory.GetFiles(textureDirectory, "*.png", SearchOption.TopDirectoryOnly);        
+        Debug.Log(textureFiles.Length);
         foreach (string textureFile in textureFiles)
         {
+            Debug.Log(textureFile);
             // Load the texture importer for the current texture
             TextureImporter textureImporter = AssetImporter.GetAtPath(textureFile) as TextureImporter;
             
             if (textureImporter != null)
-            {
-                // Load the texture to get its dimensions
-                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(textureFile);
+            {                
+                // Adjust the max texture size to 2048x2048 (or another limit if desired)
+                textureImporter.maxTextureSize = maxTextureSize;
+                textureImporter.textureCompression = TextureImporterCompression.Uncompressed; 
+                
 
-                // Check if the texture exceeds the max size (2048x2048)
-                if (texture.width > 2048 || texture.height > 2048)
-                {
-                    // Adjust the max texture size to 2048x2048 (or another limit if desired)
-                    textureImporter.maxTextureSize = 2048;
-                    textureImporter.textureCompression = TextureImporterCompression.Uncompressed;  // Optional: adjust compression
-
-                    // Save the new settings and re-import the texture
-                    textureImporter.SaveAndReimport();
-                    Debug.Log($"Resized texture: {textureFile} to fit within 2048x2048.");
-                }
-                else
-                {
-                    Debug.Log($"Texture {textureFile} is already within the max size.");
-                }
-
-                // Release texture memory
-                DestroyImmediate(texture);
+                // Save the new settings and re-import the texture
+                textureImporter.SaveAndReimport();                               
             }
         }
     }
@@ -429,6 +462,7 @@ public class TiledImporterEditorWindow : EditorWindow
         GUILayout.Space(5);
     }
     
+    
     //SUPERTILED2UNITY CHECK ONLY BELOW
     private static bool CheckSuperTiled2Unity()
     {
@@ -438,11 +472,7 @@ public class TiledImporterEditorWindow : EditorWindow
         // Wait for the request to finish
         while (!listRequest.IsCompleted)
         {
-            // Optionally, show some loading indicator here
-            EditorUtility.DisplayProgressBar("Checking for SuperTiled2Unity", "Please wait...", 0.5f);
         }
-        EditorUtility.ClearProgressBar();
-
         if (listRequest.Status == StatusCode.Success)
         {
             var installedPackages = listRequest.Result;
@@ -485,5 +515,19 @@ public class TiledImporterEditorWindow : EditorWindow
             Debug.LogError("Failed to add package: " + packageUrl);
         }
     }
+    
+    [InitializeOnLoadMethod]
+    private static void DefineSuperTiled2UnitySymbolIfNeeded()
+    {
+        if (CheckSuperTiled2Unity())
+        {
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, "SUPER_TILED2UNITY_INSTALLED");
+        }
+        else
+        {
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, "");
+        }
+    }
+    
 }
 }
