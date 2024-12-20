@@ -18,6 +18,7 @@ using SuperTiled2Unity; // Include the SuperTiled2Unity namespaces if available
 //2. Create Tiled project file - DONE
 //3. Create a .tsx file for each tileset - DONE but we still have import errors to fix
 
+namespace FingTools.Tiled{
 
 public class TiledImporterEditorWindow : EditorWindow
 {
@@ -102,8 +103,10 @@ public class TiledImporterEditorWindow : EditorWindow
             );
         if (GUILayout.Button("Import Assets"))
         {
-            EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);   
+            EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);  
+            #if SUPER_TILED2UNITY_INSTALLED 
             ImportAssets();
+            #endif
             GenerateTiledProjectFile();
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();            
@@ -122,7 +125,7 @@ public class TiledImporterEditorWindow : EditorWindow
         }
     }
 }
-
+    #if SUPER_TILED2UNITY_INSTALLED
     private void ImportAssets()
     {
         // Unzip assets first
@@ -176,6 +179,7 @@ public class TiledImporterEditorWindow : EditorWindow
             AutoReimportTextures(exteriorOutput);
         }
     }
+    #endif
     private static void GenerateTiledProjectFile()
     {
         string tiledProjectName = Application.productName+".tiled-project";
@@ -294,7 +298,7 @@ public class TiledImporterEditorWindow : EditorWindow
             Debug.LogError($"Failed to generate TSX file: {e.Message}");
         }
     }
-
+    #if SUPER_TILED2UNITY_INSTALLED
     // Method to force the re-import of textures and trigger the missing sprite action
     private void AutoReimportTextures(string tilesetDirectory)
     {
@@ -320,7 +324,7 @@ public class TiledImporterEditorWindow : EditorWindow
             Debug.Log($"Reimporting texture: {assetPath}");
         }
     }
-
+    #endif
     private void AdjustTextureImportSettings(string textureDirectory)
     {
         // Get all the PNG files from the texture directory
@@ -481,4 +485,5 @@ public class TiledImporterEditorWindow : EditorWindow
             Debug.LogError("Failed to add package: " + packageUrl);
         }
     }
+}
 }
