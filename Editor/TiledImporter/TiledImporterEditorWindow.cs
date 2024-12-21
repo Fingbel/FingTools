@@ -10,6 +10,8 @@ using UnityEditor.Build;
 using System.Reflection;
 using System;
 using UnityEditor.VersionControl;
+using System.Diagnostics;
+
 
 
 #if SUPER_TILED2UNITY_INSTALLED
@@ -108,6 +110,8 @@ public class TiledImporterEditorWindow : EditorWindow
             );
         if (GUILayout.Button("Import Assets"))
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);  
             #if SUPER_TILED2UNITY_INSTALLED 
             ImportAssets();
@@ -116,6 +120,8 @@ public class TiledImporterEditorWindow : EditorWindow
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();            
             EditorUtility.ClearProgressBar();
+            stopwatch.Stop();
+            UnityEngine.Debug.Log($"Tilesets imported in {stopwatch.Elapsed.TotalSeconds} seconds.");
         }
         EditorGUI.EndDisabledGroup();
     }
@@ -204,12 +210,12 @@ public class TiledImporterEditorWindow : EditorWindow
             File.WriteAllText(filePath, content);
 
             // Notify the user that the file was successfully created
-            Debug.Log($"Tiled project file generated at: {filePath}");
+            UnityEngine.Debug.Log($"Tiled project file generated at: {filePath}");
         }
         catch (IOException e)
         {
             // Handle any potential file write errors
-            Debug.LogError($"Failed to generate Tiled project file: {e.Message}");
+            UnityEngine.Debug.LogError($"Failed to generate Tiled project file: {e.Message}");
         }
     }
     private void GenerateTSXFilesForImportedTilesets(string tilesetDirectory, string tilesetType, int tileSize)
@@ -264,7 +270,7 @@ public class TiledImporterEditorWindow : EditorWindow
         }
 
         // Log the output path where TSX files are saved
-        Debug.Log($"TSX files generated in: {tsxOutputPath}");
+        UnityEngine.Debug.Log($"TSX files generated in: {tsxOutputPath}");
     }
 
     private void GenerateTSXFile(string fileName, string tilesetName, string tileSet, int width, int height, int tileSize)
@@ -289,12 +295,12 @@ public class TiledImporterEditorWindow : EditorWindow
             File.WriteAllText(filePath, content);
 
             // Notify the user that the file was successfully created
-            Debug.Log($"TSX file generated at: {filePath}");
+            UnityEngine.Debug.Log($"TSX file generated at: {filePath}");
         }
         catch (IOException e)
         {
             // Handle any potential file write errors
-            Debug.LogError($"Failed to generate TSX file: {e.Message}");
+            UnityEngine.Debug.LogError($"Failed to generate TSX file: {e.Message}");
         }
     }
     #if SUPER_TILED2UNITY_INSTALLED
@@ -357,28 +363,28 @@ public class TiledImporterEditorWindow : EditorWindow
                 }
                 else
                 {
-                    Debug.LogError("Method not found.");
+                    UnityEngine.Debug.LogError("Method not found.");
                 }
             }
             else
             {
-                Debug.LogError("Class not found.");
+                UnityEngine.Debug.LogError("Class not found.");
             }
         }
         else
         {
-            Debug.LogError("Assembly not found.");
+            UnityEngine.Debug.LogError("Assembly not found.");
         }
     }
         
     private void AdjustTextureImportSettings(string textureDirectory,int maxTextureSize)
     {
-        Debug.Log(textureDirectory);
+        UnityEngine.Debug.Log(textureDirectory);
         string[] textureFiles = Directory.GetFiles(textureDirectory, "*.png", SearchOption.TopDirectoryOnly);        
-        Debug.Log(textureFiles.Length);
+        UnityEngine.Debug.Log(textureFiles.Length);
         foreach (string textureFile in textureFiles)
         {
-            Debug.Log(textureFile);
+            UnityEngine.Debug.Log(textureFile);
             if(textureFile.Contains("5_Floor"))
             {
                 maxTextureSize = 8192;
@@ -406,6 +412,7 @@ public class TiledImporterEditorWindow : EditorWindow
         var archive = ZipFile.OpenRead(zipFilePath);
 
         //All the assets are inside : 1_Interior/"spriteSize"x"spriteSize"/Theme_Sorter/*.png
+        int i = 0;
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             var fullName = entry.FullName;
@@ -415,7 +422,10 @@ public class TiledImporterEditorWindow : EditorWindow
                 if(!Directory.Exists(outputPath+"/Art/Interior/"))
                     Directory.CreateDirectory(outputPath+"/Art/Interior/");
                 entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName);
+                i++;
             }
+            if(i > 5)
+                break;
         }
     }
     private void UnzipexteriorAssets(string zipFilePath, string spriteSize)
@@ -424,7 +434,7 @@ public class TiledImporterEditorWindow : EditorWindow
             Directory.CreateDirectory(outputPath+"/Art/Exterior/");
         var archive = ZipFile.OpenRead(zipFilePath);
 
-
+         int i = 0;
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             var fullName = entry.FullName;
@@ -434,9 +444,12 @@ public class TiledImporterEditorWindow : EditorWindow
             {
                 if(!Directory.Exists(outputPath+"/Art/Exterior/"))
                     Directory.CreateDirectory(outputPath+"/Art/Exterior/");
-                Debug.Log(fullName);
+                UnityEngine.Debug.Log(fullName);
                 entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName);
+                i++;
             }
+            if( i> 5)
+                break;
         }
     }
 
@@ -512,11 +525,11 @@ public class TiledImporterEditorWindow : EditorWindow
         // Check the result
         if (addRequest.Status == StatusCode.Success)
         {
-            Debug.Log("Package added successfully: " + packageUrl);
+            UnityEngine.Debug.Log("Package added successfully: " + packageUrl);
         }
         else
         {
-            Debug.LogError("Failed to add package: " + packageUrl);
+            UnityEngine.Debug.LogError("Failed to add package: " + packageUrl);
         }
     }
     
