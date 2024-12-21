@@ -379,6 +379,10 @@ public class TiledImporterEditorWindow : EditorWindow
         foreach (string textureFile in textureFiles)
         {
             Debug.Log(textureFile);
+            if(textureFile.Contains("5_Floor"))
+            {
+                maxTextureSize = 8192;
+            }
             // Load the texture importer for the current texture
             TextureImporter textureImporter = AssetImporter.GetAtPath(textureFile) as TextureImporter;
             
