@@ -42,7 +42,7 @@ public class TiledImporterEditorWindow : EditorWindow
     private bool testMode = false;
     private int maxTilesetPerType = 5;
 
-    [MenuItem("FingTools/Importer/WIP - Tilesets Importer",false,99)]
+    //[MenuItem("FingTools/Importer/WIP - Tilesets Importer",false,99)]
     public static void ShowWindow()
     {
         GetWindow<TiledImporterEditorWindow>(true,"Tilesets Importer");
