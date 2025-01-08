@@ -62,7 +62,16 @@ public class TiledImporterEditorWindow : EditorWindow
     {
         EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
         EditorGUILayout.LabelField("You can now import tilesets from the Limezu zip files", EditorStyles.boldLabel);            
-
+        EditorGUILayout.HelpBox(
+        "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n\n" +
+        "The tool automatically create a Tiled project and add the imported assets as usable tilesets inside Tiled\n\n" +
+        "To use this tool:\n" +
+        "1. Select the packs you want to import.\n" +
+        "2. Choose a sprite size to import.\n" +
+        "3. Click 'Import Assets'.\n\n" +
+        "WARNING: This process TAKE A VERY LONG TIME, optimizing is on his way. \n",
+        MessageType.Info
+    );
         DrawSeparator();
 
         // Import interior asset selection
@@ -431,10 +440,10 @@ public class TiledImporterEditorWindow : EditorWindow
             {
                 if(!Directory.Exists(outputPath+"/Art/Interior/"))
                     Directory.CreateDirectory(outputPath+"/Art/Interior/");
-                entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName);
+                entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName,true);
                 i++;
             }
-            if(testMode && i > maxTilesetPerType)
+            if(testMode && i >= maxTilesetPerType)
                 break;
         }
     }
@@ -455,10 +464,10 @@ public class TiledImporterEditorWindow : EditorWindow
                 if(!Directory.Exists(outputPath+"/Art/Exterior/"))
                     Directory.CreateDirectory(outputPath+"/Art/Exterior/");
                 UnityEngine.Debug.Log(fullName);
-                entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName);
+                entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName,true);
                 i++;
             }
-            if(testMode &&  i> maxTilesetPerType)
+            if(testMode &&  i>= maxTilesetPerType)
                 break;
         }
     }
