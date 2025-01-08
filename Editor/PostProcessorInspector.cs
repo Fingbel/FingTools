@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class PostprocessorInspector
 {
-    [MenuItem("Tools/List All Asset Postprocessors")]
+    //[MenuItem("Tools/List All Asset Postprocessors")]
     public static void ListAllPostprocessors()
     {
         // Find all types that inherit from AssetPostprocessor
