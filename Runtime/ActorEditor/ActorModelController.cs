@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using FingTools;
 using UnityEditor;
+
 using UnityEngine;
 
 namespace FingTools.Internal
@@ -29,6 +30,7 @@ namespace FingTools.Internal
         private Action onAnimationCompleteCallback;
         private string baseAnimationName;
         public bool isLocked = false;
+
         
         private void Awake()
         {
@@ -107,6 +109,7 @@ namespace FingTools.Internal
                 animationConfigMap[config.category] = (config.spritesPerDirection, config.fixedDirection);
             }
         }
+
         #if UNITY_EDITOR
         private void OnValidate()
         {

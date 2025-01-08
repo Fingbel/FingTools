@@ -158,9 +158,12 @@ public class ActorEditorWindow : EditorWindow
             
         }        
         GUILayout.EndHorizontal();
+
+        // Handle Enter key press for the name input field
         HandleEnterKeyPress();
     }
-    
+
+
     private void HandleEnterKeyPress()
     {
         Event e = Event.current;

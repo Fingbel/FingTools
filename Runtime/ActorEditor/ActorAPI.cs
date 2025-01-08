@@ -22,21 +22,21 @@ namespace FingTools{
     public class ActorAPI : MonoBehaviour
     {
         private ActorModelController modelController;
-        private void LogError(string message) => Debug.LogError($"ActorAPI Error: {message}");
-        private void LogWarning(string message) => Debug.LogWarning($"ActorAPI Warning: {message}");
 
-        private void Awake() {
+    private void Awake() {
             modelController = GetComponent<ActorModelController>();
         }
 
         /// <summary>
         /// Set the actor's current direction (North, South, East, West).
         /// </summary>
+
         public bool SetDirection(CardinalDirection direction)
         {
             if(modelController.CurrentDirection != direction)
             {
                 modelController.CurrentDirection = direction;
+
                 modelController.AnimationTick(); // Tick immediatly to avoid waiting for the next one
                 return true;
             }
@@ -47,6 +47,7 @@ namespace FingTools{
             
         }
         /// <summary>
+
         /// Remove a body part from the actor, you only need to pass the ActorPartType of the part. 
         /// The Body part cannot be removed, use SetBodyPart directly instead.
         /// </summary>
@@ -90,6 +91,7 @@ namespace FingTools{
         /// <summary>
         ///  Set the actor to a new looping animation.
         /// </summary>
+
         public bool SetLoopingAnimation(LoopingAnimation animation)
         {            
             if(animation.ToString() != modelController.currentAnimation)
@@ -106,6 +108,7 @@ namespace FingTools{
         /// <summary>
         /// Play a one shot animation
         /// </summary>
+
         public bool PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
         {
             if(!modelController.isLocked)
@@ -118,8 +121,7 @@ namespace FingTools{
             {
                 LogWarning("ActorAPI call PlayOneShotAnimation : The actor is locked for animations,skipping.");
                 return false;
-            }
-            
+            }            
         }        
     }
 }
