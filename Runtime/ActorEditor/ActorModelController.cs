@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using FingTools;
+using UnityEditor;
+
 using UnityEngine;
 
 namespace FingTools.Internal
@@ -27,7 +29,8 @@ namespace FingTools.Internal
         private Dictionary<string, (int spritesPerDirection, bool fixedDirection)> animationConfigMap;
         private Action onAnimationCompleteCallback;
         private string baseAnimationName;
-        private bool isLocked = false;
+        public bool isLocked = false;
+
         
         private void Awake()
         {
@@ -106,10 +109,13 @@ namespace FingTools.Internal
                 animationConfigMap[config.category] = (config.spritesPerDirection, config.fixedDirection);
             }
         }
+
+        #if UNITY_EDITOR
         private void OnValidate()
         {
-            SetPreviewSprites();
+            EditorApplication.delayCall += () =>SetPreviewSprites();
         }
+        #endif
 
         public void SetPreviewSprites()
         {

@@ -1,5 +1,7 @@
 ## Overview
-This tool is intended to be a comprehensive Unity package providing a system for character import and sprite management for the Modern Interiors collection by Limezu.(https://limezu.itch.io)Currently the tool provide the following : 
+This tool is intended to be a comprehensive Unity package providing a system for character import and sprite management for the Modern Interiors collection by [Limezu](https://limezu.itch.io).  
+
+### Currently the tool provide the following : 
 1. Automatic asset import
 2. Custom Character editor window
 3. Simple API-Like interface to handle animations
@@ -22,4 +24,4 @@ https://github.com/Fingbel/FingTools.git
 
 ## Credits 🙌
 
-Special thanks to the creators of the Modern asset packs, **[Limezu](https://limezu.itch.io/)**
+Special thanks to the creator of the Modern asset packs, **[Limezu](https://limezu.itch.io/)**

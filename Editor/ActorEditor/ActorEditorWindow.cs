@@ -46,19 +46,6 @@ public class ActorEditorWindow : EditorWindow
     string actorsFolderPath = "Assets/Resources/FingTools/Actors";
     private Vector2 scrollPosition = Vector2.zero;
 
-    
-
-    // Tabs
-    private enum Tab
-    {
-        SpriteSelection,
-        Inventory,
-        Dialogue
-        // Add more tabs here
-    }
-
-    //private Tab currentTab = Tab.SpriteSelection;
-
     [MenuItem("FingTools/Actor Editor")]
     public static void ShowWindow()
     {
@@ -171,9 +158,11 @@ public class ActorEditorWindow : EditorWindow
             
         }        
         GUILayout.EndHorizontal();
+
         // Handle Enter key press for the name input field
         HandleEnterKeyPress();
     }
+
 
     private void HandleEnterKeyPress()
     {
