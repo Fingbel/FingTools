@@ -57,12 +57,7 @@ public class TiledImporterEditorWindow : EditorWindow
 
     EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
     DrawSeparator();
-
-    if (isSuperTiled2UnityInstalled == true)
-    {
-        EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("You can now import tilesets from the Limezu zip files", EditorStyles.boldLabel);            
-        EditorGUILayout.HelpBox(
+    EditorGUILayout.HelpBox(
         "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n\n" +
         "The tool automatically create a Tiled project and add the imported assets as usable tilesets inside Tiled\n\n" +
         "To use this tool:\n" +
@@ -72,6 +67,11 @@ public class TiledImporterEditorWindow : EditorWindow
         "WARNING: This process TAKE A VERY LONG TIME, optimizing is on his way. \n",
         MessageType.Info
     );
+    if (isSuperTiled2UnityInstalled == true)
+    {
+        EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("You can now import tilesets from the Limezu zip files", EditorStyles.boldLabel);            
+        
         DrawSeparator();
 
         // Import interior asset selection
