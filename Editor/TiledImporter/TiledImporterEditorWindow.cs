@@ -304,7 +304,7 @@ public class TiledImporterEditorWindow : EditorWindow
         }
     }
     #if SUPER_TILED2UNITY_INSTALLED
-        [MenuItem("FingTools/Importer/Error Autofixer",false,99)]
+        //[MenuItem("FingTools/Importer/Error Autofixer",false,99)]
         public static void AutoFixInteriorTextures()
         {
             AutoFixTextures("Assets/FingTools/Tiled/Tilesets/Interior");
