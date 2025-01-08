@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 namespace FingTools.Internal
 {
     public class AssetEnumGenerator : EditorWindow
@@ -44,3 +45,4 @@ namespace FingTools.Internal
         }
     }
 }
+#endif
