@@ -39,8 +39,10 @@ public class TiledImporterEditorWindow : EditorWindow
     private bool importExterior = true;
     private readonly List<string> validSizes = new () { "16", "32"};
     private string outputPath = "Assets/FingTools/Tiled/";
+    private bool testMode = false;
+    private int maxTilesetPerType = 5;
 
-    [MenuItem("FingTools/Importer/Tilesets Importer",false,99)]
+    [MenuItem("FingTools/Importer/WIP - Tilesets Importer",false,99)]
     public static void ShowWindow()
     {
         GetWindow<TiledImporterEditorWindow>(true,"Tilesets Importer");
@@ -100,7 +102,15 @@ public class TiledImporterEditorWindow : EditorWindow
         selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
 
         DrawSeparator();
+        // Checkbox to enable maxAssetsPerType
+            testMode = EditorGUILayout.Toggle("Test Mode", testMode);
 
+            if (testMode)
+            {
+                EditorGUILayout.LabelField("This option is there if you want to test the tool without importing all the Tilesets, set the number of tilesets per pack you want to import:",EditorStyles.wordWrappedLabel);
+                maxTilesetPerType = EditorGUILayout.IntField("Tileset per pack", maxTilesetPerType);
+                maxTilesetPerType = Mathf.Max(1, maxTilesetPerType);  // Ensure it's always a positive number
+            }
         // Import button
         EditorGUI.BeginDisabledGroup(
             !importExterior && !importInterior ||
@@ -424,7 +434,7 @@ public class TiledImporterEditorWindow : EditorWindow
                 entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName);
                 i++;
             }
-            if(i > 5)
+            if(testMode && i > maxTilesetPerType)
                 break;
         }
     }
@@ -448,7 +458,7 @@ public class TiledImporterEditorWindow : EditorWindow
                 entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName);
                 i++;
             }
-            if( i> 5)
+            if(testMode &&  i> maxTilesetPerType)
                 break;
         }
     }
