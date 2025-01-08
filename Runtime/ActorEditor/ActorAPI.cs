@@ -61,7 +61,7 @@ namespace FingTools{
             }
             else
             {                
-                LogError("ActorAPI call RemoveBodyPart : Cannot remove the body, use SetBodyPart directly instead to change it.");
+                Debug.LogError("ActorAPI call RemoveBodyPart : Cannot remove the body, use SetBodyPart directly instead to change it.");
                 return false;
             }
         }
@@ -82,7 +82,7 @@ namespace FingTools{
             }
             else
             {
-                LogError($"ActorAPI call ChangeBodyPart : Part {partName} not found or is not of type {spriteType}.");
+                Debug.LogError($"ActorAPI call ChangeBodyPart : Part {partName} not found or is not of type {spriteType}.");
                 return false;
             }
             
@@ -119,7 +119,7 @@ namespace FingTools{
             }
             else
             {
-                LogWarning("ActorAPI call PlayOneShotAnimation : The actor is locked for animations,skipping.");
+                Debug.LogWarning("ActorAPI call PlayOneShotAnimation : The actor is locked for animations,skipping.");
                 return false;
             }            
         }        
