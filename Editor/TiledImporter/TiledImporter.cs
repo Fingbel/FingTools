@@ -15,7 +15,25 @@ namespace FingTools.Tiled
 {
     public static class TiledImporter
     {
-#if SUPER_TILED2UNITY_INSTALLED
+        public static bool ValidateInteriorZipFile(string zipFilePath)
+        {
+            bool output = true;
+            var fileName = Path.GetFileName(zipFilePath);
+            if (string.IsNullOrEmpty(zipFilePath) || fileName != "moderninteriors-win.zip")
+                output = false;
+            // TODO : write specific validation for interior zip file
+            return output;
+        }
+
+        public static bool ValidateExteriorZipFile(string zipFilePath)
+        {
+            bool output = true;
+            var fileName = Path.GetFileName(zipFilePath);
+            if (string.IsNullOrEmpty(zipFilePath)|| fileName != "modernexteriors-win.zip")
+                output = false;
+            // TODO : write specific validation for exterior zip file
+            return output;
+        }
         public static void ImportAssets(bool importInterior, string selectedInteriorZipFile, List<string> selectedInteriorTilesets, bool importExterior, string selectedExteriorZipFile, List<string> selectedExteriorTilesets, string outputPath, int selectedSizeIndex, List<string> validSizes)
         {
             // Unzip assets first
@@ -108,27 +126,7 @@ namespace FingTools.Tiled
                     }
                 }
             }
-        }
-
-        public static bool ValidateInteriorZipFile(string zipFilePath)
-        {
-            bool output = true;
-            var fileName = Path.GetFileName(zipFilePath);
-            if (string.IsNullOrEmpty(zipFilePath) || fileName != "moderninteriors-win.zip")
-                output = false;
-            // TODO : write specific validation for interior zip file
-            return output;
-        }
-
-        public static bool ValidateExteriorZipFile(string zipFilePath)
-        {
-            bool output = true;
-            var fileName = Path.GetFileName(zipFilePath);
-            if (string.IsNullOrEmpty(zipFilePath)|| fileName != "modernexteriors-win.zip")
-                output = false;
-            // TODO : write specific validation for exterior zip file
-            return output;
-        }
+        }       
 
         private static void GenerateTSXFilesForImportedTilesets(string tilesetDirectory, string tilesetType, int tileSize, string outputPath)
         {
@@ -216,6 +214,7 @@ namespace FingTools.Tiled
             }
         }
 
+        #if SUPER_TILED2UNITY_INSTALLED
         public static void AutoFixTextures(string tilesetPath)
         {
             // Get all .tsx files in the specified directory
@@ -237,6 +236,7 @@ namespace FingTools.Tiled
             }
             AssetDatabase.StopAssetEditing();
         }
+        #endif
 
         public static void CallAddSpritesToTexture(string textureAssetPath, IEnumerable<Rect> missingSpritesRects)
         {
@@ -305,7 +305,6 @@ namespace FingTools.Tiled
                 }
             }
         }
-#endif
 
         public static void GenerateTiledProjectFile(string productName, string outputPath)
         {
