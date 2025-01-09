@@ -7,10 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System;
 
-
-
 #if SUPER_TILED2UNITY_INSTALLED
-using SuperTiled2Unity; // Include the SuperTiled2Unity namespaces if available
+using SuperTiled2Unity;
 #endif
 
 namespace FingTools.Tiled

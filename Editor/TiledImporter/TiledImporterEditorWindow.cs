@@ -8,10 +8,6 @@ using System.IO;
 using System.IO.Compression;
 using UnityEditor.Build;
 
-#if SUPER_TILED2UNITY_INSTALLED
-using SuperTiled2Unity; // Include the SuperTiled2Unity namespaces if available
-#endif
-
 namespace FingTools.Tiled
 {
     public class TiledImporterEditorWindow : EditorWindow
@@ -32,17 +28,19 @@ namespace FingTools.Tiled
         private List<string> availableExteriorTilesets = new List<string>();
         private Vector2 interiorScrollPos;
         private Vector2 exteriorScrollPos;
-        private bool interiorExpanded = false;
-        private bool exteriorExpanded = false;
+        private bool interiorExpanded = true;
+        private bool exteriorExpanded = true;
+        private Vector2 scrollPos;
 
         [MenuItem("FingTools/Importer/Tilesets Importer", false, 99)]
         public static void ShowWindow()
         {
-            GetWindow<TiledImporterEditorWindow>(true, "Tilesets Importer");
+            GetWindow<TiledImporterEditorWindow>(false, "Tilesets Importer");
         }
 
         private void OnGUI()
         {
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Width(position.width), GUILayout.Height(position.height));
             if (isSuperTiled2UnityInstalled == null)
             {
                 isSuperTiled2UnityInstalled = CheckSuperTiled2Unity();
@@ -93,7 +91,9 @@ namespace FingTools.Tiled
                             EditorGUI.BeginDisabledGroup(true);                         
                         }
                         EditorGUILayout.BeginHorizontal();
-                        EditorGUILayout.LabelField("Available Tilesets:");
+                        int _installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
+                        int selectedInteriorTilesetsCount = selectedInteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Interior"));
+                        EditorGUILayout.LabelField($"Selected: {selectedInteriorTilesetsCount} / Installed: {_installedInteriorTilesetsCount} / Total: {availableInteriorTilesets.Count}");
                         if (GUILayout.Button(interiorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
                         {
                             interiorExpanded = !interiorExpanded;
@@ -111,7 +111,7 @@ namespace FingTools.Tiled
 
                         if (interiorExpanded)
                         {
-                            interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(130));
+                            interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(175));
                             int halfCount = Mathf.CeilToInt(availableInteriorTilesets.Count / 2f);
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.BeginVertical();
@@ -192,7 +192,9 @@ namespace FingTools.Tiled
                             EditorGUI.BeginDisabledGroup(true);
                         }
                         EditorGUILayout.BeginHorizontal();
-                        EditorGUILayout.LabelField("Available Tilesets:");
+                        int _installedExteriorTilesetsCount = availableExteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Exterior"));
+                        int selectedExteriorTilesetsCount = selectedExteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Exterior"));
+                        EditorGUILayout.LabelField($"Selected: {selectedExteriorTilesetsCount} / Installed: {_installedExteriorTilesetsCount} / Total: {availableExteriorTilesets.Count}");
                         if (GUILayout.Button(exteriorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
                         {
                             exteriorExpanded = !exteriorExpanded;
@@ -210,7 +212,7 @@ namespace FingTools.Tiled
 
                         if (exteriorExpanded)
                         {
-                            exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(130));
+                            exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(175));
                             int halfCount = Mathf.CeilToInt(availableExteriorTilesets.Count / 2f);
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.BeginVertical();
@@ -272,7 +274,10 @@ namespace FingTools.Tiled
                     (string.IsNullOrEmpty(selectedExteriorZipFile) && !importInterior) ||
                     string.IsNullOrEmpty(selectedExteriorZipFile) && string.IsNullOrEmpty(selectedInteriorZipFile)
                     );
-                if (GUILayout.Button("Import Assets"))
+                int installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
+                int installedExteriorTilesetsCount = availableExteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Exterior"));
+                EditorGUILayout.LabelField("Total tilesets to be imported : " + (selectedInteriorTilesets.Count + selectedExteriorTilesets.Count - (installedInteriorTilesetsCount + installedExteriorTilesetsCount)));
+                if (GUILayout.Button("Import Assets",GUILayout.Height(40)))
                 {
                     EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);
 #if SUPER_TILED2UNITY_INSTALLED
@@ -295,6 +300,7 @@ namespace FingTools.Tiled
                     AddPackage(superTiled2UnityGitUrl);
                 }
             }
+            EditorGUILayout.EndScrollView();
         }
 
         private void DrawSeparator()
