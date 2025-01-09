@@ -11,16 +11,9 @@ using System.Reflection;
 using System;
 using UnityEditor.Experimental.GraphView;
 
-
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity; // Include the SuperTiled2Unity namespaces if available
 #endif
-
-//projected workflow :
-//0. Make sure SuperTiled2Unity is installed - DONE
-//1. Unzip tilesets - DONE
-//2. Create Tiled project file - DONE
-//3. Create a .tsx file for each tileset - DONE but we still have import errors to fix
 
 namespace FingTools.Tiled{
 
@@ -36,12 +29,14 @@ public class TiledImporterEditorWindow : EditorWindow
     private bool importExterior = true;
     private readonly List<string> validSizes = new () { "16", "32"};
     private string outputPath = "Assets/FingTools/Tiled/";
-    private bool testMode = false;
-    private int maxTilesetPerType = 5;
     private List<string> selectedInteriorTilesets = new List<string>();
     private List<string> selectedExteriorTilesets = new List<string>();
     private List<string> availableInteriorTilesets = new List<string>();
     private List<string> availableExteriorTilesets = new List<string>();
+    private Vector2 interiorScrollPos;
+    private Vector2 exteriorScrollPos;
+    private bool interiorExpanded = false;
+    private bool exteriorExpanded = false;
 
     [MenuItem("FingTools/Importer/Tilesets Importer",false,99)]
     public static void ShowWindow()
@@ -54,10 +49,7 @@ public class TiledImporterEditorWindow : EditorWindow
     if (isSuperTiled2UnityInstalled == null)
     {
         isSuperTiled2UnityInstalled = CheckSuperTiled2Unity();
-    }
-
-    EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
-    DrawSeparator();
+    }    
     EditorGUILayout.HelpBox(
         "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n\n" +
         "The tool automatically create a Tiled project and add the imported assets as usable tilesets inside Tiled\n\n" +
@@ -68,13 +60,12 @@ public class TiledImporterEditorWindow : EditorWindow
         "WARNING: This process TAKE A VERY LONG TIME, optimizing is on his way. \n",
         MessageType.Info
     );
+    EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);    
     if (isSuperTiled2UnityInstalled == true)
     {
-        EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
-        EditorGUILayout.LabelField("You can now import tilesets from the Limezu zip files", EditorStyles.boldLabel);            
-        
-        DrawSeparator();
+        EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);       
 
+        DrawSeparator();    
         // Import interior asset selection
         importInterior = EditorGUILayout.Toggle("Import Interior Assets", importInterior);
         if (importInterior)
@@ -94,11 +85,68 @@ public class TiledImporterEditorWindow : EditorWindow
             EditorGUILayout.EndHorizontal();
             if (!string.IsNullOrEmpty(selectedInteriorZipFile))
             {
-                if (GUILayout.Button("Select Tilesets to Import", GUILayout.Width(180)))
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Available Tilesets:");
+                if (GUILayout.Button(interiorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
                 {
-                    ShowTilesetSelectionSearchWindow(availableInteriorTilesets, selectedInteriorTilesets, "Select Interior Tilesets");
+                    interiorExpanded = !interiorExpanded;
                 }
-                EditorGUILayout.LabelField("Selected Tilesets:", string.Join(", ", selectedInteriorTilesets.Select(CleanTilesetName)));
+                if (GUILayout.Button("Select All", GUILayout.Width(80)))
+                {
+                    selectedInteriorTilesets = new List<string>(availableInteriorTilesets);
+                }
+                if (GUILayout.Button("Deselect All", GUILayout.Width(80)))
+                {
+                    selectedInteriorTilesets.Clear();
+                }                
+                EditorGUILayout.EndHorizontal();
+
+                if (interiorExpanded)
+                {
+                    interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(100));
+                    int halfCount = Mathf.CeilToInt(availableInteriorTilesets.Count / 2f);
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.BeginVertical();
+                    for (int i = 0; i < halfCount; i++)
+                    {
+                        var tileset = availableInteriorTilesets[i];
+                        bool isSelected = selectedInteriorTilesets.Contains(tileset);
+                        bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                        if (newIsSelected != isSelected)
+                        {
+                            if (newIsSelected)
+                            {
+                                selectedInteriorTilesets.Add(tileset);
+                            }
+                            else
+                            {
+                                selectedInteriorTilesets.Remove(tileset);
+                            }
+                        }
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.BeginVertical();
+                    for (int i = halfCount; i < availableInteriorTilesets.Count; i++)
+                    {
+                        var tileset = availableInteriorTilesets[i];
+                        bool isSelected = selectedInteriorTilesets.Contains(tileset);
+                        bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                        if (newIsSelected != isSelected)
+                        {
+                            if (newIsSelected)
+                            {
+                                selectedInteriorTilesets.Add(tileset);
+                            }
+                            else
+                            {
+                                selectedInteriorTilesets.Remove(tileset);
+                            }
+                        }
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndScrollView();
+                }
             }
         }
 
@@ -123,11 +171,68 @@ public class TiledImporterEditorWindow : EditorWindow
             EditorGUILayout.EndHorizontal();
             if (!string.IsNullOrEmpty(selectedExteriorZipFile))
             {
-                if (GUILayout.Button("Select Tilesets to Import", GUILayout.Width(180)))
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Available Tilesets:");
+                if (GUILayout.Button(exteriorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
                 {
-                    ShowTilesetSelectionSearchWindow(availableExteriorTilesets, selectedExteriorTilesets, "Select Exterior Tilesets");
+                    exteriorExpanded = !exteriorExpanded;
                 }
-                EditorGUILayout.LabelField("Selected Tilesets:", string.Join(", ", selectedExteriorTilesets.Select(CleanTilesetName)));
+                if (GUILayout.Button("Select All", GUILayout.Width(80)))
+                {
+                    selectedExteriorTilesets = new List<string>(availableExteriorTilesets);
+                }
+                if (GUILayout.Button("Deselect All", GUILayout.Width(80)))
+                {
+                    selectedExteriorTilesets.Clear();
+                }                
+                EditorGUILayout.EndHorizontal();
+
+                if (exteriorExpanded)
+                {
+                    exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(150));
+                    int halfCount = Mathf.CeilToInt(availableExteriorTilesets.Count / 2f);
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.BeginVertical();
+                    for (int i = 0; i < halfCount; i++)
+                    {
+                        var tileset = availableExteriorTilesets[i];
+                        bool isSelected = selectedExteriorTilesets.Contains(tileset);
+                        bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                        if (newIsSelected != isSelected)
+                        {
+                            if (newIsSelected)
+                            {
+                                selectedExteriorTilesets.Add(tileset);
+                            }
+                            else
+                            {
+                                selectedExteriorTilesets.Remove(tileset);
+                            }
+                        }
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.BeginVertical();
+                    for (int i = halfCount; i < availableExteriorTilesets.Count; i++)
+                    {
+                        var tileset = availableExteriorTilesets[i];
+                        bool isSelected = selectedExteriorTilesets.Contains(tileset);
+                        bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                        if (newIsSelected != isSelected)
+                        {
+                            if (newIsSelected)
+                            {
+                                selectedExteriorTilesets.Add(tileset);
+                            }
+                            else
+                            {
+                                selectedExteriorTilesets.Remove(tileset);
+                            }
+                        }
+                    }
+                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.EndScrollView();
+                }
             }
         }
 
@@ -138,15 +243,7 @@ public class TiledImporterEditorWindow : EditorWindow
         selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
 
         DrawSeparator();
-        // Checkbox to enable maxAssetsPerType
-            testMode = EditorGUILayout.Toggle("Test Mode", testMode);
 
-            if (testMode)
-            {
-                EditorGUILayout.LabelField("This option is there if you want to test the tool without importing all the Tilesets, set the number of tilesets per pack you want to import:",EditorStyles.wordWrappedLabel);
-                maxTilesetPerType = EditorGUILayout.IntField("Tileset per pack", maxTilesetPerType);
-                maxTilesetPerType = Mathf.Max(1, maxTilesetPerType);  // Ensure it's always a positive number
-            }
         // Import button
         EditorGUI.BeginDisabledGroup(
             !importExterior && !importInterior ||
@@ -468,9 +565,7 @@ public class TiledImporterEditorWindow : EditorWindow
                     entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName,true);
                     i++;
                 }
-            }
-            if(testMode && i >= maxTilesetPerType)
-                break;
+            }           
         }
     }
     private void UnzipexteriorAssets(string zipFilePath, string spriteSize)
@@ -495,9 +590,7 @@ public class TiledImporterEditorWindow : EditorWindow
                     entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName,true);
                     i++;
                 }
-            }
-            if(testMode &&  i>= maxTilesetPerType)
-                break;
+            }           
         }
     }
 
@@ -536,7 +629,7 @@ public class TiledImporterEditorWindow : EditorWindow
         {
             if (entry.FullName.StartsWith($"1_Interiors/{spriteSize}x{spriteSize}/Theme_Sorter/") && entry.FullName.EndsWith(".png"))
             {
-                Debug.Log(entry.Name);
+                //Debug.Log(entry.Name);
                 tilesets.Add(entry.Name);
             }
         }
@@ -551,7 +644,7 @@ public class TiledImporterEditorWindow : EditorWindow
         {
             if (entry.FullName.StartsWith($"Modern_Exteriors_{spriteSize}x{spriteSize}/ME_Theme_Sorter_{spriteSize}x{spriteSize}/") && entry.FullName.EndsWith(".png") && !entry.FullName.Contains("Singles") && !entry.FullName.Contains("Old_Sorting"))
             {
-                Debug.Log(entry.Name);
+                //Debug.Log(entry.Name);
                 tilesets.Add(entry.Name);
             }
         }
@@ -561,7 +654,7 @@ public class TiledImporterEditorWindow : EditorWindow
     private void ShowTilesetSelectionSearchWindow(List<string> availableTilesets, List<string> selectedTilesets, string title)
     {
         var provider = ScriptableObject.CreateInstance<TilesetSearchProvider>();
-        provider.Initialize(availableTilesets, selectedTilesets, title, CleanTilesetName);
+        provider.Initialize(availableTilesets, selectedTilesets, title, CleanTilesetName, Repaint);
         SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
     }
 
@@ -571,13 +664,15 @@ public class TiledImporterEditorWindow : EditorWindow
         private List<string> selectedTilesets;
         private string title;
         private Func<string, string> cleanTilesetName;
+        private Action repaintCallback;
 
-        public void Initialize(List<string> availableTilesets, List<string> selectedTilesets, string title, Func<string, string> cleanTilesetName)
+        public void Initialize(List<string> availableTilesets, List<string> selectedTilesets, string title, Func<string, string> cleanTilesetName, Action repaintCallback)
         {
             this.availableTilesets = availableTilesets;
             this.selectedTilesets = selectedTilesets;
             this.title = title;
             this.cleanTilesetName = cleanTilesetName;
+            this.repaintCallback = repaintCallback;
         }
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
@@ -589,7 +684,7 @@ public class TiledImporterEditorWindow : EditorWindow
 
             foreach (var tileset in availableTilesets)
             {
-                var content = new GUIContent(cleanTilesetName(tileset));
+                var content = new GUIContent(cleanTilesetName(tileset));                
                 var entry = new SearchTreeEntry(content)
                 {
                     level = 1,
@@ -612,7 +707,8 @@ public class TiledImporterEditorWindow : EditorWindow
             {
                 selectedTilesets.Add(tileset);
             }
-            return true;
+            repaintCallback?.Invoke();
+            return false; // Return false to keep the search window open for multiple selections
         }
     }
     
