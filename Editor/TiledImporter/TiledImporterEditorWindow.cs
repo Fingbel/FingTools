@@ -32,11 +32,22 @@ namespace FingTools.Tiled
         private bool exteriorExpanded = true;
         private Vector2 scrollPos;
         private bool helpBoxExpanded = true;
+        private bool tileSizeLocked = false;
 
-        [MenuItem("FingTools/Importer/Tilesets Importer", false, 99)]
+        [MenuItem("FingTools/Importer/Tilesets Importer", false, 21)]
         public static void ShowWindow()
         {
             GetWindow<TiledImporterEditorWindow>(false, "Tilesets Importer");
+        }
+
+        private void OnEnable()
+        {
+            if (EditorPrefs.HasKey("TileSize"))
+            {
+                tileSizeLocked = true;
+                int tileSize = EditorPrefs.GetInt("TileSize");
+                selectedSizeIndex = validSizes.IndexOf(tileSize.ToString());
+            }
         }
 
         private void OnGUI()
@@ -66,7 +77,9 @@ namespace FingTools.Tiled
                 EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
                 // Select the sprite size to import
                 EditorGUILayout.LabelField("Select the sprite size to import: (48x48 is not available at the moment)", EditorStyles.wordWrappedLabel);
+                EditorGUI.BeginDisabledGroup(tileSizeLocked);
                 selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
+                EditorGUI.EndDisabledGroup();
 
                 
                 DrawSeparator();
@@ -289,6 +302,7 @@ namespace FingTools.Tiled
                     TiledImporter.ImportAssets(importInterior, selectedInteriorZipFile, selectedInteriorTilesets, importExterior, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
 #endif
                     TiledImporter.GenerateTiledProjectFile(Application.productName, outputPath);
+                    EditorPrefs.SetInt("TileSize", int.Parse(validSizes[selectedSizeIndex]));
                     AssetDatabase.Refresh();
                     AssetDatabase.SaveAssets();
                     EditorUtility.ClearProgressBar();
