@@ -58,7 +58,7 @@ namespace FingTools.Tiled
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-
+            #if SUPER_TILED2UNITY_INSTALLED
             // After unzipping, now generate the TSX files for each tileset
             if (importInterior && !string.IsNullOrEmpty(selectedInteriorZipFile))
             {
@@ -81,6 +81,7 @@ namespace FingTools.Tiled
                 AssetDatabase.Refresh();
                 AutoFixTextures(exteriorTilesetOutputPath);
             }
+            #endif
         }
 
         private static void UnzipInteriorAssets(string zipFilePath, string spriteSize, List<string> selectedInteriorTilesets, string outputPath)
