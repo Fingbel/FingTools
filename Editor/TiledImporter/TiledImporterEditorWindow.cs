@@ -4,8 +4,10 @@ using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEditor.Build;
+using System.IO;
 using System.IO.Compression;
+using UnityEditor.Build;
+
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity; // Include the SuperTiled2Unity namespaces if available
 #endif
@@ -46,7 +48,7 @@ namespace FingTools.Tiled
                 isSuperTiled2UnityInstalled = CheckSuperTiled2Unity();
             }
             EditorGUILayout.HelpBox(
-                "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n\n" +
+                "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n" +
                 "The tool automatically create a Tiled project and add the imported assets as usable tilesets inside Tiled\n\n" +
                 "To use this tool:\n" +
                 "1. Select the packs you want to import.\n" +
@@ -55,11 +57,15 @@ namespace FingTools.Tiled
                 "WARNING: This process TAKE A VERY LONG TIME, optimizing is on his way. \n",
                 MessageType.Info
             );
-            EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
+            //EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
             if (isSuperTiled2UnityInstalled == true)
             {
                 EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
+                // Select the sprite size to import
+                EditorGUILayout.LabelField("Select the sprite size to import: (48x48 is not available at the moment)", EditorStyles.wordWrappedLabel);
+                selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
 
+                
                 DrawSeparator();
                 // Import interior asset selection
                 importInterior = EditorGUILayout.Toggle("Import Interior Assets", importInterior);
@@ -77,9 +83,15 @@ namespace FingTools.Tiled
                         }
                     }
                     EditorGUILayout.LabelField("Selected Zip File:", selectedInteriorZipFile ?? "None");
-                    EditorGUILayout.EndHorizontal();
-                    if (!string.IsNullOrEmpty(selectedInteriorZipFile))
+                    EditorGUILayout.EndHorizontal();                    
+                    if(!string.IsNullOrEmpty(selectedInteriorZipFile))
                     {
+                        EditorGUI.BeginDisabledGroup(false);   
+                        if(!TiledImporter.ValidateInteriorZipFile(selectedInteriorZipFile))
+                        {
+                            selectedInteriorZipFile = "Wrong file selected";   
+                            EditorGUI.BeginDisabledGroup(true);                         
+                        }
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField("Available Tilesets:");
                         if (GUILayout.Button(interiorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
@@ -94,11 +106,12 @@ namespace FingTools.Tiled
                         {
                             selectedInteriorTilesets.Clear();
                         }
+                        EditorGUI.EndDisabledGroup();
                         EditorGUILayout.EndHorizontal();
 
                         if (interiorExpanded)
                         {
-                            interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(100));
+                            interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(130));
                             int halfCount = Mathf.CeilToInt(availableInteriorTilesets.Count / 2f);
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.BeginVertical();
@@ -106,7 +119,10 @@ namespace FingTools.Tiled
                             {
                                 var tileset = availableInteriorTilesets[i];
                                 bool isSelected = selectedInteriorTilesets.Contains(tileset);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Interior");
+                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                                EditorGUI.EndDisabledGroup();
                                 if (newIsSelected != isSelected)
                                 {
                                     if (newIsSelected)
@@ -125,7 +141,10 @@ namespace FingTools.Tiled
                             {
                                 var tileset = availableInteriorTilesets[i];
                                 bool isSelected = selectedInteriorTilesets.Contains(tileset);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Interior");
+                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                                EditorGUI.EndDisabledGroup();
                                 if (newIsSelected != isSelected)
                                 {
                                     if (newIsSelected)
@@ -164,8 +183,14 @@ namespace FingTools.Tiled
                     }
                     EditorGUILayout.LabelField("Selected Zip File:", selectedExteriorZipFile ?? "None");
                     EditorGUILayout.EndHorizontal();
-                    if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+                    if (!string.IsNullOrEmpty(selectedExteriorZipFile) )
                     {
+                        EditorGUI.BeginDisabledGroup(false);   
+                        if(!TiledImporter.ValidateExteriorZipFile(selectedExteriorZipFile))
+                        {
+                            selectedExteriorZipFile = "Wrong file selected";
+                            EditorGUI.BeginDisabledGroup(true);
+                        }
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField("Available Tilesets:");
                         if (GUILayout.Button(exteriorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
@@ -180,11 +205,12 @@ namespace FingTools.Tiled
                         {
                             selectedExteriorTilesets.Clear();
                         }
+                        EditorGUI.EndDisabledGroup();
                         EditorGUILayout.EndHorizontal();
 
                         if (exteriorExpanded)
                         {
-                            exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(150));
+                            exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(130));
                             int halfCount = Mathf.CeilToInt(availableExteriorTilesets.Count / 2f);
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.BeginVertical();
@@ -192,7 +218,10 @@ namespace FingTools.Tiled
                             {
                                 var tileset = availableExteriorTilesets[i];
                                 bool isSelected = selectedExteriorTilesets.Contains(tileset);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Exterior");
+                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                                EditorGUI.EndDisabledGroup();
                                 if (newIsSelected != isSelected)
                                 {
                                     if (newIsSelected)
@@ -211,7 +240,10 @@ namespace FingTools.Tiled
                             {
                                 var tileset = availableExteriorTilesets[i];
                                 bool isSelected = selectedExteriorTilesets.Contains(tileset);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected);
+                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Exterior");
+                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                                EditorGUI.EndDisabledGroup();
                                 if (newIsSelected != isSelected)
                                 {
                                     if (newIsSelected)
@@ -231,13 +263,7 @@ namespace FingTools.Tiled
                     }
                 }
 
-                DrawSeparator();
-
-                // Select the sprite size to import
-                EditorGUILayout.LabelField("Select the sprite size to import: (48x48 is not available at the moment)", EditorStyles.wordWrappedLabel);
-                selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
-
-                DrawSeparator();
+                DrawSeparator();               
 
                 // Import button
                 EditorGUI.BeginDisabledGroup(
@@ -396,6 +422,12 @@ namespace FingTools.Tiled
                 }
             }
             return tilesets;
+        }
+
+        private bool IsTilesetAlreadyImported(string tileset, string type)
+        {
+            string tilesetPath = Path.Combine(outputPath, "Tilesets", type, $"{Path.GetFileNameWithoutExtension(tileset)}.tsx");
+            return File.Exists(tilesetPath);
         }
     }
 }

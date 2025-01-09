@@ -112,19 +112,21 @@ namespace FingTools.Tiled
             }
         }
 
-        private static bool ValidateInteriorZipFile(string zipFilePath)
+        public static bool ValidateInteriorZipFile(string zipFilePath)
         {
             bool output = true;
-            if (string.IsNullOrEmpty(zipFilePath))
+            var fileName = Path.GetFileName(zipFilePath);
+            if (string.IsNullOrEmpty(zipFilePath) || fileName != "moderninteriors-win.zip")
                 output = false;
             // TODO : write specific validation for interior zip file
             return output;
         }
 
-        private static bool ValidateExteriorZipFile(string zipFilePath)
+        public static bool ValidateExteriorZipFile(string zipFilePath)
         {
             bool output = true;
-            if (string.IsNullOrEmpty(zipFilePath))
+            var fileName = Path.GetFileName(zipFilePath);
+            if (string.IsNullOrEmpty(zipFilePath)|| fileName != "modernexteriors-win.zip")
                 output = false;
             // TODO : write specific validation for exterior zip file
             return output;
