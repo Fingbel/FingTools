@@ -30,7 +30,7 @@ public class CharacterImporterEditor : EditorWindow
         { ActorPartType.Outfits, 0 }
     };
 
-    [MenuItem("FingTools/Importer/Character Importer",false,99)]
+    [MenuItem("FingTools/Importer/Character Importer",false,20)]
     public static void ShowWindow()
     {
         GetWindow<CharacterImporterEditor>("Character Importer");

@@ -46,7 +46,7 @@ public class ActorEditorWindow : EditorWindow
     string actorsFolderPath = "Assets/Resources/FingTools/Actors";
     private Vector2 scrollPosition = Vector2.zero;
 
-    [MenuItem("FingTools/Actor Editor")]
+    [MenuItem("FingTools/Actor Editor", false, 1)]
     public static void ShowWindow()
     {
         ActorEditorWindow window = GetWindow<ActorEditorWindow>();
