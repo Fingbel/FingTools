@@ -31,6 +31,7 @@ namespace FingTools.Tiled
         private bool interiorExpanded = true;
         private bool exteriorExpanded = true;
         private Vector2 scrollPos;
+        private bool helpBoxExpanded = true;
 
         [MenuItem("FingTools/Importer/Tilesets Importer", false, 99)]
         public static void ShowWindow()
@@ -41,21 +42,25 @@ namespace FingTools.Tiled
         private void OnGUI()
         {
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Width(position.width), GUILayout.Height(position.height));
+            helpBoxExpanded = EditorGUILayout.Foldout(helpBoxExpanded, "Help");
+            if (helpBoxExpanded)
+            {
+                EditorGUILayout.HelpBox(
+                    "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n" +
+                    "The tool automatically create a Tiled project and add the imported assets as usable tilesets inside Tiled\n\n" +
+                    "To use this tool:\n" +
+                    "1. Select the packs you want to import.\n" +
+                    "2. Choose a sprite size to import.\n" +
+                    "3. Click 'Import Assets'.\n\n" +
+                    "WARNING: This process TAKE A VERY LONG TIME, optimizing is on his way. \n",
+                    MessageType.Info
+                );
+            }
+            //EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
             if (isSuperTiled2UnityInstalled == null)
             {
                 isSuperTiled2UnityInstalled = CheckSuperTiled2Unity();
-            }
-            EditorGUILayout.HelpBox(
-                "This tool use Tilesets from Limezu's Modern Interior & Exterior packs.\n" +
-                "The tool automatically create a Tiled project and add the imported assets as usable tilesets inside Tiled\n\n" +
-                "To use this tool:\n" +
-                "1. Select the packs you want to import.\n" +
-                "2. Choose a sprite size to import.\n" +
-                "3. Click 'Import Assets'.\n\n" +
-                "WARNING: This process TAKE A VERY LONG TIME, optimizing is on his way. \n",
-                MessageType.Info
-            );
-            //EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
+            }            
             if (isSuperTiled2UnityInstalled == true)
             {
                 EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
