@@ -9,13 +9,10 @@ using System.Collections.Generic;
 using UnityEditor.Build;
 using System.Reflection;
 using System;
-using UnityEditor.VersionControl;
-using System.Diagnostics;
-
+using UnityEditor.Experimental.GraphView;
 
 
 #if SUPER_TILED2UNITY_INSTALLED
-using SuperTiled2Unity.Editor;
 using SuperTiled2Unity; // Include the SuperTiled2Unity namespaces if available
 #endif
 
@@ -41,8 +38,12 @@ public class TiledImporterEditorWindow : EditorWindow
     private string outputPath = "Assets/FingTools/Tiled/";
     private bool testMode = false;
     private int maxTilesetPerType = 5;
+    private List<string> selectedInteriorTilesets = new List<string>();
+    private List<string> selectedExteriorTilesets = new List<string>();
+    private List<string> availableInteriorTilesets = new List<string>();
+    private List<string> availableExteriorTilesets = new List<string>();
 
-    [MenuItem("FingTools/Importer/WIP - Tilesets Importer",false,99)]
+    [MenuItem("FingTools/Importer/Tilesets Importer",false,99)]
     public static void ShowWindow()
     {
         GetWindow<TiledImporterEditorWindow>(true,"Tilesets Importer");
@@ -83,9 +84,22 @@ public class TiledImporterEditorWindow : EditorWindow
             if (GUILayout.Button("Select Modern Interior zip file", GUILayout.Width(180)))
             {
                 selectedInteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
+                if (!string.IsNullOrEmpty(selectedInteriorZipFile))
+                {
+                    availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                    availableInteriorTilesets.Sort(CompareTilesetNames);
+                }
             }
             EditorGUILayout.LabelField("Selected Zip File:", selectedInteriorZipFile ?? "None");
             EditorGUILayout.EndHorizontal();
+            if (!string.IsNullOrEmpty(selectedInteriorZipFile))
+            {
+                if (GUILayout.Button("Select Tilesets to Import", GUILayout.Width(180)))
+                {
+                    ShowTilesetSelectionSearchWindow(availableInteriorTilesets, selectedInteriorTilesets, "Select Interior Tilesets");
+                }
+                EditorGUILayout.LabelField("Selected Tilesets:", string.Join(", ", selectedInteriorTilesets.Select(CleanTilesetName)));
+            }
         }
 
         DrawSeparator();
@@ -99,9 +113,22 @@ public class TiledImporterEditorWindow : EditorWindow
             if (GUILayout.Button("Select Modern Exterior zip file", GUILayout.Width(180)))
             {
                 selectedExteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
+                if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+                {
+                    availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                    availableExteriorTilesets.Sort(CompareTilesetNames);
+                }
             }
             EditorGUILayout.LabelField("Selected Zip File:", selectedExteriorZipFile ?? "None");
             EditorGUILayout.EndHorizontal();
+            if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+            {
+                if (GUILayout.Button("Select Tilesets to Import", GUILayout.Width(180)))
+                {
+                    ShowTilesetSelectionSearchWindow(availableExteriorTilesets, selectedExteriorTilesets, "Select Exterior Tilesets");
+                }
+                EditorGUILayout.LabelField("Selected Tilesets:", string.Join(", ", selectedExteriorTilesets.Select(CleanTilesetName)));
+            }
         }
 
         DrawSeparator();
@@ -129,8 +156,6 @@ public class TiledImporterEditorWindow : EditorWindow
             );
         if (GUILayout.Button("Import Assets"))
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
             EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);  
             #if SUPER_TILED2UNITY_INSTALLED 
             ImportAssets();
@@ -139,8 +164,6 @@ public class TiledImporterEditorWindow : EditorWindow
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();            
             EditorUtility.ClearProgressBar();
-            stopwatch.Stop();
-            UnityEngine.Debug.Log($"Tilesets imported in {stopwatch.Elapsed.TotalSeconds} seconds.");
         }
         EditorGUI.EndDisabledGroup();
     }
@@ -438,10 +461,13 @@ public class TiledImporterEditorWindow : EditorWindow
             var entryName = entry.Name;
             if (fullName.StartsWith($"1_Interiors/{spriteSize}x{spriteSize}/Theme_Sorter/") && fullName.EndsWith(".png"))
             {
-                if(!Directory.Exists(outputPath+"/Art/Interior/"))
-                    Directory.CreateDirectory(outputPath+"/Art/Interior/");
-                entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName,true);
-                i++;
+                if (selectedInteriorTilesets.Contains(entry.Name))
+                {
+                    if(!Directory.Exists(outputPath+"/Art/Interior/"))
+                        Directory.CreateDirectory(outputPath+"/Art/Interior/");
+                    entry.ExtractToFile(outputPath+"/Art/Interior/"+entryName,true);
+                    i++;
+                }
             }
             if(testMode && i >= maxTilesetPerType)
                 break;
@@ -461,11 +487,14 @@ public class TiledImporterEditorWindow : EditorWindow
             //Debug.Log(fullName);
             if (fullName.StartsWith($"Modern_Exteriors_{spriteSize}x{spriteSize}/ME_Theme_Sorter_{spriteSize}x{spriteSize}/") && fullName.EndsWith(".png") && !fullName.Contains("Singles") && !fullName.Contains("Old_Sorting"))
             {
-                if(!Directory.Exists(outputPath+"/Art/Exterior/"))
-                    Directory.CreateDirectory(outputPath+"/Art/Exterior/");
-                UnityEngine.Debug.Log(fullName);
-                entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName,true);
-                i++;
+                if (selectedExteriorTilesets.Contains(entry.Name))
+                {
+                    if(!Directory.Exists(outputPath+"/Art/Exterior/"))
+                        Directory.CreateDirectory(outputPath+"/Art/Exterior/");
+                    UnityEngine.Debug.Log(fullName);
+                    entry.ExtractToFile(outputPath+"/Art/Exterior/"+entryName,true);
+                    i++;
+                }
             }
             if(testMode &&  i>= maxTilesetPerType)
                 break;
@@ -498,6 +527,94 @@ public class TiledImporterEditorWindow : EditorWindow
         GUILayout.Space(5);
     }
     
+    
+    private List<string> GetAvailableInteriorTilesets(string zipFilePath, int spriteSize)
+    {
+        List<string> tilesets = new List<string>();
+        var archive = ZipFile.OpenRead(zipFilePath);
+        foreach (ZipArchiveEntry entry in archive.Entries)
+        {
+            if (entry.FullName.StartsWith($"1_Interiors/{spriteSize}x{spriteSize}/Theme_Sorter/") && entry.FullName.EndsWith(".png"))
+            {
+                Debug.Log(entry.Name);
+                tilesets.Add(entry.Name);
+            }
+        }
+        return tilesets;
+    }
+
+    private List<string> GetAvailableExteriorTilesets(string zipFilePath,int spriteSize)
+    {
+        List<string> tilesets = new List<string>();
+        var archive = ZipFile.OpenRead(zipFilePath);
+        foreach (ZipArchiveEntry entry in archive.Entries)
+        {
+            if (entry.FullName.StartsWith($"Modern_Exteriors_{spriteSize}x{spriteSize}/ME_Theme_Sorter_{spriteSize}x{spriteSize}/") && entry.FullName.EndsWith(".png") && !entry.FullName.Contains("Singles") && !entry.FullName.Contains("Old_Sorting"))
+            {
+                Debug.Log(entry.Name);
+                tilesets.Add(entry.Name);
+            }
+        }
+        return tilesets;
+    }
+
+    private void ShowTilesetSelectionSearchWindow(List<string> availableTilesets, List<string> selectedTilesets, string title)
+    {
+        var provider = ScriptableObject.CreateInstance<TilesetSearchProvider>();
+        provider.Initialize(availableTilesets, selectedTilesets, title, CleanTilesetName);
+        SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), provider);
+    }
+
+    private class TilesetSearchProvider : ScriptableObject, ISearchWindowProvider
+    {
+        private List<string> availableTilesets;
+        private List<string> selectedTilesets;
+        private string title;
+        private Func<string, string> cleanTilesetName;
+
+        public void Initialize(List<string> availableTilesets, List<string> selectedTilesets, string title, Func<string, string> cleanTilesetName)
+        {
+            this.availableTilesets = availableTilesets;
+            this.selectedTilesets = selectedTilesets;
+            this.title = title;
+            this.cleanTilesetName = cleanTilesetName;
+        }
+
+        public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+        {
+            var tree = new List<SearchTreeEntry>
+            {
+                new SearchTreeGroupEntry(new GUIContent(title), 0)
+            };
+
+            foreach (var tileset in availableTilesets)
+            {
+                var content = new GUIContent(cleanTilesetName(tileset));
+                var entry = new SearchTreeEntry(content)
+                {
+                    level = 1,
+                    userData = tileset
+                };
+                tree.Add(entry);
+            }
+
+            return tree;
+        }
+
+        public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
+        {
+            var tileset = entry.userData as string;
+            if (selectedTilesets.Contains(tileset))
+            {
+                selectedTilesets.Remove(tileset);
+            }
+            else
+            {
+                selectedTilesets.Add(tileset);
+            }
+            return true;
+        }
+    }
     
     //SUPERTILED2UNITY CHECK ONLY BELOW
     private static bool CheckSuperTiled2Unity()
@@ -565,5 +682,31 @@ public class TiledImporterEditorWindow : EditorWindow
         }
     }
     
+    private int CompareTilesetNames(string x, string y)
+    {
+        int xNum = int.Parse(x.Split('_')[0]);
+        int yNum = int.Parse(y.Split('_')[0]);
+        return xNum.CompareTo(yNum);
+    }
+
+    private string CleanTilesetName(string tilesetName)
+    {
+        var parts = tilesetName.Split('_');
+        if (parts.Length > 1)
+        {
+            var nameWithoutPrefix = string.Join(" ", parts.Skip(1));
+            var sizeIndex = nameWithoutPrefix.IndexOf(validSizes[selectedSizeIndex] + "x" + validSizes[selectedSizeIndex]);
+            if (sizeIndex > 0)
+            {
+                nameWithoutPrefix = nameWithoutPrefix.Substring(0, sizeIndex).Trim();
+            }
+            else
+            {
+                nameWithoutPrefix = nameWithoutPrefix.Replace(".png", "").Trim();
+            }
+            return nameWithoutPrefix.Replace('_', ' ');
+        }
+        return tilesetName.Replace(".png", "").Trim();
+    }
 }
 }
