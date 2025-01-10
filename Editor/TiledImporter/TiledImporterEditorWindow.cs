@@ -40,18 +40,21 @@ namespace FingTools.Tiled
             GetWindow<TiledImporterEditorWindow>(false, "Tilesets Importer");
         }
 
-        private void OnEnable()
+        private void OnGUI()
         {
+            string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
+            if(!File.Exists(projectPath))
+            {
+                tileSizeLocked = false;
+                EditorPrefs.DeleteKey("TileSize");
+
+            }
             if (EditorPrefs.HasKey("TileSize"))
             {
                 tileSizeLocked = true;
                 int tileSize = EditorPrefs.GetInt("TileSize");
                 selectedSizeIndex = validSizes.IndexOf(tileSize.ToString());
             }
-        }
-
-        private void OnGUI()
-        {
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Width(position.width), GUILayout.Height(position.height));
             helpBoxExpanded = EditorGUILayout.Foldout(helpBoxExpanded, "Help");
             if (helpBoxExpanded)

@@ -42,7 +42,7 @@ namespace FingTools.Tiled
                     EditorUtility.DisplayDialog("Error", "Invalid Modern Interior zip file. Please select the correct file.", "OK");
                     return;
                 }
-                UnzipInteriorAssets(selectedInteriorZipFile, validSizes[selectedSizeIndex], selectedInteriorTilesets, outputPath);
+                UnzipInteriorAssets(selectedInteriorZipFile, validSizes[selectedSizeIndex], selectedInteriorTilesets, outputPath,validSizes[selectedSizeIndex].ToInt());
             }
 
             if (importExterior && !string.IsNullOrEmpty(selectedExteriorZipFile))
@@ -52,7 +52,7 @@ namespace FingTools.Tiled
                     EditorUtility.DisplayDialog("Error", "Invalid Modern Exterior zip file. Please select the correct file.", "OK");
                     return;
                 }
-                UnzipExteriorAssets(selectedExteriorZipFile, validSizes[selectedSizeIndex], selectedExteriorTilesets, outputPath);
+                UnzipExteriorAssets(selectedExteriorZipFile, validSizes[selectedSizeIndex], selectedExteriorTilesets, outputPath,validSizes[selectedSizeIndex].ToInt());
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -62,22 +62,41 @@ namespace FingTools.Tiled
             {
                 string interiorArtOutput = Path.Combine(outputPath, "Art/Interior/");
                 string interiorTilesetOutputPath = Path.Combine(outputPath, "Tilesets/Interior");
-
+                AdjustTextureImportSettings(interiorArtOutput, 2048,validSizes[selectedSizeIndex].ToInt());
                 GenerateTSXFilesForImportedTilesets(interiorArtOutput, "Interior", int.Parse(validSizes[selectedSizeIndex]), outputPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 AutoFixTextures(interiorTilesetOutputPath);
+                EditorApplication.delayCall += () =>
+                {
+                    foreach(var tileset in selectedInteriorTilesets)
+                    {
+                        var tilesetName = Path.GetFileNameWithoutExtension(tileset);
+                        string assetPath = interiorTilesetOutputPath + "/" + tilesetName + ".tsx";
+                        UpdatePixelsPerUnit(assetPath, validSizes[selectedSizeIndex].ToInt());
+                    }
+                };
             }
 
             if (importExterior && !string.IsNullOrEmpty(selectedExteriorZipFile))
             {
                 string exteriorArtOutput = Path.Combine(outputPath, "Art/Exterior/");
                 string exteriorTilesetOutputPath = Path.Combine(outputPath, "Tilesets/Exterior");
-                AdjustTextureImportSettings(exteriorArtOutput, 4096);
+                AdjustTextureImportSettings(exteriorArtOutput, 4096,validSizes[selectedSizeIndex].ToInt());
                 GenerateTSXFilesForImportedTilesets(exteriorArtOutput, "Exterior", int.Parse(validSizes[selectedSizeIndex]), outputPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
                 AutoFixTextures(exteriorTilesetOutputPath);
+                EditorApplication.delayCall += () =>
+                {
+                    foreach(var tileset in selectedExteriorTilesets)
+                    {
+                        var tilesetName = Path.GetFileNameWithoutExtension(tileset);
+                        string assetPath = exteriorTilesetOutputPath + "/" + tilesetName + ".tsx";
+                        UpdatePixelsPerUnit(assetPath, validSizes[selectedSizeIndex].ToInt());
+                    }
+                };
+                
             }
             #endif
 
@@ -85,7 +104,7 @@ namespace FingTools.Tiled
             AddTilesetsToExistingMaps(outputPath);
         }
 
-        private static void UnzipInteriorAssets(string zipFilePath, string spriteSize, List<string> selectedInteriorTilesets, string outputPath)
+        private static void UnzipInteriorAssets(string zipFilePath, string spriteSize, List<string> selectedInteriorTilesets, string outputPath,int pixelsPerUnit)
         {
             if (!Directory.Exists(outputPath + "/Art/Interior/"))
                 Directory.CreateDirectory(outputPath + "/Art/Interior/");
@@ -103,12 +122,19 @@ namespace FingTools.Tiled
                         if (!Directory.Exists(outputPath + "/Art/Interior/"))
                             Directory.CreateDirectory(outputPath + "/Art/Interior/");
                         entry.ExtractToFile(outputPath + "/Art/Interior/" + entryName, true);
+                    string assetPath = outputPath + "/Art/Interior/" + entryName;
+                    TextureImporter textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+                    if (textureImporter != null)
+                    {
+                        textureImporter.spritePixelsPerUnit = pixelsPerUnit; // Set your desired pixels per unit value here
+                        textureImporter.SaveAndReimport();
+                    }
                     }
                 }
             }
         }
 
-        private static void UnzipExteriorAssets(string zipFilePath, string spriteSize, List<string> selectedExteriorTilesets, string outputPath)
+        private static void UnzipExteriorAssets(string zipFilePath, string spriteSize, List<string> selectedExteriorTilesets, string outputPath, int pixelsPerUnit)
         {
             if (!Directory.Exists(outputPath + "/Art/Exterior/"))
                 Directory.CreateDirectory(outputPath + "/Art/Exterior/");
@@ -125,6 +151,13 @@ namespace FingTools.Tiled
                         if (!Directory.Exists(outputPath + "/Art/Exterior/"))
                             Directory.CreateDirectory(outputPath + "/Art/Exterior/");
                         entry.ExtractToFile(outputPath + "/Art/Exterior/" + entryName, true);
+                        string assetPath = outputPath + "/Art/Exterior/" + entryName;
+                        TextureImporter textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+                        if (textureImporter != null)
+                        {
+                            textureImporter.spritePixelsPerUnit = pixelsPerUnit; // Set your desired pixels per unit value here
+                            textureImporter.SaveAndReimport();
+                        }
                     }
                 }
             }
@@ -178,11 +211,11 @@ namespace FingTools.Tiled
                     width,
                     height,
                     tileSize
-                );
+                );                
             }
 
             // Log the output path where TSX files are saved
-            UnityEngine.Debug.Log($"TSX files generated in: {tsxOutputPath}");
+            Debug.Log($"TSX files generated in: {tsxOutputPath}");
         }
 
         private static void GenerateTSXFile(string fileName, string tilesetName, string tileSet, int width, int height, int tileSize)
@@ -215,7 +248,41 @@ namespace FingTools.Tiled
                 UnityEngine.Debug.LogError($"Failed to generate TSX file: {e.Message}");
             }
         }
+        public static void UpdatePixelsPerUnit(string assetPath,int pixelsPerUnit)
+        {           
+            Debug.Log($"Updating Pixels Per Unit for {assetPath}");
+            // Get the generic importer for the .tsx file
+            AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
+            if (importer == null)
+            {
+                Debug.LogError($"No importer found for the asset at path: {assetPath}");
+                return;
+            }
+
+            // Check if it's the correct importer
+            Debug.Log($"Importer type detected: {importer.GetType().Name}");
+
+            // Use SerializedObject to modify properties
+            SerializedObject serializedObject = new SerializedObject(importer);
+            SerializedProperty pixelsPerUnitProp = serializedObject.FindProperty("m_PixelsPerUnit");
+
+            if (pixelsPerUnitProp != null)
+            {
+                float newValue = pixelsPerUnit;
+                pixelsPerUnitProp.floatValue = newValue;
+                serializedObject.ApplyModifiedProperties();
+
+                // Force reimport to apply changes
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+
+                Debug.Log($"Successfully updated Pixels Per Unit to {newValue} for {assetPath}");
+            }
+            else
+            {
+                Debug.LogWarning("Property 'm_PixelsPerUnit' not found. Ensure the importer supports this property.");
+            }
+        }        
         #if SUPER_TILED2UNITY_INSTALLED
         public static void AutoFixTextures(string tilesetPath)
         {
@@ -225,7 +292,7 @@ namespace FingTools.Tiled
             // Iterate over the .tsx files and attempt to find ImportErrors
             foreach (string tsxFile in tsxFiles)
             {
-                ImportErrors importErrors = AssetDatabase.LoadAssetAtPath(tsxFile, typeof(ImportErrors)) as ImportErrors;
+                ImportErrors importErrors = AssetDatabase.LoadAssetAtPath(tsxFile, typeof(ImportErrors)) as ImportErrors;                
                 if (importErrors != null)
                 {
                     // Iterate over the missing sprites in the ImportErrors and handle them
@@ -233,11 +300,11 @@ namespace FingTools.Tiled
                     {
                         // Call method to add missing sprites
                         CallAddSpritesToTexture(missingTileSprite.m_TextureAssetPath, missingTileSprite.m_MissingSprites.Select(m => m.m_Rect));
-                    }
+                    }                    
                 }
             }
             AssetDatabase.StopAssetEditing();
-        }
+        }        
         #endif
 
         public static void CallAddSpritesToTexture(string textureAssetPath, IEnumerable<Rect> missingSpritesRects)
@@ -267,21 +334,21 @@ namespace FingTools.Tiled
                     }
                     else
                     {
-                        UnityEngine.Debug.LogError("Method not found.");
+                        Debug.LogError("Method not found.");
                     }
                 }
                 else
                 {
-                    UnityEngine.Debug.LogError("Class not found.");
+                    Debug.LogError("Class not found.");
                 }
             }
             else
             {
-                UnityEngine.Debug.LogError("Assembly not found.");
+                Debug.LogError("Assembly not found.");
             }
         }
 
-        public static void AdjustTextureImportSettings(string textureDirectory, int maxTextureSize)
+        public static void AdjustTextureImportSettings(string textureDirectory, int maxTextureSize, int pixelsPerUnit)
         {
             UnityEngine.Debug.Log(textureDirectory);
             string[] textureFiles = Directory.GetFiles(textureDirectory, "*.png", SearchOption.TopDirectoryOnly);
@@ -301,6 +368,7 @@ namespace FingTools.Tiled
                     // Adjust the max texture size to 2048x2048 (or another limit if desired)
                     textureImporter.maxTextureSize = maxTextureSize;
                     textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
+                    textureImporter.spritePixelsPerUnit = pixelsPerUnit;
 
                     // Save the new settings and re-import the texture
                     textureImporter.SaveAndReimport();
