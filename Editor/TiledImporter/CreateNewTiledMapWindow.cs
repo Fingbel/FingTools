@@ -24,14 +24,14 @@ public class CreateNewTiledMapWindow : EditorWindow
     [MenuItem("FingTools/Create New Tiled Map", true)]
     public static bool ValidateShowWindow()
     {
-        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"{Application.productName}.tiled-project");
+        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
         return File.Exists(projectPath);
     }
 
     private void OnEnable()
     {
         tileSize = EditorPrefs.GetInt("TileSize", 16); // Default to 16 if not set
-        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"{Application.productName}.tiled-project");
+        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
         tiledProjectDetected = File.Exists(projectPath);
     }
 

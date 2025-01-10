@@ -47,7 +47,7 @@ public class TiledChecker
     [MenuItem("FingTools/Open Tiled", true)]
     public static bool ValidateOpenTiled()
     {
-        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"{Application.productName}.tiled-project");
+        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
         return File.Exists(projectPath);
     }
 
@@ -58,7 +58,7 @@ public class TiledChecker
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
         if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))
         {
-            string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"{Application.productName}.tiled-project");
+            string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
             if (File.Exists(projectPath))
             {
                 try
@@ -81,28 +81,6 @@ public class TiledChecker
         }
     }
     
-    //[MenuItem("Tools/Clear Tiled Path")]
-    public static void ClearTiledPath()
-    {
-        EditorPrefs.DeleteKey(TiledPathKey);
-        Debug.Log("Tiled path cleared. You will need to set it again.");
-    }
-
-    [InitializeOnLoadMethod]
-    private static void RenameTiledProjectIfNeeded()
-    {
-        string oldProjectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"{EditorPrefs.GetString("LastProductName", Application.productName)}.tiled-project");
-        string newProjectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"{Application.productName}.tiled-project");
-
-        if (File.Exists(oldProjectPath) && !File.Exists(newProjectPath))
-        {
-            File.Move(oldProjectPath, newProjectPath);
-            Debug.Log($"Tiled project renamed to: {newProjectPath}");
-        }
-
-        EditorPrefs.SetString("LastProductName", Application.productName);
-    }
-
     private static void PromptUserForTiledPath()
     {
         int option = EditorUtility.DisplayDialogComplex(

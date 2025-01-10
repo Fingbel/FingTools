@@ -298,10 +298,11 @@ namespace FingTools.Tiled
                 if (GUILayout.Button("Import Assets",GUILayout.Height(40)))
                 {
                     EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);
-#if SUPER_TILED2UNITY_INSTALLED
+                    #if SUPER_TILED2UNITY_INSTALLED
                     TiledImporter.ImportAssets(importInterior, selectedInteriorZipFile, selectedInteriorTilesets, importExterior, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
-#endif
-                    TiledImporter.GenerateTiledProjectFile(Application.productName, outputPath);
+                    #endif
+
+                    TiledImporter.GenerateTiledProjectFile("TiledProject", outputPath);
                     EditorPrefs.SetInt("TileSize", int.Parse(validSizes[selectedSizeIndex]));
                     AssetDatabase.Refresh();
                     AssetDatabase.SaveAssets();
