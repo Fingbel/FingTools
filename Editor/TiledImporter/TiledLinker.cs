@@ -81,7 +81,7 @@ public class TiledChecker
         }
     }
     
-    [MenuItem("Tools/Clear Tiled Path")]
+    //[MenuItem("Tools/Clear Tiled Path")]
     public static void ClearTiledPath()
     {
         EditorPrefs.DeleteKey(TiledPathKey);

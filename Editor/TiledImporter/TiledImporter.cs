@@ -21,7 +21,6 @@ namespace FingTools.Tiled
             var fileName = Path.GetFileName(zipFilePath);
             if (string.IsNullOrEmpty(zipFilePath) || fileName != "moderninteriors-win.zip")
                 output = false;
-            // TODO : write specific validation for interior zip file
             return output;
         }
 
@@ -31,7 +30,6 @@ namespace FingTools.Tiled
             var fileName = Path.GetFileName(zipFilePath);
             if (string.IsNullOrEmpty(zipFilePath)|| fileName != "modernexteriors-win.zip")
                 output = false;
-            // TODO : write specific validation for exterior zip file
             return output;
         }
         public static void ImportAssets(bool importInterior, string selectedInteriorZipFile, List<string> selectedInteriorTilesets, bool importExterior, string selectedExteriorZipFile, List<string> selectedExteriorTilesets, string outputPath, int selectedSizeIndex, List<string> validSizes)
@@ -82,6 +80,9 @@ namespace FingTools.Tiled
                 AutoFixTextures(exteriorTilesetOutputPath);
             }
             #endif
+
+            // Add new tilesets to all existing maps
+            AddTilesetsToExistingMaps(outputPath);
         }
 
         private static void UnzipInteriorAssets(string zipFilePath, string spriteSize, List<string> selectedInteriorTilesets, string outputPath)
@@ -335,6 +336,34 @@ namespace FingTools.Tiled
             {
                 // Handle any potential file write errors
                 UnityEngine.Debug.LogError($"Failed to generate Tiled project file: {e.Message}");
+            }
+        }
+
+        private static void AddTilesetsToExistingMaps(string outputPath)
+        {
+            string mapDirectory = Path.Combine(outputPath, "Tilemaps");
+            if (!Directory.Exists(mapDirectory))
+            {
+                return;
+            }
+
+            string[] mapFiles = Directory.GetFiles(mapDirectory, "*.tmx", SearchOption.AllDirectories);
+            string tilesetDirectory = Path.Combine(outputPath, "Tilesets");
+            string[] tilesetFiles = Directory.GetFiles(tilesetDirectory, "*.tsx", SearchOption.AllDirectories);
+
+            foreach (string mapFile in mapFiles)
+            {
+                string mapContent = File.ReadAllText(mapFile);
+                foreach (string tilesetFile in tilesetFiles)
+                {
+                    string relativePath = Path.GetRelativePath(Path.GetDirectoryName(mapFile), tilesetFile).Replace("\\", "/");
+                    string tilesetReference = $"<tileset firstgid=\"1\" source=\"{relativePath}\"/>";
+                    if (!mapContent.Contains(tilesetReference))
+                    {
+                        mapContent = mapContent.Replace("<layer", $"{tilesetReference}\n<layer");
+                    }
+                }
+                File.WriteAllText(mapFile, mapContent);
             }
         }
     }
