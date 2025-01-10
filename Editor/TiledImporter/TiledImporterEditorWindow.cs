@@ -15,29 +15,58 @@ namespace FingTools.Tiled
         private static string superTiled2UnityPackageId = "com.seanba.super-tiled2unity";
         private static string superTiled2UnityGitUrl = "https://github.com/Seanba/SuperTiled2Unity.git?path=/SuperTiled2Unity/Packages/com.seanba.super-tiled2unity";
         private static bool? isSuperTiled2UnityInstalled = null;
-        private string selectedInteriorZipFile = null;
-        private string selectedExteriorZipFile = null;
+        private string selectedInteriorZipFile = null, selectedExteriorZipFile = null;
         private int selectedSizeIndex = 0;
-        private bool importInterior = true;
-        private bool importExterior = true;
+        private bool importInterior = true , importExterior = true;
         private readonly List<string> validSizes = new() { "16", "32" };
         private string outputPath = "Assets/FingTools/Tiled/";
-        private List<string> selectedInteriorTilesets = new List<string>();
-        private List<string> selectedExteriorTilesets = new List<string>();
-        private List<string> availableInteriorTilesets = new List<string>();
-        private List<string> availableExteriorTilesets = new List<string>();
-        private Vector2 interiorScrollPos;
-        private Vector2 exteriorScrollPos;
-        private bool interiorExpanded = true;
-        private bool exteriorExpanded = true;
+        private List<string> selectedInteriorTilesets = new (),selectedExteriorTilesets = new ();
+        private List<string> availableInteriorTilesets = new (),availableExteriorTilesets = new ();
+        private Vector2 interiorScrollPos, exteriorScrollPos;
+        private bool interiorExpanded = true, exteriorExpanded = true;
         private Vector2 scrollPos;
         private bool helpBoxExpanded = true;
         private bool tileSizeLocked = false;
+
+        private const string InteriorZipFilePathKey = "InteriorZipFilePath";
+        private const string ExteriorZipFilePathKey = "ExteriorZipFilePath";
 
         [MenuItem("FingTools/Importer/Tilesets Importer", false, 21)]
         public static void ShowWindow()
         {
             GetWindow<TiledImporterEditorWindow>(false, "Tilesets Importer");
+        }
+
+        private void OnEnable()
+        {
+            EditorUtility.DisplayProgressBar("Loading", "Loading tilesets, please wait ...", 0f);
+            selectedInteriorZipFile = EditorPrefs.GetString(InteriorZipFilePathKey, null);
+            selectedExteriorZipFile = EditorPrefs.GetString(ExteriorZipFilePathKey, null);
+
+            if(!string.IsNullOrEmpty(selectedInteriorZipFile))
+            {
+                availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                availableInteriorTilesets.Sort(CompareTilesetNames);
+            }
+            EditorUtility.DisplayProgressBar("Loading", "Loading tilesets, please wait ...", 0.5f);
+            if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+            {
+                availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                availableExteriorTilesets.Sort(CompareTilesetNames);
+            }
+            EditorUtility.ClearProgressBar();
+        }
+
+        private void OnDisable()
+        {
+            if (!string.IsNullOrEmpty(selectedInteriorZipFile))
+            {
+                EditorPrefs.SetString(InteriorZipFilePathKey, selectedInteriorZipFile);
+            }
+            if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+            {
+                EditorPrefs.SetString(ExteriorZipFilePathKey, selectedExteriorZipFile);
+            }
         }
 
         private void OnGUI()
@@ -87,204 +116,197 @@ namespace FingTools.Tiled
                 
                 DrawSeparator();
                 // Import interior asset selection
-                importInterior = EditorGUILayout.Toggle("Import Interior Assets", importInterior);
-                if (importInterior)
+                
+                // Show button to select interior zip file if selected
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Select Modern Interior zip file", GUILayout.Width(180)))
                 {
-                    // Show button to select interior zip file if selected
-                    EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button("Select Modern Interior zip file", GUILayout.Width(180)))
+                    selectedInteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
+                    if (!string.IsNullOrEmpty(selectedInteriorZipFile))
                     {
-                        selectedInteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
-                        if (!string.IsNullOrEmpty(selectedInteriorZipFile))
-                        {
-                            availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
-                            availableInteriorTilesets.Sort(CompareTilesetNames);
-                        }
-                    }
-                    EditorGUILayout.LabelField("Selected Zip File:", selectedInteriorZipFile ?? "None");
-                    EditorGUILayout.EndHorizontal();                    
-                    if(!string.IsNullOrEmpty(selectedInteriorZipFile))
-                    {
-                        EditorGUI.BeginDisabledGroup(false);   
-                        if(!TiledImporter.ValidateInteriorZipFile(selectedInteriorZipFile))
-                        {
-                            selectedInteriorZipFile = "Wrong file selected";   
-                            EditorGUI.BeginDisabledGroup(true);                         
-                        }
-                        EditorGUILayout.BeginHorizontal();
-                        int _installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
-                        int selectedInteriorTilesetsCount = selectedInteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Interior"));
-                        EditorGUILayout.LabelField($"Selected: {selectedInteriorTilesetsCount} / Installed: {_installedInteriorTilesetsCount} / Total: {availableInteriorTilesets.Count}");
-                        if (GUILayout.Button(interiorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
-                        {
-                            interiorExpanded = !interiorExpanded;
-                        }
-                        if (GUILayout.Button("Select All", GUILayout.Width(80)))
-                        {
-                            selectedInteriorTilesets = new List<string>(availableInteriorTilesets);
-                        }
-                        if (GUILayout.Button("Deselect All", GUILayout.Width(80)))
-                        {
-                            selectedInteriorTilesets.Clear();
-                        }
-                        EditorGUI.EndDisabledGroup();
-                        EditorGUILayout.EndHorizontal();
-
-                        if (interiorExpanded)
-                        {
-                            interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(175));
-                            int halfCount = Mathf.CeilToInt(availableInteriorTilesets.Count / 2f);
-                            EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.BeginVertical();
-                            for (int i = 0; i < halfCount; i++)
-                            {
-                                var tileset = availableInteriorTilesets[i];
-                                bool isSelected = selectedInteriorTilesets.Contains(tileset);
-                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Interior");
-                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
-                                EditorGUI.EndDisabledGroup();
-                                if (newIsSelected != isSelected)
-                                {
-                                    if (newIsSelected)
-                                    {
-                                        selectedInteriorTilesets.Add(tileset);
-                                    }
-                                    else
-                                    {
-                                        selectedInteriorTilesets.Remove(tileset);
-                                    }
-                                }
-                            }
-                            EditorGUILayout.EndVertical();
-                            EditorGUILayout.BeginVertical();
-                            for (int i = halfCount; i < availableInteriorTilesets.Count; i++)
-                            {
-                                var tileset = availableInteriorTilesets[i];
-                                bool isSelected = selectedInteriorTilesets.Contains(tileset);
-                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Interior");
-                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
-                                EditorGUI.EndDisabledGroup();
-                                if (newIsSelected != isSelected)
-                                {
-                                    if (newIsSelected)
-                                    {
-                                        selectedInteriorTilesets.Add(tileset);
-                                    }
-                                    else
-                                    {
-                                        selectedInteriorTilesets.Remove(tileset);
-                                    }
-                                }
-                            }
-                            EditorGUILayout.EndVertical();
-                            EditorGUILayout.EndHorizontal();
-                            EditorGUILayout.EndScrollView();
-                        }
+                        availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                        availableInteriorTilesets.Sort(CompareTilesetNames);
                     }
                 }
-
-                DrawSeparator();
-
-                // Import exterior asset selection
-                importExterior = EditorGUILayout.Toggle("Import Exterior Assets", importExterior);
-                if (importExterior)
+                EditorGUILayout.LabelField("Selected Zip File:", selectedInteriorZipFile ?? "None");
+                EditorGUILayout.EndHorizontal();                    
+                if(!string.IsNullOrEmpty(selectedInteriorZipFile))
                 {
-                    // Show button to select exterior zip file if selected
-                    EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button("Select Modern Exterior zip file", GUILayout.Width(180)))
+                    EditorGUI.BeginDisabledGroup(false);   
+                    if(!TiledImporter.ValidateInteriorZipFile(selectedInteriorZipFile))
                     {
-                        selectedExteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
-                        if (!string.IsNullOrEmpty(selectedExteriorZipFile))
-                        {
-                            availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
-                            availableExteriorTilesets.Sort(CompareTilesetNames);
-                        }
+                        selectedInteriorZipFile = "Wrong file selected";   
+                        EditorGUI.BeginDisabledGroup(true);                         
                     }
-                    EditorGUILayout.LabelField("Selected Zip File:", selectedExteriorZipFile ?? "None");
+                    EditorGUILayout.BeginHorizontal();
+                    int _installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
+                    int selectedInteriorTilesetsCount = selectedInteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Interior"));
+                    EditorGUILayout.LabelField($"Selected: {selectedInteriorTilesetsCount} / Installed: {_installedInteriorTilesetsCount} / Total: {availableInteriorTilesets.Count}");
+                    if (GUILayout.Button(interiorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
+                    {
+                        interiorExpanded = !interiorExpanded;
+                    }
+                    if (GUILayout.Button("Select All", GUILayout.Width(80)))
+                    {
+                        selectedInteriorTilesets = new List<string>(availableInteriorTilesets);
+                    }
+                    if (GUILayout.Button("Deselect All", GUILayout.Width(80)))
+                    {
+                        selectedInteriorTilesets.Clear();
+                    }
+                    EditorGUI.EndDisabledGroup();
                     EditorGUILayout.EndHorizontal();
-                    if (!string.IsNullOrEmpty(selectedExteriorZipFile) )
-                    {
-                        EditorGUI.BeginDisabledGroup(false);   
-                        if(!TiledImporter.ValidateExteriorZipFile(selectedExteriorZipFile))
-                        {
-                            selectedExteriorZipFile = "Wrong file selected";
-                            EditorGUI.BeginDisabledGroup(true);
-                        }
-                        EditorGUILayout.BeginHorizontal();
-                        int _installedExteriorTilesetsCount = availableExteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Exterior"));
-                        int selectedExteriorTilesetsCount = selectedExteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Exterior"));
-                        EditorGUILayout.LabelField($"Selected: {selectedExteriorTilesetsCount} / Installed: {_installedExteriorTilesetsCount} / Total: {availableExteriorTilesets.Count}");
-                        if (GUILayout.Button(exteriorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
-                        {
-                            exteriorExpanded = !exteriorExpanded;
-                        }
-                        if (GUILayout.Button("Select All", GUILayout.Width(80)))
-                        {
-                            selectedExteriorTilesets = new List<string>(availableExteriorTilesets);
-                        }
-                        if (GUILayout.Button("Deselect All", GUILayout.Width(80)))
-                        {
-                            selectedExteriorTilesets.Clear();
-                        }
-                        EditorGUI.EndDisabledGroup();
-                        EditorGUILayout.EndHorizontal();
 
-                        if (exteriorExpanded)
+                    if (interiorExpanded)
+                    {
+                        interiorScrollPos = EditorGUILayout.BeginScrollView(interiorScrollPos, GUILayout.Height(175));
+                        int halfCount = Mathf.CeilToInt(availableInteriorTilesets.Count / 2f);
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.BeginVertical();
+                        for (int i = 0; i < halfCount; i++)
                         {
-                            exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(175));
-                            int halfCount = Mathf.CeilToInt(availableExteriorTilesets.Count / 2f);
-                            EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.BeginVertical();
-                            for (int i = 0; i < halfCount; i++)
+                            var tileset = availableInteriorTilesets[i];
+                            bool isSelected = selectedInteriorTilesets.Contains(tileset);
+                            bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Interior");
+                            EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                            bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                            EditorGUI.EndDisabledGroup();
+                            if (newIsSelected != isSelected)
                             {
-                                var tileset = availableExteriorTilesets[i];
-                                bool isSelected = selectedExteriorTilesets.Contains(tileset);
-                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Exterior");
-                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
-                                EditorGUI.EndDisabledGroup();
-                                if (newIsSelected != isSelected)
+                                if (newIsSelected)
                                 {
-                                    if (newIsSelected)
-                                    {
-                                        selectedExteriorTilesets.Add(tileset);
-                                    }
-                                    else
-                                    {
-                                        selectedExteriorTilesets.Remove(tileset);
-                                    }
+                                    selectedInteriorTilesets.Add(tileset);
+                                }
+                                else
+                                {
+                                    selectedInteriorTilesets.Remove(tileset);
                                 }
                             }
-                            EditorGUILayout.EndVertical();
-                            EditorGUILayout.BeginVertical();
-                            for (int i = halfCount; i < availableExteriorTilesets.Count; i++)
-                            {
-                                var tileset = availableExteriorTilesets[i];
-                                bool isSelected = selectedExteriorTilesets.Contains(tileset);
-                                bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Exterior");
-                                EditorGUI.BeginDisabledGroup(isAlreadyImported);
-                                bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
-                                EditorGUI.EndDisabledGroup();
-                                if (newIsSelected != isSelected)
-                                {
-                                    if (newIsSelected)
-                                    {
-                                        selectedExteriorTilesets.Add(tileset);
-                                    }
-                                    else
-                                    {
-                                        selectedExteriorTilesets.Remove(tileset);
-                                    }
-                                }
-                            }
-                            EditorGUILayout.EndVertical();
-                            EditorGUILayout.EndHorizontal();
-                            EditorGUILayout.EndScrollView();
                         }
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.BeginVertical();
+                        for (int i = halfCount; i < availableInteriorTilesets.Count; i++)
+                        {
+                            var tileset = availableInteriorTilesets[i];
+                            bool isSelected = selectedInteriorTilesets.Contains(tileset);
+                            bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Interior");
+                            EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                            bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                            EditorGUI.EndDisabledGroup();
+                            if (newIsSelected != isSelected)
+                            {
+                                if (newIsSelected)
+                                {
+                                    selectedInteriorTilesets.Add(tileset);
+                                }
+                                else
+                                {
+                                    selectedInteriorTilesets.Remove(tileset);
+                                }
+                            }
+                        }
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.EndScrollView();
                     }
                 }
+                
+                DrawSeparator();
+                
+                // Show button to select exterior zip file if selected
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Select Modern Exterior zip file", GUILayout.Width(180)))
+                {
+                    selectedExteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
+                    if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+                    {
+                        availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                        availableExteriorTilesets.Sort(CompareTilesetNames);
+                    }
+                }
+                EditorGUILayout.LabelField("Selected Zip File:", selectedExteriorZipFile ?? "None");
+                EditorGUILayout.EndHorizontal();
+                if (!string.IsNullOrEmpty(selectedExteriorZipFile) )
+                {
+                    EditorGUI.BeginDisabledGroup(false);   
+                    if(!TiledImporter.ValidateExteriorZipFile(selectedExteriorZipFile))
+                    {
+                        selectedExteriorZipFile = "Wrong file selected";
+                        EditorGUI.BeginDisabledGroup(true);
+                    }
+                    EditorGUILayout.BeginHorizontal();
+                    int _installedExteriorTilesetsCount = availableExteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Exterior"));
+                    int selectedExteriorTilesetsCount = selectedExteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Exterior"));
+                    EditorGUILayout.LabelField($"Selected: {selectedExteriorTilesetsCount} / Installed: {_installedExteriorTilesetsCount} / Total: {availableExteriorTilesets.Count}");
+                    if (GUILayout.Button(exteriorExpanded ? "Collapse" : "Select", GUILayout.Width(80)))
+                    {
+                        exteriorExpanded = !exteriorExpanded;
+                    }
+                    if (GUILayout.Button("Select All", GUILayout.Width(80)))
+                    {
+                        selectedExteriorTilesets = new List<string>(availableExteriorTilesets);
+                    }
+                    if (GUILayout.Button("Deselect All", GUILayout.Width(80)))
+                    {
+                        selectedExteriorTilesets.Clear();
+                    }
+                    EditorGUI.EndDisabledGroup();
+                    EditorGUILayout.EndHorizontal();
+
+                    if (exteriorExpanded)
+                    {
+                        exteriorScrollPos = EditorGUILayout.BeginScrollView(exteriorScrollPos, GUILayout.Height(175));
+                        int halfCount = Mathf.CeilToInt(availableExteriorTilesets.Count / 2f);
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.BeginVertical();
+                        for (int i = 0; i < halfCount; i++)
+                        {
+                            var tileset = availableExteriorTilesets[i];
+                            bool isSelected = selectedExteriorTilesets.Contains(tileset);
+                            bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Exterior");
+                            EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                            bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                            EditorGUI.EndDisabledGroup();
+                            if (newIsSelected != isSelected)
+                            {
+                                if (newIsSelected)
+                                {
+                                    selectedExteriorTilesets.Add(tileset);
+                                }
+                                else
+                                {
+                                    selectedExteriorTilesets.Remove(tileset);
+                                }
+                            }
+                        }
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.BeginVertical();
+                        for (int i = halfCount; i < availableExteriorTilesets.Count; i++)
+                        {
+                            var tileset = availableExteriorTilesets[i];
+                            bool isSelected = selectedExteriorTilesets.Contains(tileset);
+                            bool isAlreadyImported = IsTilesetAlreadyImported(tileset, "Exterior");
+                            EditorGUI.BeginDisabledGroup(isAlreadyImported);
+                            bool newIsSelected = EditorGUILayout.ToggleLeft(CleanTilesetName(tileset), isSelected || isAlreadyImported);
+                            EditorGUI.EndDisabledGroup();
+                            if (newIsSelected != isSelected)
+                            {
+                                if (newIsSelected)
+                                {
+                                    selectedExteriorTilesets.Add(tileset);
+                                }
+                                else
+                                {
+                                    selectedExteriorTilesets.Remove(tileset);
+                                }
+                            }
+                        }
+                        EditorGUILayout.EndVertical();
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.EndScrollView();
+                    }
+                }
+                
 
                 DrawSeparator();               
 

@@ -11,7 +11,6 @@ using SuperTiled2Unity.Editor;
     public override void TmxAssetImported(TmxAssetImportedArgs args)
     {
         int tileSize;
-        var map = args.ImportedSuperMap;
         if (EditorPrefs.HasKey("TileSize"))
         {
             tileSize = EditorPrefs.GetInt("TileSize");
@@ -20,13 +19,12 @@ using SuperTiled2Unity.Editor;
         {
             tileSize = 16;
         }
-        UpdatePPU(args.AssetImporter, tileSize);
+        if(args.AssetImporter.PixelsPerUnit != tileSize)
+            UpdatePPU(args.AssetImporter, tileSize);
     }
 
     public static void UpdatePPU(TmxAssetImporter importer,int pixelsPerUnit)
     {           
-        
-        
         // Use SerializedObject to modify properties
         SerializedObject serializedObject = new SerializedObject(importer);
         SerializedProperty pixelsPerUnitProp = serializedObject.FindProperty("m_PixelsPerUnit");
@@ -40,11 +38,11 @@ using SuperTiled2Unity.Editor;
             // Force reimport to apply changes
             AssetDatabase.ImportAsset(importer.assetPath, ImportAssetOptions.ForceUpdate);
 
-            Debug.Log($"Successfully updated Pixels Per Unit to {newValue} for {importer}");
+            //Debug.Log($"Successfully updated Pixels Per Unit to {newValue} for {importer}");
         }
         else
         {
-            Debug.LogWarning("Property 'm_PixelsPerUnit' not found. Ensure the importer supports this property.");
+            //Debug.LogWarning("Property 'm_PixelsPerUnit' not found. Ensure the importer supports this property.");
         }
     }        
  }
