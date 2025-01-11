@@ -68,7 +68,7 @@ namespace FingTools.Tiled
         private void OnGUI()
         {
             string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
-            if(!File.Exists(projectPath))
+            if (!File.Exists(projectPath))
             {
                 tileSizeLocked = false;
                 EditorPrefs.DeleteKey("TileSize");
@@ -81,12 +81,12 @@ namespace FingTools.Tiled
                 selectedSizeIndex = validSizes.IndexOf(tileSize.ToString());
             }
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Width(position.width), GUILayout.Height(position.height));
-            
+
             //EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
             if (isSuperTiled2UnityInstalled == null)
             {
                 isSuperTiled2UnityInstalled = CheckSuperTiled2Unity();
-            }            
+            }
             if (isSuperTiled2UnityInstalled == true)
             {
                 EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
@@ -95,13 +95,14 @@ namespace FingTools.Tiled
                 EditorGUI.BeginDisabledGroup(tileSizeLocked);
                 selectedSizeIndex = EditorGUILayout.Popup(selectedSizeIndex, validSizes.ToArray());
                 EditorGUI.EndDisabledGroup();
-                
+
                 // Calculate available height for scrollable areas
                 float availableHeight = Mathf.Max(position.height - 400, 200);
 
                 DrawInteriorTilesetSelector(availableHeight);
                 DrawExteriorTilesetSelector(availableHeight);
                 DrawSeparator();
+                DrawImportButton();
             }
             else if (isSuperTiled2UnityInstalled == false)
             {
@@ -113,7 +114,12 @@ namespace FingTools.Tiled
                     AddPackage(superTiled2UnityGitUrl);
                 }
             }
+            EditorGUILayout.EndScrollView();
+            
+        }
 
+        private void DrawImportButton()
+        {
             // Import button
             EditorGUI.BeginDisabledGroup(
                 string.IsNullOrEmpty(selectedInteriorZipFile) ||
@@ -145,17 +151,17 @@ namespace FingTools.Tiled
                 selectedExteriorTilesets = selectedExteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Exterior")).ToList();
 
                 EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);
-                #if SUPER_TILED2UNITY_INSTALLED
+#if SUPER_TILED2UNITY_INSTALLED
                 TiledImporter.ImportAssets(selectedInteriorZipFile, selectedInteriorTilesets, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
-                #endif
-                TiledImporter.GenerateTiledProjectFile( outputPath);
+#endif
+                TiledImporter.GenerateTiledProjectFile(outputPath);
                 EditorPrefs.SetInt("TileSize", int.Parse(validSizes[selectedSizeIndex]));
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
                 EditorUtility.ClearProgressBar();
             }
             EditorGUI.EndDisabledGroup();
-            EditorGUILayout.EndScrollView();
+
         }
 
         private void DrawExteriorTilesetSelector(float availableHeight)

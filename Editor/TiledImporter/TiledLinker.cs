@@ -55,6 +55,7 @@ public class TiledLinker
     [MenuItem("FingTools/Open Tiled", false, 2)]
     public static void OpenTiled()
     {
+        MapManager.RefreshMaps();
         CheckForTiled();
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
         if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))

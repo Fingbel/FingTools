@@ -12,14 +12,14 @@ using FingTools.Internal;
 [Overlay(typeof(EditorWindow), "FloatingToolbar", true)]
 public class FloatingToolbar : ToolbarOverlay
 {
-    FloatingToolbar() : base(ActorEditor.Id,MapLoader.Id,NewMap.Id,OpenTiled.Id) { }
+    FloatingToolbar() : base(ActorEditor.Id,MapSwitch.Id,RemoveMap.Id,NewMap.Id,OpenTiled.Id) { }
 
     [EditorToolbarElement(Id, typeof(EditorWindow))]
-    class MapLoader : EditorToolbarButton
+    class MapSwitch : EditorToolbarButton
     {
         public const string Id = "SwitchMap";
 
-        public MapLoader()
+        public MapSwitch()
         {
             text = "SwitchMap";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
@@ -29,6 +29,7 @@ public class FloatingToolbar : ToolbarOverlay
                 MapManager.RefreshMaps();
                 if(MapManager.Instance.HasMaps())
                 {
+                    
                     ShowSearchWindow();
                 }
                 else
@@ -47,12 +48,12 @@ public class FloatingToolbar : ToolbarOverlay
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class OpenTiled : EditorToolbarButton
     {
-        public const string Id = "OpenTiled";
+        public const string Id = "Tiled";
 
         public OpenTiled()
         {
-            text = "OpenTiled";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            text = "Tiled";
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
             clicked += TiledLinker.OpenTiled;
         }
     }
@@ -67,6 +68,18 @@ public class FloatingToolbar : ToolbarOverlay
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
             clicked += CreateNewTiledMapWindow.ShowWindow;
         }
+}
+     [EditorToolbarElement(Id, typeof(EditorWindow))]
+    class RemoveMap : EditorToolbarButton
+    {
+        public const string Id = "RemoveMap";
+
+        public RemoveMap()
+        {
+            text = "RemoveMap";
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            clicked += MapLoader.Instance.RemoveCurrentLoadedMap;
+        }
     }
 
     [EditorToolbarElement(Id, typeof(EditorWindow))]
@@ -77,7 +90,7 @@ public class FloatingToolbar : ToolbarOverlay
         public ActorEditor()
         {
             text = "ActorEditor";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/actor-logo.png");
             clicked += ActorEditorWindow.ShowWindow;
         }
     }
@@ -115,7 +128,20 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
     {
         if (entry.userData is string mapFilePath)
         {
-            // Load the map in the MapManager 
+            var mapLoader = MapLoader.Instance;
+            if(mapLoader == null)
+            {
+                if (EditorUtility.DisplayDialog("Map Loader Not Found", "No MapLoader instance found. Would you like to create one?", "Yes", "No"))
+                {
+                    var mapLoaderGameObject = new GameObject("MapLoader");
+                    mapLoader = mapLoaderGameObject.AddComponent<MapLoader>();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            mapLoader.LoadMapToScene(mapFilePath);
             return true;
         }
         return false;

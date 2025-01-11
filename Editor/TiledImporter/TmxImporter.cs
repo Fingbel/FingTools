@@ -7,6 +7,7 @@ using Codice.Client.BaseCommands;
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity.Editor;
 
+
 [AutoCustomTmxImporter()]
  public class TmxImporter : CustomTmxImporter
  {

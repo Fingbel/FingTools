@@ -1,30 +1,57 @@
-//This is used at runtime to load/unload maps and their objects
-//This script will be created on the current scene at the request of the user when they create a new map and if it doesn't already exist
-
 using UnityEngine;
+using UnityEditor;
+using System.Collections.Generic;
+
+#if SUPER_TILED2UNITY_INSTALLED
+using SuperTiled2Unity;
+#endif
+
 public class MapLoader : MonoBehaviour
 {
-    public static MapLoader Instance { get; private set; }
-
-    private void Awake()
+    private Dictionary<string,GameObject> _loadedMaps = new ();
+    //TODO : dictionary data is lost when the editor is reloaded, need to save the data to a file or use scriptable objects
+    private static MapLoader _instance;
+    public static MapLoader Instance 
     {
-        if (Instance == null)
+        get
         {
-            Instance = this;
+            if (_instance == null)
+            {
+                // Load the Singleton instance from the scene or create one if not found
+                _instance = FindFirstObjectByType<MapLoader>();
+                if (_instance == null)
+                {
+                    // Create a new GameObject with the MapManager component attached
+                    GameObject mapManagerGameObject = new GameObject("MapLoader");
+                    _instance = mapManagerGameObject.AddComponent<MapLoader>();                    
+                }
+            }
+            return _instance;
+        }
+    }
+
+    public void LoadMapToScene(string mapPath)
+    {
+        Debug.Log($"Loading map: {mapPath}");
+        if(_loadedMaps == null)
+        {
+            _loadedMaps = new Dictionary<string, GameObject>();
+        }
+        GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(mapPath);
+        if (mapPrefab != null)
+        {
+            Instantiate(mapPrefab,transform);
+            _loadedMaps.Add(mapPath, mapPrefab);
         }
         else
         {
-            Destroy(gameObject);
+            Debug.LogError($"Failed to load map prefab at path: {mapPath}");
         }
+
     }
 
-    public void LoadMap(string mapName)
+    public void RemoveCurrentLoadedMap()
     {
-        Debug.Log($"Loading map: {mapName}");
+        
     }
-
-    public void UnloadMap(string mapName)
-    {
-        Debug.Log($"Unloading map: {mapName}");
-    }    
 }
