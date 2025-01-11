@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEditor;
+using Codice.Client.BaseCommands;
+
 
 #if UNITY_EDITOR
 #if SUPER_TILED2UNITY_INSTALLED
@@ -21,6 +23,7 @@ using SuperTiled2Unity.Editor;
         }
         if(args.AssetImporter.PixelsPerUnit != tileSize)
             UpdatePPU(args.AssetImporter, tileSize);
+        MapManager.RefreshMaps();
     }
 
     public static void UpdatePPU(TmxAssetImporter importer,int pixelsPerUnit)

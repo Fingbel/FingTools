@@ -3,6 +3,8 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using Unity.Plastic.Newtonsoft.Json.Linq;
+
 public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
@@ -58,16 +60,10 @@ public class TiledLinker
         if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))
         {
             string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
+            string sessionPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-session");
             if (File.Exists(projectPath))
             {
-                string mapDirectory = Path.Combine(Application.dataPath, "FingTools", "Tiled", "Tilemaps");
-                if(!Directory.Exists(mapDirectory))
-                {
-                    Directory.CreateDirectory(mapDirectory);
-                }
-                string[] mapFiles = Directory.GetFiles(mapDirectory, "*.tmx", SearchOption.AllDirectories);
-
-                if (mapFiles.Length == 0)
+                if (MapManager.Instance.NoMaps())
                 {
                     int option = EditorUtility.DisplayDialogComplex(
                         "No Maps Found",
@@ -79,7 +75,7 @@ public class TiledLinker
 
                     switch (option)
                     {
-                        case 0: // Create a Map                            
+                        case 0: // Create a Map
                             CreateNewTiledMapWindow.ShowWindow();
                             break;
                         case 1: // Open Tiled Anyway
@@ -92,6 +88,22 @@ public class TiledLinker
                 }
                 else
                 {
+                    if (File.Exists(sessionPath))
+                    {
+                        string sessionContent = File.ReadAllText(sessionPath);
+                        JObject sessionJson = JObject.Parse(sessionContent);
+                        string activeFile = sessionJson["activeFile"]?.ToString();
+                        if (!string.IsNullOrEmpty(activeFile))
+                        {
+                            string activeFilePath = Path.Combine(Application.dataPath, "FingTools", "Tiled", activeFile);
+                            if (!File.Exists(activeFilePath))
+                            {
+                                sessionJson["activeFile"] = "";
+                                sessionJson["openFiles"] = new JArray();
+                                File.WriteAllText(sessionPath, sessionJson.ToString());
+                            }
+                        }
+                    }
                     OpenTiledWithProject(savedPath, projectPath);
                 }
             }
@@ -103,6 +115,27 @@ public class TiledLinker
         else
         {
             Debug.LogError("Tiled is not installed or could not be found.");
+        }
+    }
+
+    public static void OpenTiledWithProjectAndMap(string mapPath)
+    {
+        string tiledPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
+        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
+        if (!string.IsNullOrEmpty(tiledPath) && File.Exists(tiledPath) && File.Exists(projectPath))
+        {
+            try
+            {
+                Process.Start(tiledPath, $"\"{projectPath}\" \"{mapPath}\"");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Failed to open Tiled: {ex.Message}");
+            }
+        }
+        else
+        {
+            Debug.LogError("Tiled executable path or project file is not set or invalid.");
         }
     }
 
@@ -156,7 +189,6 @@ public class TiledLinker
         string fileName = Path.GetFileName(path).ToLower();
         return fileName == "tiled.exe" || fileName == "tiled";
     }
-
 
     private static void SaveTiledPath(string path)
     {

@@ -5,25 +5,37 @@ using UnityEditor.Toolbars;
 using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
 using System.IO;
-using System.Diagnostics;
-using Debug = UnityEngine.Debug;
+using Codice.Client.BaseCommands;
+using FingTools.Internal;
 
 #if UNITY_EDITOR
 [Overlay(typeof(EditorWindow), "FloatingToolbar", true)]
 public class FloatingToolbar : ToolbarOverlay
 {
-    FloatingToolbar() : base(MapLoader.Id,TiledLoader.Id) { }
+    FloatingToolbar() : base(ActorEditor.Id,MapLoader.Id,NewMap.Id,OpenTiled.Id) { }
 
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class MapLoader : EditorToolbarButton
     {
-        public const string Id = "MapLoader";
+        public const string Id = "SwitchMap";
 
         public MapLoader()
         {
-            text = "Map";
+            text = "SwitchMap";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
-            clicked += ShowSearchWindow;
+            
+            clicked += () =>
+            {
+                MapManager.RefreshMaps();
+                if(MapManager.Instance.HasMaps())
+                {
+                    ShowSearchWindow();
+                }
+                else
+                {
+                    CreateNewTiledMapWindow.ShowWindow();
+                }
+            };
         }
 
         private void ShowSearchWindow()
@@ -33,15 +45,40 @@ public class FloatingToolbar : ToolbarOverlay
         }
     }
     [EditorToolbarElement(Id, typeof(EditorWindow))]
-    class TiledLoader : EditorToolbarButton
+    class OpenTiled : EditorToolbarButton
     {
-        public const string Id = "TiledLoader";
+        public const string Id = "OpenTiled";
 
-        public TiledLoader()
+        public OpenTiled()
         {
-            text = "Tiled";
+            text = "OpenTiled";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
             clicked += TiledLinker.OpenTiled;
+        }
+    }
+    [EditorToolbarElement(Id, typeof(EditorWindow))]
+    class NewMap : EditorToolbarButton
+    {
+        public const string Id = "NewMap";
+
+        public NewMap()
+        {
+            text = "New Map";
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            clicked += CreateNewTiledMapWindow.ShowWindow;
+        }
+    }
+
+    [EditorToolbarElement(Id, typeof(EditorWindow))]
+    class ActorEditor : EditorToolbarButton
+    {
+        public const string Id = "ActorEditor";
+
+        public ActorEditor()
+        {
+            text = "ActorEditor";
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            clicked += ActorEditorWindow.ShowWindow;
         }
     }
 
@@ -58,15 +95,17 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
             new SearchTreeGroupEntry(new GUIContent("Tiled Maps"), 0)
         };
 
-        string mapDirectory = Path.Combine(Application.dataPath, "FingTools", "Tiled", "Tilemaps");
-        if (Directory.Exists(mapDirectory))
+        if (MapManager.Instance.HasMaps())
         {
-            string[] mapFiles = Directory.GetFiles(mapDirectory, "*.tmx", SearchOption.AllDirectories);
-            foreach (string mapFile in mapFiles)
+            foreach (string mapPath in MapManager.Instance.existingMaps)
             {
-                string mapName = Path.GetFileNameWithoutExtension(mapFile);
-                searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(mapName)) { level = 1, userData = mapFile });
+                string mapName = Path.GetFileNameWithoutExtension(mapPath);
+                searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(mapName)) { level = 1, userData = mapPath });
             }
+        }
+        else
+        {
+            searchTreeEntries.Add(new SearchTreeEntry(new GUIContent("No maps available")) { level = 1 });
         }
 
         return searchTreeEntries;
@@ -81,7 +120,5 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
         }
         return false;
     }
-
-    
 }
 #endif

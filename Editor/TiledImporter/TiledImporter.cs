@@ -371,37 +371,65 @@ namespace FingTools.Tiled
         //Create the Tiled project file if it doesn't exist already
         public static void GenerateTiledProjectFile(string outputPath)
         {
-            string projectName = "TiledProject";            
-            if(File.Exists(Path.Combine(outputPath, projectName + ".tiled-project")))
-            {
-                return;
-            }
-            string tiledProjectName = projectName + ".tiled-project";
-            // Create the Tiled project file
-            string filePath = Path.Combine(outputPath, tiledProjectName);
+            string projectName = "TiledProject";
+            string projectFilePath = Path.Combine(outputPath, projectName + ".tiled-project");
+            string sessionFilePath = Path.Combine(outputPath, projectName + ".tiled-session");
 
-            // Define the base content for the Tiled project file
-            string content = "{\n" +
-                             "    \"automappingRulesFile\": \"\",\n" +
-                             "    \"commands\": [\n" +
-                             "    ],\n" +
-                             "    \"extensionsPath\": \"extensions\",\n" +
-                             "    \"folders\": [\n" +
-                             "        \".\"\n" +
-                             "    ]\n" +
-                             "}";
-            try
+            if (!File.Exists(projectFilePath))
             {
-                // Write the content to the file
-                File.WriteAllText(filePath, content);
+                // Create the Tiled project file
+                string projectContent = "{\n" +
+                                        "    \"automappingRulesFile\": \"\",\n" +
+                                        "    \"commands\": [\n" +
+                                        "    ],\n" +
+                                        "    \"extensionsPath\": \"extensions\",\n" +
+                                        "    \"folders\": [\n" +
+                                        "        \".\"\n" +
+                                        "    ]\n" +
+                                        "}";
+                try
+                {
+                    // Write the content to the project file
+                    File.WriteAllText(projectFilePath, projectContent);
 
-                // Notify the user that the file was successfully created
-                UnityEngine.Debug.Log($"Tiled project file generated at: {filePath}");
+                    // Notify the user that the file was successfully created
+                    UnityEngine.Debug.Log($"Tiled project file generated at: {projectFilePath}");
+                }
+                catch (IOException e)
+                {
+                    // Handle any potential file write errors
+                    UnityEngine.Debug.LogError($"Failed to generate Tiled project file: {e.Message}");
+                }
             }
-            catch (IOException e)
+
+            if (!File.Exists(sessionFilePath))
             {
-                // Handle any potential file write errors
-                UnityEngine.Debug.LogError($"Failed to generate Tiled project file: {e.Message}");
+                // Create the Tiled session file
+                string sessionContent = "{\n" +
+                                        "    \"activeFile\": \"\",\n" +
+                                        "    \"expandedProjectPaths\": [\n" +
+                                        "    ],\n" +
+                                        "    \"fileStates\": {\n" +
+                                        "    },\n" +
+                                        "    \"openFiles\": [\n" +
+                                        "    ],\n" +
+                                        "    \"project\": \"TiledProject.tiled-project\",\n" +
+                                        "    \"recentFiles\": [\n" +
+                                        "    ]\n" +
+                                        "}";
+                try
+                {
+                    // Write the content to the session file
+                    File.WriteAllText(sessionFilePath, sessionContent);
+
+                    // Notify the user that the file was successfully created
+                    UnityEngine.Debug.Log($"Tiled session file generated at: {sessionFilePath}");
+                }
+                catch (IOException e)
+                {
+                    // Handle any potential file write errors
+                    UnityEngine.Debug.LogError($"Failed to generate Tiled session file: {e.Message}");
+                }
             }
         }
 

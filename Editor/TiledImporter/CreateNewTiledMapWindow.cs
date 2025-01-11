@@ -4,6 +4,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
 using Debug = UnityEngine.Debug;
+using Codice.Client.BaseCommands;
 
 public class CreateNewTiledMapWindow : EditorWindow
 {
@@ -84,8 +85,8 @@ public class CreateNewTiledMapWindow : EditorWindow
         File.WriteAllText(outputPath, mapContent);
         AssetDatabase.Refresh();
         Debug.Log($"New Tiled map created at: {outputPath}");
-
-        OpenTiledWithMap(outputPath);
+        MapManager.RefreshMaps();
+        TiledLinker.OpenTiledWithProjectAndMap(outputPath);
         Close();
     }
 
@@ -107,26 +108,6 @@ public class CreateNewTiledMapWindow : EditorWindow
         }
 
         return string.Join("\n", tilesetReferences);
-    }
-
-    private void OpenTiledWithMap(string mapPath)
-    {
-        string tiledPath = EditorPrefs.GetString("TiledExecutablePath", string.Empty);
-        if (!string.IsNullOrEmpty(tiledPath) && File.Exists(tiledPath))
-        {
-            try
-            {
-                Process.Start(tiledPath, $"\"{mapPath}\"");
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError($"Failed to open Tiled: {ex.Message}");
-            }
-        }
-        else
-        {
-            Debug.LogError("Tiled executable path is not set or invalid.");
-        }
     }
 
     private string GenerateEmptyTiles(int width, int height)

@@ -79,7 +79,8 @@ public class ActorEditorWindow : EditorWindow
     {
         if(Directory.Exists("Assets/Resources/FingTools"))
         {
-            if(Resources.Load<SpriteManager>("FingTools/SpriteManager").HasAssetsImported() == true)
+            var manager = Resources.Load<SpriteManager>("FingTools/SpriteManager");
+            if(manager?.HasAssetsImported() == true)
             {
                 return true;
             }
