@@ -60,13 +60,39 @@ public class TiledChecker
             string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
             if (File.Exists(projectPath))
             {
-                try
+                string mapDirectory = Path.Combine(Application.dataPath, "FingTools", "Tiled", "Tilemaps");
+                if(!Directory.Exists(mapDirectory))
                 {
-                    Process.Start(savedPath, $"\"{projectPath}\"");
+                    Directory.CreateDirectory(mapDirectory);
                 }
-                catch (System.Exception ex)
+                string[] mapFiles = Directory.GetFiles(mapDirectory, "*.tmx", SearchOption.AllDirectories);
+
+                if (mapFiles.Length == 0)
                 {
-                    Debug.LogError($"Failed to open Tiled: {ex.Message}");
+                    int option = EditorUtility.DisplayDialogComplex(
+                        "No Maps Found",
+                        "No maps have been created yet. What would you like to do?",
+                        "Create a Map",
+                        "Open Tiled Anyway",
+                        "Cancel"
+                    );
+
+                    switch (option)
+                    {
+                        case 0: // Create a Map                            
+                            CreateNewTiledMapWindow.ShowWindow();
+                            break;
+                        case 1: // Open Tiled Anyway
+                            OpenTiledWithProject(savedPath, projectPath);
+                            break;
+                        case 2: // Cancel
+                            Debug.Log("User cancelled the operation.");
+                            return;
+                    }
+                }
+                else
+                {
+                    OpenTiledWithProject(savedPath, projectPath);
                 }
             }
             else
@@ -77,6 +103,18 @@ public class TiledChecker
         else
         {
             Debug.LogError("Tiled is not installed or could not be found.");
+        }
+    }
+
+    private static void OpenTiledWithProject(string tiledPath, string projectPath)
+    {
+        try
+        {
+            Process.Start(tiledPath, $"\"{projectPath}\"");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Failed to open Tiled: {ex.Message}");
         }
     }
     
