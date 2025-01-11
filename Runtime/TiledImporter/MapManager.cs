@@ -21,8 +21,10 @@ public class MapManager : ScriptableObject
                     {
                         System.IO.Directory.CreateDirectory("Assets/Resources/FingTools");
                     }
+                    #if UNITY_EDITOR
                     AssetDatabase.CreateAsset(_instance, "Assets/Resources/FingTools/MapManager.asset");
                     EditorApplication.delayCall += () => AssetDatabase.SaveAssets();
+                    #endif
                 }
             }
             return _instance;
@@ -31,8 +33,10 @@ public class MapManager : ScriptableObject
 
     public List<string> existingMaps = new List<string>();
 
+    
     public static void RefreshMaps()
     {
+        #if UNITY_EDITOR
         Instance.existingMaps.Clear();
         string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/FingTools/Tiled/Tilemaps" });
         foreach (string guid in guids)
@@ -43,6 +47,7 @@ public class MapManager : ScriptableObject
                 Instance.AddMap(path);
             }
         }
+        #endif
     }
 
     private void AddMap(string mapPath)

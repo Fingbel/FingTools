@@ -36,6 +36,7 @@ namespace FingTools.Tiled
         }
         public static void ImportAssets(string selectedInteriorZipFile, List<string> _selectedInteriorTilesets,string selectedExteriorZipFile, List<string> _selectedExteriorTilesets, string outputPath, int selectedSizeIndex, List<string> validSizes)
         {
+            #if SUPER_TILED2UNITY_INSTALLED
             selectedExteriorTilesets = _selectedExteriorTilesets;
             selectedInteriorTilesets = _selectedInteriorTilesets;
             if (!string.IsNullOrEmpty(selectedInteriorZipFile))
@@ -58,7 +59,7 @@ namespace FingTools.Tiled
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            #if SUPER_TILED2UNITY_INSTALLED
+            
             // After unzipping, now generate the TSX files for each tileset
             if (!string.IsNullOrEmpty(selectedInteriorZipFile))
             {

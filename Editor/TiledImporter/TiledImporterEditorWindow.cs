@@ -392,18 +392,27 @@ namespace FingTools.Tiled
             {
                 UnityEngine.Debug.LogError("Failed to add package: " + packageUrl);
             }
+
         }
 
         [InitializeOnLoadMethod]
         private static void DefineSuperTiled2UnitySymbolIfNeeded()
         {
             if (CheckSuperTiled2Unity())
-            {
+            {                
                 PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, "SUPER_TILED2UNITY_INSTALLED");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, "SUPER_TILED2UNITY_INSTALLED");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, "SUPER_TILED2UNITY_INSTALLED");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.iOS, "SUPER_TILED2UNITY_INSTALLED");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.EmbeddedLinux, "SUPER_TILED2UNITY_INSTALLED");
             }
             else
             {
                 PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, "");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, "");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, "");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.iOS, "");
+                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.EmbeddedLinux, "");
             }
         }
 
