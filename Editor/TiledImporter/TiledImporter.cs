@@ -15,6 +15,8 @@ namespace FingTools.Tiled
 {
     public static class TiledImporter
     {
+        private static List<string> selectedInteriorTilesets = new ();
+        private static List<string> selectedExteriorTilesets = new ();
         public static bool ValidateInteriorZipFile(string zipFilePath)
         {
             bool output = true;
@@ -32,33 +34,33 @@ namespace FingTools.Tiled
                 output = false;
             return output;
         }
-        public static void ImportAssets(bool importInterior, string selectedInteriorZipFile, List<string> selectedInteriorTilesets, bool importExterior, string selectedExteriorZipFile, List<string> selectedExteriorTilesets, string outputPath, int selectedSizeIndex, List<string> validSizes)
+        public static void ImportAssets(string selectedInteriorZipFile, List<string> _selectedInteriorTilesets,string selectedExteriorZipFile, List<string> _selectedExteriorTilesets, string outputPath, int selectedSizeIndex, List<string> validSizes)
         {
-            // Unzip assets first
-            if (importInterior && !string.IsNullOrEmpty(selectedInteriorZipFile))
+            selectedExteriorTilesets = _selectedExteriorTilesets;
+            selectedInteriorTilesets = _selectedInteriorTilesets;
+            if (!string.IsNullOrEmpty(selectedInteriorZipFile))
             {
                 if (!ValidateInteriorZipFile(selectedInteriorZipFile))
                 {
                     EditorUtility.DisplayDialog("Error", "Invalid Modern Interior zip file. Please select the correct file.", "OK");
                     return;
                 }
-                UnzipInteriorAssets(selectedInteriorZipFile, validSizes[selectedSizeIndex], selectedInteriorTilesets, outputPath,validSizes[selectedSizeIndex].ToInt());
+                UnzipInteriorAssets(selectedInteriorZipFile, validSizes[selectedSizeIndex], _selectedInteriorTilesets, outputPath,validSizes[selectedSizeIndex].ToInt());
             }
-
-            if (importExterior && !string.IsNullOrEmpty(selectedExteriorZipFile))
+            if (!string.IsNullOrEmpty(selectedExteriorZipFile))
             {
                 if (!ValidateExteriorZipFile(selectedExteriorZipFile))
                 {
                     EditorUtility.DisplayDialog("Error", "Invalid Modern Exterior zip file. Please select the correct file.", "OK");
                     return;
                 }
-                UnzipExteriorAssets(selectedExteriorZipFile, validSizes[selectedSizeIndex], selectedExteriorTilesets, outputPath,validSizes[selectedSizeIndex].ToInt());
+                UnzipExteriorAssets(selectedExteriorZipFile, validSizes[selectedSizeIndex], _selectedExteriorTilesets, outputPath,validSizes[selectedSizeIndex].ToInt());
             }
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             #if SUPER_TILED2UNITY_INSTALLED
             // After unzipping, now generate the TSX files for each tileset
-            if (importInterior && !string.IsNullOrEmpty(selectedInteriorZipFile))
+            if (!string.IsNullOrEmpty(selectedInteriorZipFile))
             {
                 string interiorArtOutput = Path.Combine(outputPath, "Art/Interior/");
                 string interiorTilesetOutputPath = Path.Combine(outputPath, "Tilesets/Interior");
@@ -66,10 +68,10 @@ namespace FingTools.Tiled
                 GenerateTSXFilesForImportedTilesets(interiorArtOutput, "Interior", int.Parse(validSizes[selectedSizeIndex]), outputPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
-                AutoFixTextures(interiorTilesetOutputPath);
+                EditorApplication.delayCall += () => AutoFixTextures(interiorTilesetOutputPath);
                 EditorApplication.delayCall += () =>
                 {
-                    foreach(var tileset in selectedInteriorTilesets)
+                    foreach(var tileset in _selectedInteriorTilesets)
                     {
                         var tilesetName = Path.GetFileNameWithoutExtension(tileset);
                         string assetPath = interiorTilesetOutputPath + "/" + tilesetName + ".tsx";
@@ -78,7 +80,7 @@ namespace FingTools.Tiled
                 };
             }
 
-            if (importExterior && !string.IsNullOrEmpty(selectedExteriorZipFile))
+            if (!string.IsNullOrEmpty(selectedExteriorZipFile))
             {
                 string exteriorArtOutput = Path.Combine(outputPath, "Art/Exterior/");
                 string exteriorTilesetOutputPath = Path.Combine(outputPath, "Tilesets/Exterior");
@@ -86,10 +88,10 @@ namespace FingTools.Tiled
                 GenerateTSXFilesForImportedTilesets(exteriorArtOutput, "Exterior", int.Parse(validSizes[selectedSizeIndex]), outputPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
-                AutoFixTextures(exteriorTilesetOutputPath);
+                EditorApplication.delayCall += () =>AutoFixTextures(exteriorTilesetOutputPath);
                 EditorApplication.delayCall += () =>
                 {
-                    foreach(var tileset in selectedExteriorTilesets)
+                    foreach(var tileset in _selectedExteriorTilesets)
                     {
                         var tilesetName = Path.GetFileNameWithoutExtension(tileset);
                         string assetPath = exteriorTilesetOutputPath + "/" + tilesetName + ".tsx";
@@ -177,18 +179,15 @@ namespace FingTools.Tiled
             // Get all the PNG files from the tileset directory
             string[] tilesetFiles = Directory.GetFiles(tilesetDirectory, "*.png", SearchOption.AllDirectories);
 
-            // Use a HashSet to track processed files to avoid duplicates
-            HashSet<string> processedTextures = new HashSet<string>();
-
+            
             foreach (string filePath in tilesetFiles)
-            {
-                // Check if the texture has already been processed
-                if (processedTextures.Contains(filePath))
+            {              
+               if(!selectedExteriorTilesets.Contains(Path.GetFileName(filePath))
+                && !selectedInteriorTilesets.Contains(Path.GetFileName(filePath)))
+                {
                     continue;
-
-                // Mark this texture as processed
-                processedTextures.Add(filePath);
-
+                }
+               
                 string fileName = Path.GetFileNameWithoutExtension(filePath);
                 string tsxFileName = $"{fileName}.tsx";
 
@@ -213,9 +212,6 @@ namespace FingTools.Tiled
                     tileSize
                 );                
             }
-
-            // Log the output path where TSX files are saved
-            Debug.Log($"TSX files generated in: {tsxOutputPath}");
         }
 
         private static void GenerateTSXFile(string fileName, string tilesetName, string tileSet, int width, int height, int tileSize)
@@ -250,7 +246,6 @@ namespace FingTools.Tiled
         }
         public static void UpdatePixelsPerUnit(string assetPath,int pixelsPerUnit)
         {           
-            Debug.Log($"Updating Pixels Per Unit for {assetPath}");
             // Get the generic importer for the .tsx file
             AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
@@ -259,9 +254,6 @@ namespace FingTools.Tiled
                 Debug.LogError($"No importer found for the asset at path: {assetPath}");
                 return;
             }
-
-            // Check if it's the correct importer
-            Debug.Log($"Importer type detected: {importer.GetType().Name}");
 
             // Use SerializedObject to modify properties
             SerializedObject serializedObject = new SerializedObject(importer);
@@ -275,8 +267,6 @@ namespace FingTools.Tiled
 
                 // Force reimport to apply changes
                 AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
-
-                Debug.Log($"Successfully updated Pixels Per Unit to {newValue} for {assetPath}");
             }
             else
             {
@@ -291,7 +281,7 @@ namespace FingTools.Tiled
             AssetDatabase.StartAssetEditing();
             // Iterate over the .tsx files and attempt to find ImportErrors
             foreach (string tsxFile in tsxFiles)
-            {
+            {                
                 ImportErrors importErrors = AssetDatabase.LoadAssetAtPath(tsxFile, typeof(ImportErrors)) as ImportErrors;                
                 if (importErrors != null)
                 {
@@ -350,12 +340,14 @@ namespace FingTools.Tiled
 
         public static void AdjustTextureImportSettings(string textureDirectory, int maxTextureSize, int pixelsPerUnit)
         {
-            UnityEngine.Debug.Log(textureDirectory);
             string[] textureFiles = Directory.GetFiles(textureDirectory, "*.png", SearchOption.TopDirectoryOnly);
-            UnityEngine.Debug.Log(textureFiles.Length);
             foreach (string textureFile in textureFiles)
-            {
-                UnityEngine.Debug.Log(textureFile);
+            {                              
+                if(!selectedExteriorTilesets.Contains(Path.GetFileName(textureFile))
+                && !selectedInteriorTilesets.Contains(Path.GetFileName(textureFile)))
+                {
+                    continue;
+                }
                 if (textureFile.Contains("5_Floor"))
                 {
                     maxTextureSize = 8192;
@@ -376,9 +368,15 @@ namespace FingTools.Tiled
             }
         }
 
-        public static void GenerateTiledProjectFile(string productName, string outputPath)
+        //Create the Tiled project file if it doesn't exist already
+        public static void GenerateTiledProjectFile(string outputPath)
         {
-            string tiledProjectName = productName + ".tiled-project";
+            string projectName = "TiledProject";            
+            if(!File.Exists(Path.Combine(outputPath, projectName + ".tiled-project")))
+            {
+                return;
+            }
+            string tiledProjectName = projectName + ".tiled-project";
             // Create the Tiled project file
             string filePath = Path.Combine(outputPath, tiledProjectName);
 

@@ -17,7 +17,6 @@ namespace FingTools.Tiled
         private static bool? isSuperTiled2UnityInstalled = null;
         private string selectedInteriorZipFile = null, selectedExteriorZipFile = null;
         private int selectedSizeIndex = 0;
-        private bool importInterior = true , importExterior = true;
         private readonly List<string> validSizes = new() { "16", "32" };
         private string outputPath = "Assets/FingTools/Tiled/";
         private List<string> selectedInteriorTilesets = new (),selectedExteriorTilesets = new ();
@@ -102,15 +101,23 @@ namespace FingTools.Tiled
 
                 DrawInteriorTilesetSelector(availableHeight);
                 DrawExteriorTilesetSelector(availableHeight);
-
                 DrawSeparator();
+            }
+            else if (isSuperTiled2UnityInstalled == false)
+            {
+                EditorGUILayout.LabelField("🔴 SuperTiled2Unity is not currently installed.", EditorStyles.wordWrappedLabel);
+                EditorGUILayout.LabelField("Click on the button below to add SuperTiled2Unity Package to this Unity project.");
+
+                if (GUILayout.Button("Install SuperTiled2Unity"))
+                {
+                    AddPackage(superTiled2UnityGitUrl);
+                }
             }
 
             // Import button
             EditorGUI.BeginDisabledGroup(
-                !importExterior && !importInterior ||
-                (string.IsNullOrEmpty(selectedInteriorZipFile) && !importExterior) ||
-                (string.IsNullOrEmpty(selectedExteriorZipFile) && !importInterior) ||
+                string.IsNullOrEmpty(selectedInteriorZipFile) ||
+                string.IsNullOrEmpty(selectedExteriorZipFile) ||
                 string.IsNullOrEmpty(selectedExteriorZipFile) && string.IsNullOrEmpty(selectedInteriorZipFile)
             );
             int installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
@@ -133,24 +140,21 @@ namespace FingTools.Tiled
                     }
                 }
 
+                // Remove already installed tilesets from the selected lists
+                selectedInteriorTilesets = selectedInteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Interior")).ToList();
+                selectedExteriorTilesets = selectedExteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Exterior")).ToList();
+
                 EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);
                 #if SUPER_TILED2UNITY_INSTALLED
-                TiledImporter.ImportAssets(importInterior, selectedInteriorZipFile, selectedInteriorTilesets, importExterior, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
+                TiledImporter.ImportAssets(selectedInteriorZipFile, selectedInteriorTilesets, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
                 #endif
-                TiledImporter.GenerateTiledProjectFile("TiledProject", outputPath);
+                TiledImporter.GenerateTiledProjectFile( outputPath);
                 EditorPrefs.SetInt("TileSize", int.Parse(validSizes[selectedSizeIndex]));
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
                 EditorUtility.ClearProgressBar();
             }
             EditorGUI.EndDisabledGroup();
-
-            // Add a button to clear saved zip file locations
-            if (GUILayout.Button("Clear Saved Zip File Locations", GUILayout.Height(20)))
-            {
-                ClearSavedZipFileLocations();
-            }
-
             EditorGUILayout.EndScrollView();
         }
 
@@ -329,16 +333,6 @@ namespace FingTools.Tiled
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndScrollView();
             }
-        }
-
-        private void ClearSavedZipFileLocations()
-        {
-            EditorPrefs.DeleteKey(InteriorZipFilePathKey);
-            EditorPrefs.DeleteKey(ExteriorZipFilePathKey);
-            selectedInteriorZipFile = null;
-            selectedExteriorZipFile = null;
-            availableInteriorTilesets.Clear();
-            availableExteriorTilesets.Clear();
         }
 
         private void DrawSeparator()

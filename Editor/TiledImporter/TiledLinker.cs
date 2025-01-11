@@ -12,7 +12,6 @@ public class TiledChecker
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
         if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))
         {
-            Debug.Log($"Tiled found at: {savedPath}");
             return;
         }
 
