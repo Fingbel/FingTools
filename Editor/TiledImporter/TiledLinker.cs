@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
-public class TiledChecker
+public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
 
