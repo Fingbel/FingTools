@@ -10,9 +10,10 @@ using System;
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity;
 #endif
-
+#if UNITY_EDITOR
 namespace FingTools.Tiled
 {
+
     public static class TiledImporter
     {
         private static List<string> selectedInteriorTilesets = new ();
@@ -462,4 +463,6 @@ namespace FingTools.Tiled
             }
         }
     }
+
 }
+#endif

@@ -1,12 +1,7 @@
-using UnityEngine;
-using UnityEditor;
-using Codice.Client.BaseCommands;
-
-
 #if UNITY_EDITOR
+using UnityEditor;
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity.Editor;
-
 
 [AutoCustomTmxImporter()]
  public class TmxImporter : CustomTmxImporter
@@ -50,5 +45,5 @@ using SuperTiled2Unity.Editor;
         }
     }        
  }
- #endif
+#endif
 #endif

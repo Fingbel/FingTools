@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
-using Unity.Plastic.Newtonsoft.Json.Linq;
 
+#if UNITY_EDITOR
+using Unity.Plastic.Newtonsoft.Json.Linq;
+using UnityEditor;
 public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
@@ -196,3 +197,4 @@ public class TiledLinker
         EditorPrefs.SetString(TiledPathKey, path);
     }
 }
+#endif

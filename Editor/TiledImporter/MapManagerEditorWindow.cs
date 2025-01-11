@@ -1,6 +1,5 @@
-using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
-
 [CustomEditor(typeof(MapManager))]
 public class MapManagerEditorWindow : Editor
 {
@@ -15,3 +14,4 @@ public class MapManagerEditorWindow : Editor
         MapManager.RefreshMaps();
     }
 }
+#endif

@@ -12,7 +12,6 @@ using SuperTiled2Unity;
 public class MapLoader : MonoBehaviour
 {
     [SerializeField]private List<GameObject> spawnedMaps = new();
-    //TODO : dictionary data is lost when the editor is reloaded, we need to use a scriptable objects instead
     private static MapLoader _instance;
     public static MapLoader Instance 
     {

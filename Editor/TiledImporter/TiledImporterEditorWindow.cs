@@ -1,13 +1,14 @@
 using UnityEngine;
-using UnityEditor;
-using UnityEditor.PackageManager.Requests;
-using UnityEditor.PackageManager;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using UnityEditor.Build;
 
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.PackageManager.Requests;
+using UnityEditor.PackageManager;
+using UnityEditor.Build;
 namespace FingTools.Tiled
 {
     public class TiledImporterEditorWindow : EditorWindow
@@ -484,3 +485,4 @@ namespace FingTools.Tiled
         }
     }
 }
+#endif

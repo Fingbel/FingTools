@@ -1,11 +1,10 @@
-using UnityEditor;
 using UnityEngine;
 using System.IO;
-using System.Diagnostics;
 using System.Collections.Generic;
 using Debug = UnityEngine.Debug;
-using Codice.Client.BaseCommands;
 
+#if UNITY_EDITOR
+using UnityEditor;
 public class CreateNewTiledMapWindow : EditorWindow
 {
     private int width = 30;
@@ -128,3 +127,4 @@ public class CreateNewTiledMapWindow : EditorWindow
         return emptyTiles.TrimEnd(',');
     }
 }
+#endif
