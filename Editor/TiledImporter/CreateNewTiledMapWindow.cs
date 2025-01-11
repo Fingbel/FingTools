@@ -99,14 +99,35 @@ public class CreateNewTiledMapWindow : EditorWindow
 
         string[] tilesetFiles = Directory.GetFiles(tilesetDirectory, "*.tsx", SearchOption.AllDirectories);
         List<string> tilesetReferences = new List<string>();
+        int firstGid = 1;
 
         foreach (string tilesetFile in tilesetFiles)
         {
             string relativePath = Path.GetRelativePath(Path.Combine(Application.dataPath, "FingTools", "Tiled", "Tilemaps"), tilesetFile).Replace("\\", "/");
-            tilesetReferences.Add($"<tileset firstgid=\"1\" source=\"{relativePath}\"/>");
+            int tileCount = GetTileCountFromTileset(tilesetFile);
+            tilesetReferences.Add($"<tileset firstgid=\"{firstGid}\" source=\"{relativePath}\"/>");
+            firstGid += tileCount;
         }
 
         return string.Join("\n", tilesetReferences);
+    }
+
+    private int GetTileCountFromTileset(string tilesetFile)
+    {
+        string content = File.ReadAllText(tilesetFile);
+        int tileCount = 0;
+        string tileCountString = "tilecount=\"";
+        int startIndex = content.IndexOf(tileCountString) + tileCountString.Length;
+        if (startIndex > tileCountString.Length)
+        {
+            int endIndex = content.IndexOf("\"", startIndex);
+            if (endIndex > startIndex)
+            {
+                string tileCountValue = content.Substring(startIndex, endIndex - startIndex);
+                int.TryParse(tileCountValue, out tileCount);
+            }
+        }
+        return tileCount;
     }
 
     private string GenerateEmptyTiles(int width, int height)

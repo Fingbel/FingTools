@@ -450,17 +450,58 @@ namespace FingTools.Tiled
             foreach (string mapFile in mapFiles)
             {
                 string mapContent = File.ReadAllText(mapFile);
+                int firstGid = GetLastFirstGid(mapContent);
+
                 foreach (string tilesetFile in tilesetFiles)
                 {
                     string relativePath = Path.GetRelativePath(Path.GetDirectoryName(mapFile), tilesetFile).Replace("\\", "/");
-                    string tilesetReference = $"<tileset firstgid=\"1\" source=\"{relativePath}\"/>";
+                    int tileCount = GetTileCountFromTileset(tilesetFile);
+                    string tilesetReference = $"<tileset firstgid=\"{firstGid}\" source=\"{relativePath}\"/>";
                     if (!mapContent.Contains(tilesetReference))
                     {
-                        mapContent = mapContent.Replace("<layer", $"{tilesetReference}\n<layer");
+                        mapContent = mapContent.Replace("</map>", $"{tilesetReference}\n</map>");
                     }
+                    firstGid += tileCount;
                 }
                 File.WriteAllText(mapFile, mapContent);
             }
+        }
+
+        private static int GetLastFirstGid(string mapContent)
+        {
+            int lastFirstGid = 1;
+            string firstGidString = "firstgid=\"";
+            int startIndex = mapContent.LastIndexOf(firstGidString);
+            if (startIndex != -1)
+            {
+                startIndex += firstGidString.Length;
+                int endIndex = mapContent.IndexOf("\"", startIndex);
+                if (endIndex > startIndex)
+                {
+                    string firstGidValue = mapContent.Substring(startIndex, endIndex - startIndex);
+                    int.TryParse(firstGidValue, out lastFirstGid);
+                    lastFirstGid++;
+                }
+            }
+            return lastFirstGid;
+        }
+
+        private static int GetTileCountFromTileset(string tilesetFile)
+        {
+            string content = File.ReadAllText(tilesetFile);
+            int tileCount = 0;
+            string tileCountString = "tilecount=\"";
+            int startIndex = content.IndexOf(tileCountString) + tileCountString.Length;
+            if (startIndex > tileCountString.Length)
+            {
+                int endIndex = content.IndexOf("\"", startIndex);
+                if (endIndex > startIndex)
+                {
+                    string tileCountValue = content.Substring(startIndex, endIndex - startIndex);
+                    int.TryParse(tileCountValue, out tileCount);
+                }
+            }
+            return tileCount;
         }
     }
 

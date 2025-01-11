@@ -18,8 +18,7 @@ using SuperTiled2Unity.Editor;
             tileSize = 16;
         }
         if(args.AssetImporter.PixelsPerUnit != tileSize)
-            UpdatePPU(args.AssetImporter, tileSize);
-        MapManager.RefreshMaps();
+            UpdatePPU(args.AssetImporter, tileSize);        
     }
 
     public static void UpdatePPU(TmxAssetImporter importer,int pixelsPerUnit)

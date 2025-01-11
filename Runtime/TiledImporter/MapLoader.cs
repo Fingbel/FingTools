@@ -4,11 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 
-
-#if SUPER_TILED2UNITY_INSTALLED
-using SuperTiled2Unity;
-#endif
-
 public class MapLoader : MonoBehaviour
 {
     [SerializeField]private List<GameObject> spawnedMaps = new();

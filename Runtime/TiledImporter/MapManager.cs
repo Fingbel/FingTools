@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
-using System.Linq;
-using System.IO;
 
 public class MapManager : ScriptableObject
 {
