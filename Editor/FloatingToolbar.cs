@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.IO;
 using Codice.Client.BaseCommands;
 using FingTools.Internal;
+using FingTools.Tiled;
 
 #if UNITY_EDITOR
 [Overlay(typeof(EditorWindow), "FloatingToolbar", true)]
 public class FloatingToolbar : ToolbarOverlay
 {
-    FloatingToolbar() : base(ActorEditor.Id,MapSwitch.Id,RemoveMap.Id,NewMap.Id,OpenTiled.Id) { }
+    FloatingToolbar() : base(ActorEditor.Id,MapSwitch.Id,NewMap.Id,OpenTiled.Id) { }
 
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class MapSwitch : EditorToolbarButton
@@ -25,17 +26,46 @@ public class FloatingToolbar : ToolbarOverlay
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
             
             clicked += () =>
-            {
-                MapManager.RefreshMaps();
-                if(MapManager.Instance.HasMaps())
+            {        
+                string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
+                bool tiledProjectDetected = File.Exists(projectPath);
+                // Check if Tiled project is detected
+                if(!tiledProjectDetected)
                 {
-                    
-                    ShowSearchWindow();
+                    if(EditorUtility.DisplayDialog("Map Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
+                    {
+                            TiledImporterEditorWindow.ShowWindow();
+                            return;
+                    }
+                    return;
                 }
+
+                // Check if MapManager exists
+                if(Resources.Load<MapManager>("FingTools/MapManager") == null )
+                {
+                    if(EditorUtility.DisplayDialog("Map Loader", "No maps have been created yet, would you like to create one ?", "Yes", "No"))
+                    {
+                        CreateNewTiledMapWindow.ShowWindow();
+                        return;
+                    };              
+                    return;      
+                }
+                //We have everything 
                 else
                 {
-                    CreateNewTiledMapWindow.ShowWindow();
-                }
+                    MapManager.RefreshMaps();
+                    if(MapManager.Instance.HasMaps())
+                    {
+                        ShowSearchWindow();
+                    }
+                    else
+                    {
+                        if(EditorUtility.DisplayDialog("Map Loader", "No maps have been created yet, would you like to create one ?", "Yes", "No"))
+                        {
+                            CreateNewTiledMapWindow.ShowWindow();
+                        };              
+                    }
+                }                
             };
         }
 
@@ -68,20 +98,8 @@ public class FloatingToolbar : ToolbarOverlay
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
             clicked += CreateNewTiledMapWindow.ShowWindow;
         }
-}
-     [EditorToolbarElement(Id, typeof(EditorWindow))]
-    class RemoveMap : EditorToolbarButton
-    {
-        public const string Id = "RemoveMap";
-
-        public RemoveMap()
-        {
-            text = "RemoveMap";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
-            clicked += MapLoader.Instance.RemoveCurrentLoadedMap;
-        }
     }
-
+    
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class ActorEditor : EditorToolbarButton
     {
@@ -91,7 +109,21 @@ public class FloatingToolbar : ToolbarOverlay
         {
             text = "ActorEditor";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/actor-logo.png");
-            clicked += ActorEditorWindow.ShowWindow;
+            clicked += () => {
+                if(Directory.Exists("Assets/Resources/FingTools"))
+                {
+                    var manager = Resources.Load<SpriteManager>("FingTools/SpriteManager");
+                    if(manager?.HasAssetsImported() == true)
+                    {
+                        ActorEditorWindow.ShowWindow();
+                        return;
+                    }
+                }              
+                if(EditorUtility.DisplayDialog("Actor Editor", "No character assets have been imported yet. Would you like to import assets now?", "Yes", "No"))
+                {
+                    CharacterImporterEditor.ShowWindow();
+                };
+            };
         }
     }
 
