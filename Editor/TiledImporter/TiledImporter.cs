@@ -372,7 +372,7 @@ namespace FingTools.Tiled
         public static void GenerateTiledProjectFile(string outputPath)
         {
             string projectName = "TiledProject";            
-            if(!File.Exists(Path.Combine(outputPath, projectName + ".tiled-project")))
+            if(File.Exists(Path.Combine(outputPath, projectName + ".tiled-project")))
             {
                 return;
             }
