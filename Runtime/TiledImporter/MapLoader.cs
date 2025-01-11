@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
+using System.IO;
+
 
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity;
@@ -8,8 +11,8 @@ using SuperTiled2Unity;
 
 public class MapLoader : MonoBehaviour
 {
-    private Dictionary<string,GameObject> _loadedMaps = new ();
-    //TODO : dictionary data is lost when the editor is reloaded, need to save the data to a file or use scriptable objects
+    [SerializeField]private List<GameObject> spawnedMaps = new();
+    //TODO : dictionary data is lost when the editor is reloaded, we need to use a scriptable objects instead
     private static MapLoader _instance;
     public static MapLoader Instance 
     {
@@ -29,29 +32,67 @@ public class MapLoader : MonoBehaviour
             return _instance;
         }
     }
+    public void ActivateMap(string mapName)
+    {
+        mapName = Path.GetFileNameWithoutExtension(mapName);
+        GameObject map = spawnedMaps.FirstOrDefault(x => x.name == mapName);
+        if(map != null)
+        {
+            map.SetActive(true);
+        }
+        spawnedMaps.Where(x => x.name != mapName).ToList().ForEach(x => x.SetActive(false));
+    }
 
     public void LoadMapToScene(string mapPath)
     {
+        #if UNITY_EDITOR
         Debug.Log($"Loading map: {mapPath}");
-        if(_loadedMaps == null)
-        {
-            _loadedMaps = new Dictionary<string, GameObject>();
-        }
         GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(mapPath);
         if (mapPrefab != null)
         {
-            Instantiate(mapPrefab,transform);
-            _loadedMaps.Add(mapPath, mapPrefab);
+            GameObject mapInstance = (GameObject)PrefabUtility.InstantiatePrefab(mapPrefab, transform);
+            if (mapInstance != null)
+            {
+                spawnedMaps.Add(mapInstance);
+                mapInstance.gameObject.SetActive(false);
+                Debug.Log($"Map {mapPath} loaded successfully.");
+            }
+            else
+            {
+                Debug.LogError($"Failed to instantiate map: {mapPath}");
+            }
         }
         else
         {
             Debug.LogError($"Failed to load map prefab at path: {mapPath}");
         }
-
+        #endif
     }
 
-    public void RemoveCurrentLoadedMap()
+    public void RefreshSpawnedMaps(List<string> existingMaps)
     {
-        
+        spawnedMaps.Clear();
+        for(int i = transform.childCount - 1; i >= 0; i--)
+        {
+            GameObject map = transform.GetChild(i).gameObject;
+            if(map != null)
+            {
+                spawnedMaps.Add(map);            
+            }
+        }
+
+        // Remove maps that are no longer in the existingMaps list
+        foreach(var map in spawnedMaps.Where(x => !existingMaps.Any(y => Path.GetFileNameWithoutExtension(y) == x.name)).ToList())
+        {
+            DestroyImmediate(map);
+            spawnedMaps.Remove(map);
+        }
+
+        // Load maps that are in the existingMaps list but not in the spawnedMaps list
+        foreach(var map in existingMaps.Where(x => !spawnedMaps.Any(y => y.name == Path.GetFileNameWithoutExtension(x))))
+        {
+            LoadMapToScene(map);
+            
+        }
     }
 }

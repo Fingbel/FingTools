@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
+using System.Linq;
+using System.IO;
 
 public class MapManager : ScriptableObject
 {
@@ -32,7 +34,6 @@ public class MapManager : ScriptableObject
     }
 
     public List<string> existingMaps = new List<string>();
-
     
     public static void RefreshMaps()
     {
@@ -44,19 +45,16 @@ public class MapManager : ScriptableObject
             string path = AssetDatabase.GUIDToAssetPath(guid);
             if (path.EndsWith(".tmx"))
             {
-                Instance.AddMap(path);
+                if(!Instance.existingMaps.Contains(path))
+                {
+                    Instance.existingMaps.Add(path);
+                }
             }
         }
         #endif
+        MapLoader.Instance.RefreshSpawnedMaps(Instance.existingMaps);
     }
 
-    private void AddMap(string mapPath)
-    {
-        if (!existingMaps.Contains(mapPath))
-        {
-            existingMaps.Add(mapPath);
-        }
-    }
     public bool HasMaps()
     {
         return existingMaps.Count > 0;

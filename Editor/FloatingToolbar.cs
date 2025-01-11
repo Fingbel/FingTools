@@ -160,20 +160,7 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
     {
         if (entry.userData is string mapFilePath)
         {
-            var mapLoader = MapLoader.Instance;
-            if(mapLoader == null)
-            {
-                if (EditorUtility.DisplayDialog("Map Loader Not Found", "No MapLoader instance found. Would you like to create one?", "Yes", "No"))
-                {
-                    var mapLoaderGameObject = new GameObject("MapLoader");
-                    mapLoader = mapLoaderGameObject.AddComponent<MapLoader>();
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            mapLoader.LoadMapToScene(mapFilePath);
+            MapLoader.Instance.ActivateMap(mapFilePath);            
             return true;
         }
         return false;
