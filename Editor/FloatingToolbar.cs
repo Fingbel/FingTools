@@ -5,9 +5,9 @@ using UnityEditor.Toolbars;
 using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
 using System.IO;
-using Codice.Client.BaseCommands;
 using FingTools.Internal;
 using FingTools.Tiled;
+using System.Linq;
 
 #if UNITY_EDITOR
 [Overlay(typeof(EditorWindow), "FloatingToolbar", true)]
@@ -137,30 +137,54 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
     {
         searchTreeEntries = new List<SearchTreeEntry>
         {
-            new SearchTreeGroupEntry(new GUIContent("Tiled Maps"), 0)
+            new SearchTreeGroupEntry(new GUIContent("Tiled Maps and Worlds"), 0)
         };
 
-        if (MapManager.Instance.HasMaps())
+        List<string> mapsInWorlds = new List<string>();
+        foreach (string worldPath in MapManager.Instance.existingWorlds)
         {
-            foreach (string mapPath in MapManager.Instance.existingMaps)
+            string worldContent = File.ReadAllText(worldPath);
+            var worldData = JsonUtility.FromJson<MapLoader.WorldData>(worldContent);
+            mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
+        }        
+        Dictionary<GUIContent,string> mapContents = new ();
+        mapContents.Add(new GUIContent("==== Maps ===="), "");
+        foreach (string mapPath in MapManager.Instance.existingMaps)
+        {
+            string mapName = Path.GetFileNameWithoutExtension(mapPath);
+            if (!mapsInWorlds.Contains(mapName))
             {
-                string mapName = Path.GetFileNameWithoutExtension(mapPath);
-                searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(mapName)) { level = 1, userData = mapPath });
+                mapContents.Add(new GUIContent(mapName), mapPath);
+                //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(mapName)) { level = 1, userData = mapPath });
             }
-        }
-        else
+        }       
+        mapContents.Add(new GUIContent("==== Worlds ===="), "");
+        //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent("----- Worlds -----")) { level = 0 });
+        foreach (string worldPath in MapManager.Instance.existingWorlds)
         {
-            searchTreeEntries.Add(new SearchTreeEntry(new GUIContent("No maps available")) { level = 1 });
+            string worldName = Path.GetFileNameWithoutExtension(worldPath);
+            mapContents.Add(new GUIContent(worldName), worldPath);            
+            //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(worldName)) { level = 1, userData = worldPath });
         }
-
+        foreach (var mapContent in mapContents)
+        {
+            searchTreeEntries.Add(new SearchTreeEntry(mapContent.Key) { level = 1, userData = mapContent.Value });
+        }
         return searchTreeEntries;
     }
 
     public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
     {
-        if (entry.userData is string mapFilePath)
+        if (entry.userData is string filePath)
         {
-            MapLoader.Instance.ActivateMap(mapFilePath);            
+            if (filePath.EndsWith(".tmx"))
+            {
+                MapLoader.Instance.LoadMapObject(filePath);
+            }
+            else if (filePath.EndsWith(".world"))
+            {
+                MapLoader.Instance.LoadMapObject(filePath, true);
+            }
             return true;
         }
         return false;
