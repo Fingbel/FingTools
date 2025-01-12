@@ -6,6 +6,8 @@ using Debug = UnityEngine.Debug;
 #if UNITY_EDITOR
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEditor;
+
+namespace FingTools.Tiled{
 public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
@@ -56,7 +58,7 @@ public class TiledLinker
     [MenuItem("FingTools/Open Tiled", false, 2)]
     public static void OpenTiled()
     {
-        MapManager.RefreshMaps();
+        MapManager.RefreshUniverse();
         CheckForTiled();
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
         if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))
@@ -196,5 +198,6 @@ public class TiledLinker
     {
         EditorPrefs.SetString(TiledPathKey, path);
     }
+}
 }
 #endif

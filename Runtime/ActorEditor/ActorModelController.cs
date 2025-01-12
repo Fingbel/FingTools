@@ -110,14 +110,7 @@ namespace FingTools.Internal
             }
         }
 
-        #if UNITY_EDITOR
-        private void OnValidate()
-        {
-            EditorApplication.delayCall += () =>SetPreviewSprites();
-        }
-        #endif
-
-        public void SetPreviewSprites()
+        public void UpdatePreviewSprites()
         {
             if (Application.isPlaying) return;
             if (actor_SO != null)

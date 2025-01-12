@@ -2,6 +2,8 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
+namespace FingTools.Tiled
+{
 public class TiledWorldAssetProcessor : AssetPostprocessor
 {
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
@@ -11,7 +13,7 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
             if (assetPath.EndsWith(".world"))
             {
                 Debug.Log($"World asset imported: {assetPath}");
-                MapManager.RefreshMaps();
+                MapManager.RefreshUniverse();
             }
         }
 
@@ -20,9 +22,10 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
             if (assetPath.EndsWith(".world"))
             {
                 Debug.Log($"World asset deleted: {assetPath}");
-                MapManager.RefreshMaps();
+                MapManager.RefreshUniverse();
             }
         }       
     }
+}
 }
 #endif

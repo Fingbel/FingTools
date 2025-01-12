@@ -3,7 +3,10 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using FingTools.Tiled;
 
+namespace FingTools
+{
 public class MapLoader : MonoBehaviour
 {
     [SerializeField] private List<GameObject> spawnedMaps = new();
@@ -44,10 +47,31 @@ public class MapLoader : MonoBehaviour
             Debug.LogError("MapManager not found");
             return;
         }
-        EditorApplication.delayCall += () =>Instance.LoadMapObject(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
+        EditorApplication.delayCall += () =>{
+            if(!Application.isPlaying)
+            {
+                Instance.LoadMap(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
+            };
+        };
+        
     }
     #endif
-    public void LoadMapObject(string mapObjectName,bool isWorld = false)
+
+    private void Awake() {
+        UnloadAllMaps();
+    }
+    public void UnloadAllMaps()
+    {
+        foreach(var map in spawnedMaps)
+        {
+            map.SetActive(false);
+        }
+        foreach(var world in spawnedWorlds)
+        {
+            world.SetActive(false);
+        }
+    }
+    public void LoadMap(string mapObjectName,bool isWorld = false)
     {
         mapObjectName = Path.GetFileNameWithoutExtension(mapObjectName);        
         spawnedMaps.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));
@@ -59,7 +83,7 @@ public class MapLoader : MonoBehaviour
             {
                 world.SetActive(true);
                 MapManager.Instance.LoadedMapObject = mapObjectName;
-                MapManager.Instance.IsLoadedMapObjectAWorld = true;                
+                MapManager.Instance.IsLoadedMapObjectAWorld = true;                                                               
             }
         }
         else
@@ -67,16 +91,16 @@ public class MapLoader : MonoBehaviour
             GameObject map = spawnedMaps.FirstOrDefault(x => x.name == mapObjectName);
             if(map != null)
             {
-                map.SetActive(true);
+                map.SetActive(true);                              
                 MapManager.Instance.LoadedMapObject = mapObjectName;
-                MapManager.Instance.IsLoadedMapObjectAWorld = false;
+                MapManager.Instance.IsLoadedMapObjectAWorld = false;                                
             }
             
         }
         
     }
 
-    public void AddMapObjectToScene(string mapPath)
+    private void AddMapObjectToScene(string mapPath)
     {
         #if UNITY_EDITOR
         Debug.Log($"Loading map: {mapPath}");
@@ -102,7 +126,7 @@ public class MapLoader : MonoBehaviour
         #endif
     }
 
-    public void AddWorldObjectToScene(string worldPath)
+    private void AddWorldObjectToScene(string worldPath)
     {
         #if UNITY_EDITOR
         Debug.Log($"Loading world: {worldPath}");
@@ -127,8 +151,13 @@ public class MapLoader : MonoBehaviour
         }
         #endif
     }
+    public void RefreshMapObjects()
+    {
+        RefreshSpawnedWorldObjects(MapManager.Instance.existingWorlds);
+        RefreshSpawnedMapObjects(MapManager.Instance.existingMaps);
+    }
 
-    public void RefreshSpawnedMapObjects(List<string> existingMaps)
+    private void RefreshSpawnedMapObjects(List<string> existingMaps)
     {
         spawnedMaps.Clear();
         if(mapHolder == null)
@@ -170,7 +199,7 @@ public class MapLoader : MonoBehaviour
         }
     }
 
-    public void RefreshSpawnedWorldObjects(List<string> existingWorlds)
+    private void RefreshSpawnedWorldObjects(List<string> existingWorlds)
     {
         spawnedWorlds.Clear();
         mapsInWorlds = new List<string>();
@@ -233,4 +262,5 @@ public class MapLoader : MonoBehaviour
         public int x;
         public int y;
     }
+}
 }

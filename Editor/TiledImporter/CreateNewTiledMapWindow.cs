@@ -5,6 +5,7 @@ using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
 using UnityEditor;
+namespace FingTools.Tiled{
 public class CreateNewTiledMapWindow : EditorWindow
 {
     private int width = 30;
@@ -84,7 +85,7 @@ public class CreateNewTiledMapWindow : EditorWindow
         File.WriteAllText(outputPath, mapContent);
         AssetDatabase.Refresh();
         Debug.Log($"New Tiled map created at: {outputPath}");
-        MapManager.RefreshMaps();
+        MapManager.RefreshUniverse();
         TiledLinker.OpenTiledWithProjectAndMap(outputPath);
         Close();
     }
@@ -147,5 +148,6 @@ public class CreateNewTiledMapWindow : EditorWindow
         }
         return emptyTiles.TrimEnd(',');
     }
+}
 }
 #endif

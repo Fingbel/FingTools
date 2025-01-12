@@ -10,6 +10,8 @@ using FingTools.Tiled;
 using System.Linq;
 
 #if UNITY_EDITOR
+namespace FingTools.Tiled
+{
 [Overlay(typeof(EditorWindow), "FloatingToolbar", true)]
 public class FloatingToolbar : ToolbarOverlay
 {
@@ -53,7 +55,7 @@ public class FloatingToolbar : ToolbarOverlay
                 //We have everything 
                 else
                 {
-                    MapManager.RefreshMaps();
+                    MapManager.RefreshUniverse();
                     if(MapManager.Instance.HasMaps())
                     {
                         ShowSearchWindow();
@@ -179,11 +181,11 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
         {
             if (filePath.EndsWith(".tmx"))
             {
-                MapLoader.Instance.LoadMapObject(filePath);
+                MapLoader.Instance.LoadMap(filePath);
             }
             else if (filePath.EndsWith(".world"))
             {
-                MapLoader.Instance.LoadMapObject(filePath, true);
+                MapLoader.Instance.LoadMap(filePath, true);
             }
             return true;
         }
@@ -191,3 +193,4 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
     }
 }
 #endif
+}

@@ -719,12 +719,10 @@ private SpritePart_SO DrawPartSelector(
             selectedActor.accessory = accessory;
 
             OnActorUpdated?.Invoke(selectedActor);
-            
             // Save the updated NPC_SO
             EditorUtility.SetDirty(selectedActor);
-            AssetDatabase.SaveAssets();        
-            
-            
+            AssetDatabase.SaveAssets();      
+            UpdateSpawnedActors();                         
         }
         else
         {
@@ -754,7 +752,17 @@ private SpritePart_SO DrawPartSelector(
         }
     }
 
-    private void RenameSelectedActorAsset(string newName)
+        private void UpdateSpawnedActors()
+        {
+            //We need to gather all the ActorAPI of the scene
+            var actorAPIs = FindObjectsByType<ActorAPI>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+            foreach(var actorApi in actorAPIs)
+            {
+                actorApi.GetComponent<ActorModelController>().UpdatePreviewSprites();
+            }
+        }
+
+        private void RenameSelectedActorAsset(string newName)
     {
         if (selectedActor != null)
         {

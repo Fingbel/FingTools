@@ -4,6 +4,8 @@ using UnityEditor;
 using System.IO;
 using System;
 
+namespace FingTools.Tiled
+{
 public class MapManager : ScriptableObject
 {
     public List<string> existingMaps = new List<string>();
@@ -16,8 +18,11 @@ public class MapManager : ScriptableObject
         set{
             _currentLoadedMapObject = value;
             #if UNITY_EDITOR
-            EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
+            if(!Application.isPlaying)
+            {
+                EditorUtility.SetDirty(this);
+                AssetDatabase.SaveAssets();
+            }
             #endif
         }
     }
@@ -28,8 +33,11 @@ public class MapManager : ScriptableObject
         set{
             _isCurrentLoadedMapObjectWorld = value;
             #if UNITY_EDITOR
-            EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
+            if(!Application.isPlaying)
+            {
+                EditorUtility.SetDirty(this);
+                AssetDatabase.SaveAssets();
+            }
             #endif
         }
     }
@@ -59,6 +67,31 @@ public class MapManager : ScriptableObject
             return _instance;
         }
     }
+    public static void RefreshUniverse()
+    {
+        RefreshMaps();
+        RefreshWorlds();
+        MapLoader.Instance.RefreshMapObjects();
+    }
+    
+    private static void RefreshMaps()
+    {
+#if UNITY_EDITOR
+        Instance.existingMaps.Clear();
+        string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/FingTools/Tiled/Tilemaps" });
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (path.EndsWith(".tmx"))
+            {
+                if (!Instance.existingMaps.Contains(path))
+                {
+                    Instance.existingMaps.Add(path);
+                }
+            }
+        }
+#endif
+    }
     private static void RefreshWorlds()
     {
         #if UNITY_EDITOR
@@ -81,28 +114,6 @@ public class MapManager : ScriptableObject
         }
         #endif
     }
-    public static void RefreshMaps()
-    {
-        #if UNITY_EDITOR
-        Instance.existingMaps.Clear();
-        string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/FingTools/Tiled/Tilemaps" });
-        foreach (string guid in guids)
-        {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            if (path.EndsWith(".tmx"))
-            {
-                if(!Instance.existingMaps.Contains(path))
-                {
-                    Instance.existingMaps.Add(path);
-                }
-            }
-        }
-        #endif
-        RefreshWorlds();
-        MapLoader.Instance.RefreshSpawnedWorldObjects(Instance.existingWorlds);
-        MapLoader.Instance.RefreshSpawnedMapObjects(Instance.existingMaps);
-    }
-
     public bool HasMaps()
     {
         return existingMaps.Count > 0;
@@ -112,4 +123,5 @@ public class MapManager : ScriptableObject
     {
         return existingMaps.Count == 0;
     }
+}
 }

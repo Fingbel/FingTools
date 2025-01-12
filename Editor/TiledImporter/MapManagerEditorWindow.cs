@@ -1,5 +1,8 @@
 #if UNITY_EDITOR
 using UnityEditor;
+
+namespace FingTools.Tiled
+{
 [CustomEditor(typeof(MapManager))]
 public class MapManagerEditorWindow : Editor
 {
@@ -11,7 +14,8 @@ public class MapManagerEditorWindow : Editor
     }
 
     private void OnEnable() {
-        MapManager.RefreshMaps();
+        MapManager.RefreshUniverse();
     }
+}
 }
 #endif
