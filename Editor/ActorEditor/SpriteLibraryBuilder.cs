@@ -10,7 +10,7 @@ namespace FingTools.Internal
     public class SpriteLibraryBuilder : Editor
     {
         // Root folder where SpriteLibraries will be stored
-        private const string LibraryRootFolderName = "SpriteLibraries";
+        private const string LibraryRootFolderName = "SpriteLibraries/CharacterParts";
 
         public static void BuildAllSpriteLibraries()
         {
@@ -24,7 +24,7 @@ namespace FingTools.Internal
                 if (spritePart != null)
                 {
                     // Create a new SpriteLibraryAsset
-                    SpriteLibraryAsset library = ScriptableObject.CreateInstance<SpriteLibraryAsset>();
+                    SpriteLibraryAsset library = CreateInstance<SpriteLibraryAsset>();
 
                     // Add sprites to the library
                     AddSpritesToLibrary(spritePart, library);

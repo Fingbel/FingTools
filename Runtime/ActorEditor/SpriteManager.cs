@@ -87,6 +87,7 @@ public class SpriteManager : ScriptableObject
     #if UNITY_EDITOR
     public void PopulateSpriteLists(string destinationPath)
     {
+        if(!Directory.Exists("Assets/Resources/FingTools/CharacterSprites")) return; //Early return as we don't have no directory
         // Clear existing lists
         accessoryParts.Clear();
         bodyParts.Clear();
@@ -102,13 +103,13 @@ public class SpriteManager : ScriptableObject
             ActorPartType type = GetSpriteTypeFromPath(bodyPartFolder);
 
             // Load all textures in the folder
-            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/Sprites/" + bodyPartName);
+            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/CharacterSprites/" + bodyPartName);
 
             // Create a SpritePart for each texture
             foreach (Texture2D texture in textures)
             {
                 // Load all sprites in the folder
-                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/Sprites/" + bodyPartName + "/" + texture.name);
+                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/CharacterSprites/" + bodyPartName + "/" + texture.name);
 
                 // Create a SpritePart with the sprites
                 SpritePart_SO spritePart = CreateInstance<SpritePart_SO>();
@@ -117,7 +118,7 @@ public class SpriteManager : ScriptableObject
 
                 // Save the SpritePart as an asset
                 string assetName = texture.name + ".asset";
-                string assetPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/" + bodyPartName + "/", assetName);
+                string assetPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/CharacterParts/" + bodyPartName + "/", assetName);
                 if (!Directory.Exists(Path.GetDirectoryName(assetPath)))
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(assetPath));

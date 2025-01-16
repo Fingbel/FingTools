@@ -4,15 +4,20 @@ using System.IO;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
+using System;
+
 
 #if UNITY_EDITOR
 using UnityEditor.U2D.Sprites;
 namespace FingTools.Internal
 {
     public static class CharacterImporter
-    {
+    {        
+        public const string resourcesFolderPath = "Assets/Resources/FingTools/CharacterSprites"; 
+        private static readonly List<string> validBodyParts = new () { "Accessories","Accessory", "Bodies", "Eyes", "Hairstyles", "Outfits","Outfit" };
         private const int slicePerSprite = 467;         
-        public static void UnzipIntSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, bool enableMaxAssetsPerType, int maxAssetsPerType, List<string> validBodyParts)
+        private static readonly List<int>  spritesPerRowList = new List<int> { 4, 24, 24, 6, 12, 12, 12, 12, 24, 48, 40, 56, 56, 24, 24, 24, 16, 24, 12, 12 };
+        public static void UnzipIntSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
             unzipedAssets = 0;     
             Dictionary<ActorPartType, int> processedAssetsPerType = new Dictionary<ActorPartType, int>()
@@ -51,19 +56,22 @@ namespace FingTools.Internal
                 
                 if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
                 {
-                    string outputPath = $"Assets/Resources/FingTools/Sprites/{type}/";
+                    string outputPath = resourcesFolderPath+ $"/{type}/";
                     if (!Directory.Exists(outputPath))
                         Directory.CreateDirectory(outputPath);
 
-                    entry.ExtractToFile($"{outputPath}/{entry.Name}", true);
-
+                    if(!File.Exists($"{outputPath}/{entry.Name}"))
+                    {
+                        entry.ExtractToFile($"{outputPath}/{entry.Name}", false);
+                    }
                     processedAssetsPerType[type.Value]++;
                     unzipedAssets++;
                 }
             }
+            archive.Dispose();
         }
 
-        public static void UnzipExtSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, bool enableMaxAssetsPerType, int maxAssetsPerType,List<string> validBodyParts)
+        public static void UnzipExtSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
             Dictionary<ActorPartType, int> processedAssetsPerType = new Dictionary<ActorPartType, int>()
             {
@@ -95,53 +103,36 @@ namespace FingTools.Internal
                 string expectedPath = $"Modern_Exteriors_{spriteSize}x{spriteSize}/Character_Generator_Addons_{spriteSize}x{spriteSize}";
                 if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
                 {
-                    string outputPath = $"Assets/Resources/FingTools/Sprites/{type}/";
+                    string outputPath = resourcesFolderPath+ $"/{type}/";
                     if (!Directory.Exists(outputPath))
                         Directory.CreateDirectory(outputPath);
 
-                    entry.ExtractToFile($"{outputPath}/{entry.Name}", true);
+                    if(!File.Exists($"{outputPath}/{entry.Name}"))
+                    {
+                        entry.ExtractToFile($"{outputPath}/{entry.Name}", false);                        
+                    }                    
                     processedAssetsPerType[type.Value]++;
                     unzipedAssets++;
                 }
             }
+            archive.Dispose();
         }
 
-        public static void ProcessImportedAssets(string destinationFolderPath, int unzipedAssets, List<int> spritesPerRowList, string selectedSize)
-        {
-            string[] bodyPartFolders = Directory.GetDirectories(destinationFolderPath);
-            List<string> importList = new List<string>();
-            int i = 0;        
-            // Iterate through body part folders and find assets
-            foreach (string bodyPartFolder in bodyPartFolders)
-            {            
-                string[] assetFiles = Directory.GetFiles(bodyPartFolder, "*.png", SearchOption.AllDirectories);
-
-                foreach (string assetFile in assetFiles)
-                {
-                    string assetName = Path.GetFileNameWithoutExtension(assetFile);
-                    string spritePartSoPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/",bodyPartFolder.Split("\\").Last(), $"{assetName}.asset");
-
-                    // Check if the asset has already been processed
-                    if (AssetDatabase.LoadAllAssetsAtPath(assetFile).Length == slicePerSprite &&
-                        File.Exists(spritePartSoPath))
-                    {                  
-                        continue;
-                    }
-
-                    importList.Add(assetFile);                 
-                }
-            }
-
+        public static void ProcessImportedAssets(string selectedSize)
+        {            
+            int i = 0;
+            if(!Directory.Exists(resourcesFolderPath)) return; //Early return as we don't have no directory
+            var importList = PrepareImportList(resourcesFolderPath);
             int totalAssetsToProcess = importList.Count;
             foreach (var assetFile in importList)
             {
                 string relativeAssetPath = assetFile.Replace(Application.dataPath, "").Replace("\\", "/");
-                ApplyImportSettings(AssetImporter.GetAtPath(relativeAssetPath) as TextureImporter, selectedSize);
-                AutoSliceTexture(relativeAssetPath, spritesPerRowList, selectedSize);
-                EditorUtility.DisplayProgressBar("Processing Assets", $"Slicing asset {i + 1} of {totalAssetsToProcess} ", (i + 1) / (float)totalAssetsToProcess);                
-                i++;                 
+                CommonImporter.ApplyImportSettings(AssetImporter.GetAtPath(relativeAssetPath) as TextureImporter, selectedSize,4096);
+                CommonImporter.AutoSliceTexture(relativeAssetPath, spritesPerRowList, selectedSize);
+                EditorUtility.DisplayProgressBar("Processing Assets", $"Slicing asset {i + 1} of {totalAssetsToProcess} ", (i + 1) / (float)totalAssetsToProcess);
+                i++;
             }
-            
+
             EditorUtility.ClearProgressBar();
             foreach (var assetPath in importList)
             {
@@ -149,67 +140,30 @@ namespace FingTools.Internal
             }
         }
 
-        private static void AutoSliceTexture(string assetPath, List<int> spritesPerRowList, string selectedSize)
+        private static List<string> PrepareImportList(string destinationFolderPath)
         {
-            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
-            if (texture == null)
+            List<string> outputList = new List<string>();
+            string[] bodyPartFolders = Directory.GetDirectories(destinationFolderPath);
+            // Iterate through body part folders and find assets
+            foreach (string bodyPartFolder in bodyPartFolders)
             {
-                Debug.LogError($"Failed to load texture at path: {assetPath}");
-                return;
-            }
+                string[] assetFiles = Directory.GetFiles(bodyPartFolder, "*.png", SearchOption.AllDirectories);
 
-            var factory = new SpriteDataProviderFactories();
-            factory.Init();
-            ISpriteEditorDataProvider dataProvider = factory.GetSpriteEditorDataProviderFromObject(texture);
-            dataProvider.InitSpriteEditorDataProvider();
-
-            // Generate the sprite rect data for slicing
-            SpriteRect[] spriteRects = GenerateSpriteRectData(texture.height, spritesPerRowList, selectedSize);
-
-            dataProvider.SetSpriteRects(spriteRects);
-            dataProvider.Apply();
-        }
-
-        private static SpriteRect[] GenerateSpriteRectData(int textureHeight, List<int> spritesPerRowList, string selectedSize)
-        {
-            List<SpriteRect> spriteRects = new List<SpriteRect>();
-            int yOffset = 0;
-            int sliceHeight = int.Parse(selectedSize) * 2;
-
-            for (int row = 0; row < spritesPerRowList.Count; row++)
-            {
-                int spritesInRow = spritesPerRowList[row];
-                int sliceWidth = int.Parse(selectedSize);
-
-                for (int col = 0; col < spritesInRow; col++)
+                foreach (string assetFile in assetFiles)
                 {
-                    float x = col * sliceWidth;
-                    float y = textureHeight - (yOffset + sliceHeight);
-
-                    spriteRects.Add(new SpriteRect
+                    string assetName = Path.GetFileNameWithoutExtension(assetFile);
+                    string spritePartSoPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/CharacterParts/", bodyPartFolder.Split("\\").Last(), $"{assetName}.asset");
+                    // Check if the asset has already been processed
+                    if (AssetDatabase.LoadAllAssetsAtPath(assetFile).Length == slicePerSprite &&
+                        File.Exists(spritePartSoPath))
                     {
-                        rect = new Rect(x, y, sliceWidth, sliceHeight),
-                        pivot = new Vector2(0.5f, 0),
-                        name = $"Slice_{row}_{col}",
-                        alignment = SpriteAlignment.BottomCenter,
-                        border = Vector4.zero
-                    });
+                        continue;
+                    }
+
+                    outputList.Add(assetFile);
                 }
-                yOffset += sliceHeight;
             }
-
-            return spriteRects.ToArray();
-        }
-
-        private static void ApplyImportSettings(TextureImporter textureImporter, string selectedSize)
-        {
-            textureImporter.textureType = TextureImporterType.Sprite;
-            textureImporter.spriteImportMode = SpriteImportMode.Multiple;
-            textureImporter.mipmapEnabled = false;
-            textureImporter.filterMode = FilterMode.Point;
-            textureImporter.maxTextureSize = 4096;
-            textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
-            textureImporter.spritePixelsPerUnit = int.Parse(selectedSize);
+            return outputList;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace FingTools.Internal{
         public SpritePart_SO eyes;
         public SpritePart_SO hairstyle;
         public SpritePart_SO accessory;   
-             
+
+        public Portrait_SO portrait_SO;
     }
 }

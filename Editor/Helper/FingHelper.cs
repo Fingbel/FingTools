@@ -20,5 +20,10 @@ public static class FingHelper
                 output = false;
             return output;
         }
+
+        public static bool ValidateUIZipFile(string zipFilePath)
+        {
+            return true;
+        }
 }
 }
