@@ -9,6 +9,7 @@ using UnityEditor;
 using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager;
 using UnityEditor.Build;
+using FingTools.Helper;
 namespace FingTools.Tiled
 {
     public class TiledImporterEditorWindow : EditorWindow
@@ -174,7 +175,7 @@ namespace FingTools.Tiled
             if (GUILayout.Button("Select Modern Exterior zip file", GUILayout.Width(180)))
             {
                 selectedExteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
-                if (!string.IsNullOrEmpty(selectedExteriorZipFile) && TiledImporter.ValidateExteriorZipFile(selectedExteriorZipFile))
+                if (!string.IsNullOrEmpty(selectedExteriorZipFile) && FingHelper.ValidateExteriorZipFile(selectedExteriorZipFile))
                 {
                     availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
                     availableExteriorTilesets.Sort(CompareTilesetNames);
@@ -182,7 +183,7 @@ namespace FingTools.Tiled
             }
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-            bool isExteriorZipFileValid = TiledImporter.ValidateExteriorZipFile(selectedExteriorZipFile);                   
+            bool isExteriorZipFileValid = FingHelper.ValidateExteriorZipFile(selectedExteriorZipFile);                   
             if (isExteriorZipFileValid)
             {
                 EditorGUILayout.LabelField("Selected Zip File:", selectedExteriorZipFile ?? "None");
@@ -261,7 +262,7 @@ namespace FingTools.Tiled
             if (GUILayout.Button("Select Modern Interior zip file", GUILayout.Width(180)))
             {
                 selectedInteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
-                if (!string.IsNullOrEmpty(selectedInteriorZipFile) && TiledImporter.ValidateInteriorZipFile(selectedInteriorZipFile))
+                if (!string.IsNullOrEmpty(selectedInteriorZipFile) && FingHelper.ValidateInteriorZipFile(selectedInteriorZipFile))
                 {
                     availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
                     availableInteriorTilesets.Sort(CompareTilesetNames);
@@ -270,7 +271,7 @@ namespace FingTools.Tiled
 
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-            bool isInteriorZipFileValid = TiledImporter.ValidateInteriorZipFile(selectedInteriorZipFile);            
+            bool isInteriorZipFileValid = FingHelper.ValidateInteriorZipFile(selectedInteriorZipFile);            
             
             if(isInteriorZipFileValid)
             {

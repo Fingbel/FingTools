@@ -6,6 +6,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System;
+using FingTools.Helper;
+
 
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity;
@@ -17,24 +19,7 @@ namespace FingTools.Tiled
     public static class TiledImporter
     {
         private static List<string> selectedInteriorTilesets = new ();
-        private static List<string> selectedExteriorTilesets = new ();
-        public static bool ValidateInteriorZipFile(string zipFilePath)
-        {
-            bool output = true;
-            var fileName = Path.GetFileName(zipFilePath);
-            if (string.IsNullOrEmpty(zipFilePath) || fileName != "moderninteriors-win.zip")
-                output = false;
-            return output;
-        }
-
-        public static bool ValidateExteriorZipFile(string zipFilePath)
-        {
-            bool output = true;
-            var fileName = Path.GetFileName(zipFilePath);
-            if (string.IsNullOrEmpty(zipFilePath)|| fileName != "modernexteriors-win.zip")
-                output = false;
-            return output;
-        }
+        private static List<string> selectedExteriorTilesets = new ();        
         public static void ImportAssets(string selectedInteriorZipFile, List<string> _selectedInteriorTilesets,string selectedExteriorZipFile, List<string> _selectedExteriorTilesets, string outputPath, int selectedSizeIndex, List<string> validSizes)
         {
             #if SUPER_TILED2UNITY_INSTALLED
@@ -42,7 +27,7 @@ namespace FingTools.Tiled
             selectedInteriorTilesets = _selectedInteriorTilesets;
             if (!string.IsNullOrEmpty(selectedInteriorZipFile))
             {
-                if (!ValidateInteriorZipFile(selectedInteriorZipFile))
+                if (!FingHelper.ValidateInteriorZipFile(selectedInteriorZipFile))
                 {
                     EditorUtility.DisplayDialog("Error", "Invalid Modern Interior zip file. Please select the correct file.", "OK");
                     return;
@@ -51,7 +36,7 @@ namespace FingTools.Tiled
             }
             if (!string.IsNullOrEmpty(selectedExteriorZipFile))
             {
-                if (!ValidateExteriorZipFile(selectedExteriorZipFile))
+                if (!FingHelper.ValidateExteriorZipFile(selectedExteriorZipFile))
                 {
                     EditorUtility.DisplayDialog("Error", "Invalid Modern Exterior zip file. Please select the correct file.", "OK");
                     return;

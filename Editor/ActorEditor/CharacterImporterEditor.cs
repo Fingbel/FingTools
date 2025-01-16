@@ -4,6 +4,8 @@ using System.IO;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
+using FingTools.Helper;
+
 
 #if UNITY_EDITOR
 using UnityEditor.U2D.Sprites;
@@ -11,10 +13,11 @@ namespace FingTools.Internal
 {  
 public class CharacterImporterEditor : EditorWindow
 {
-    private string zipFilePath = "";
+    private string intZipFilePath = "";
+    private string extZipFilePath = "";
     private string resourcesFolderPath = "Assets/Resources/FingTools/Sprites"; // Hardcoded output folder
     private int selectedSizeIndex = 0; 
-    private readonly List<string> validBodyParts = new () { "Accessories", "Bodies", "Eyes", "Hairstyles", "Outfits" };
+    private readonly List<string> validBodyParts = new () { "Accessories","Accessory", "Bodies", "Eyes", "Hairstyles", "Outfits","Outfit" };
     private readonly List<string> validSizes = new () { "16", "32"};
     private SpriteManager spriteManager;
     private int unzipedAssets = 0;
@@ -76,10 +79,17 @@ public class CharacterImporterEditor : EditorWindow
 
     if (GUILayout.Button("Select Modern Interior zip file")) 
     {            
-        zipFilePath = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
+        intZipFilePath = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
     }
+    EditorGUILayout.LabelField("Interior Zip File:", intZipFilePath ?? "None");
 
-    EditorGUILayout.LabelField("Selected Zip File:", zipFilePath ?? "None");
+    if(GUILayout.Button(" Optional : Select Modern Exterior zip file "))
+    {
+        extZipFilePath = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
+    }
+    EditorGUILayout.LabelField("Exterior Zip File:", extZipFilePath ?? "None");
+
+    
 
     // Checkbox to enable maxAssetsPerType
     enableMaxAssetsPerType = EditorGUILayout.Toggle("Test Mode", enableMaxAssetsPerType);
@@ -109,7 +119,7 @@ public class CharacterImporterEditor : EditorWindow
 
     EditorGUI.EndDisabledGroup();
 
-    if (zipFilePath == "")
+    if (intZipFilePath == "")
     {
         EditorGUI.BeginDisabledGroup(true);
     }
@@ -118,28 +128,28 @@ public class CharacterImporterEditor : EditorWindow
 
     if (GUILayout.Button("Import Assets"))
     {
+        Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
         spriteManager = LoadSpriteManager();
+        if (FingHelper.ValidateInteriorZipFile(intZipFilePath))
+        {           
+            UnzipIntSprites(intZipFilePath, validSizes[selectedSizeIndex]);            
+        }        
 
-        if (ValidateZipFile(zipFilePath))
-        {
-            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
-            UnzipSprites(zipFilePath, validSizes[selectedSizeIndex]);
-            AssetDatabase.Refresh();
-            ProcessImportedAssets();
-            spriteManager.PopulateSpriteLists(resourcesFolderPath);
-            SpriteLibraryBuilder.BuildAllSpriteLibraries();
-            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
-            AssetEnumGenerator.GenerateAssetEnum();
-        }
-        else
-        {
-            Debug.Log("Zip file is not valid.");
-        }
+        if(!string.IsNullOrEmpty(extZipFilePath) && FingHelper.ValidateExteriorZipFile(extZipFilePath))
+        {            
+            UnzipExtSprites(extZipFilePath,validSizes[selectedSizeIndex]);
+        }        
+        AssetDatabase.Refresh();
+        ProcessImportedAssets();
+        spriteManager.PopulateSpriteLists(resourcesFolderPath);
+        SpriteLibraryBuilder.BuildAllSpriteLibraries();
+        Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
+        AssetEnumGenerator.GenerateAssetEnum();
     }
     EditorGUI.EndDisabledGroup();
 }
 
-    private void UnzipSprites(string zipFilePath, string spriteSize)
+    private void UnzipIntSprites(string zipFilePath, string spriteSize)
     {
         unzipedAssets = 0;
         ZipArchive archive = ZipFile.OpenRead(zipFilePath);
@@ -181,38 +191,40 @@ public class CharacterImporterEditor : EditorWindow
             }
         }
     }
-    private bool ValidateZipFile(string filePath)
+    private void UnzipExtSprites(string zipFilePath, string spriteSize)
     {
-        try
+       
+        ZipArchive archive = ZipFile.OpenRead(zipFilePath);
+        foreach (ZipArchiveEntry entry in archive.Entries)
         {
-            using (ZipArchive archive = ZipFile.OpenRead(filePath))
+            ActorPartType? type = validBodyParts.FirstOrDefault(x => entry.FullName.Contains(x)) switch
             {
-                foreach (string part in validBodyParts)
-                {
-                    bool partExists = archive.Entries.Any(entry => entry.FullName.Contains(part));
-                    if (!partExists)
-                    {
-                        Debug.LogWarning($"Body part '{part}' is missing in the zip.");
-                        return false;
-                    }
-                }
-                return true;
+                "Accessory" => ActorPartType.Accessories, 
+                "Outfit"    => ActorPartType.Outfits,
+                _            => null
+            };
+
+            if (type == null)
+                continue;
+            string expectedPath = $"Modern_Exteriors_{spriteSize}x{spriteSize}/Character_Generator_Addons_{spriteSize}x{spriteSize}";
+            if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
+            {
+                string outputPath = $"Assets/Resources/FingTools/Sprites/{type}/";
+                if (!Directory.Exists(outputPath))
+                    Directory.CreateDirectory(outputPath);
+
+                entry.ExtractToFile($"{outputPath}/{entry.Name}", true);
+                unzipedAssets++;
             }
         }
-        catch (IOException)
-        {
-            Debug.LogError("Failed to open the zip file.");
-            return false;
-        }
     }
-
     private void ProcessImportedAssets()
     {
         string destinationFolderPath = "Assets/Resources/FingTools/Sprites/";
-
         string[] bodyPartFolders = Directory.GetDirectories(destinationFolderPath);
+        int skipped = 0;
+        int processed = 0;
         List<string> importList = new List<string>();
-        int i = 0;        
         // Iterate through body part folders and find assets
         foreach (string bodyPartFolder in bodyPartFolders)
         {            
@@ -220,12 +232,23 @@ public class CharacterImporterEditor : EditorWindow
 
             foreach (string assetFile in assetFiles)
             {
+                var sprite = AssetDatabase.LoadAllAssetsAtPath(assetFile);
+                var bodyPartType = bodyPartFolder.Split('/').Last();
+                // Check if the asset has already been processed
+                
+                if (sprite.Length == 467 && File.Exists(Path.Combine("Assets/Resources/FingTools/ScriptableObjects/",bodyPartType,Path.GetFileNameWithoutExtension(assetFile))+".asset"))
+                {                    
+                    //Debug.Log($"Skipped asset : {Path.GetFileNameWithoutExtension(assetFile)}");
+                    skipped++;
+                    continue;
+                }
+
                 string relativeAssetPath = assetFile.Replace(Application.dataPath, "").Replace("\\", "/");
                 ApplyImportSettings(AssetImporter.GetAtPath(relativeAssetPath) as TextureImporter);
                 AutoSliceTexture(relativeAssetPath);
                 importList.Add(relativeAssetPath);           
-                EditorUtility.DisplayProgressBar("Processing Assets", $"Slicing asset {i} of {unzipedAssets} ", i / (float)unzipedAssets);                
-                i++;                 
+                EditorUtility.DisplayProgressBar("Processing Assets", $"Processing asset {processed}  ", 0.5f);                
+                processed++;           
             }
             
         }
@@ -234,7 +257,7 @@ public class CharacterImporterEditor : EditorWindow
         {
             AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
         }
-        
+        Debug.Log($"New assets processed and added : {processed}");
     }
     
     private void AutoSliceTexture(string assetPath)
