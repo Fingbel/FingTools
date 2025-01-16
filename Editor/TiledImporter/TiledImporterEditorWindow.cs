@@ -170,7 +170,7 @@ namespace FingTools.Tiled
         {
             DrawSeparator();
             // Show button to select exterior zip file if selected
-            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginHorizontal();        
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Select Modern Exterior zip file", GUILayout.Width(180)))
             {
@@ -180,13 +180,32 @@ namespace FingTools.Tiled
                     availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
                     availableExteriorTilesets.Sort(CompareTilesetNames);
                 }
-            }
+                else
+                {
+                    if(EditorUtility.DisplayDialog("Wrong Zip File", "The Zip File you provided is incorrect", "Ok"))
+                    {
+                        selectedExteriorZipFile = "";
+                        EditorPrefs.SetString(ExteriorZipFilePathKey, selectedExteriorZipFile);
+                        return;
+                    };      
+                }
+            }            
             GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();        
             bool isExteriorZipFileValid = FingHelper.ValidateExteriorZipFile(selectedExteriorZipFile);                   
             if (isExteriorZipFileValid)
             {
+                EditorGUILayout.BeginHorizontal();                
+                if(!string.IsNullOrEmpty(selectedExteriorZipFile))
+                {                    
+                    if(GUILayout.Button("X",GUILayout.Width(20)))
+                    {
+                        selectedExteriorZipFile = "";
+                        EditorPrefs.SetString(ExteriorZipFilePathKey, selectedExteriorZipFile);
+                    }
+                }
                 EditorGUILayout.LabelField("Selected Zip File:", selectedExteriorZipFile ?? "None");
+                EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 int _installedExteriorTilesetsCount = availableExteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Exterior"));
                 int selectedExteriorTilesetsCount = selectedExteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Exterior"));
@@ -257,8 +276,9 @@ namespace FingTools.Tiled
         {
             DrawSeparator();
             // Show button to select interior zip file if selected
-            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginHorizontal();        
             GUILayout.FlexibleSpace();
+
             if (GUILayout.Button("Select Modern Interior zip file", GUILayout.Width(180)))
             {
                 selectedInteriorZipFile = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
@@ -267,15 +287,32 @@ namespace FingTools.Tiled
                     availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
                     availableInteriorTilesets.Sort(CompareTilesetNames);
                 }
-            }
-
+                else
+                {
+                    if(EditorUtility.DisplayDialog("Wrong Zip File", "The Zip File you provided is incorrect", "Ok"))
+                    {
+                        selectedInteriorZipFile = "";
+                        EditorPrefs.SetString(InteriorZipFilePathKey, selectedInteriorZipFile);
+                        return;
+                    };              
+                }
+            }            
             GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();        
             bool isInteriorZipFileValid = FingHelper.ValidateInteriorZipFile(selectedInteriorZipFile);            
-            
             if(isInteriorZipFileValid)
             {
+                EditorGUILayout.BeginHorizontal();                
+                if(!string.IsNullOrEmpty(selectedInteriorZipFile))
+                {
+                    if(GUILayout.Button("X",GUILayout.Width(20)))
+                    {
+                        selectedInteriorZipFile = "";
+                        EditorPrefs.SetString(InteriorZipFilePathKey, selectedInteriorZipFile);
+                    }
+                }
                 EditorGUILayout.LabelField("Selected Zip File:", selectedInteriorZipFile ?? "None");
+                EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginHorizontal();
                 int _installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
                 int selectedInteriorTilesetsCount = selectedInteriorTilesets.Count(tileset => !IsTilesetAlreadyImported(tileset, "Interior"));

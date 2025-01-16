@@ -64,6 +64,15 @@ public class CharacterImporterEditorWindow : EditorWindow
         if (GUILayout.Button("Select Modern Interior zip file")) 
         {            
             intZipFilePath = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
+            if(string.IsNullOrEmpty(intZipFilePath) || !FingHelper.ValidateInteriorZipFile(intZipFilePath))
+            {
+                if(EditorUtility.DisplayDialog("Wrong Zip File", "The Zip File you provided is incorrect", "Ok"))
+                    {
+                        intZipFilePath = "";
+                        EditorPrefs.SetString(InteriorZipFilePathKey, intZipFilePath);
+                        return;
+                    };      
+            }
         }        
         DrawSeparator();
 
@@ -82,6 +91,15 @@ public class CharacterImporterEditorWindow : EditorWindow
         if(GUILayout.Button(" Optional : Select Modern Exterior zip file "))
         {
             extZipFilePath = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
+            if(string.IsNullOrEmpty(extZipFilePath) || !FingHelper.ValidateExteriorZipFile(extZipFilePath))
+            {
+                if(EditorUtility.DisplayDialog("Wrong Zip File", "The Zip File you provided is incorrect", "Ok"))
+                    {
+                        extZipFilePath = "";
+                        EditorPrefs.SetString(ExteriorZipFilePathKey, extZipFilePath);
+                        return;
+                    };      
+            }
         }        
         DrawSeparator();
         
