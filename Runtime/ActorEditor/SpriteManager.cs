@@ -19,7 +19,16 @@ public class SpriteManager : ScriptableObject
                     _instance = Resources.Load<SpriteManager>("FingTools/SpriteManager");
                     if (_instance == null)
                     {
-                        Debug.LogError("SpriteManager asset not found in Resources. Please create it.");
+                        _instance = CreateInstance<SpriteManager>();
+                        if(!Directory.Exists("Assets/Resources/FingTools"))
+                        {
+                            Directory.CreateDirectory("Assets/Resources/FingTools");
+                        }
+                        #if UNITY_EDITOR
+                        AssetDatabase.CreateAsset(_instance, "Assets/Resources/FingTools/SpriteManager.asset");
+                        EditorApplication.delayCall += () => AssetDatabase.SaveAssets();
+                        #endif
+                    
                     }
                 }
                 return _instance;
