@@ -9,6 +9,8 @@ namespace FingTools.Internal
 {  
 public class CharacterImporterEditorWindow : EditorWindow
 {
+    private const string InteriorZipFilePathKey = "InteriorZipFilePath";
+    private const string ExteriorZipFilePathKey = "ExteriorZipFilePath";
     private string intZipFilePath = "";
     private string extZipFilePath = "";
     private string resourcesFolderPath = "Assets/Resources/FingTools/Sprites"; // Hardcoded output folder
@@ -26,11 +28,39 @@ public class CharacterImporterEditorWindow : EditorWindow
         GetWindow<CharacterImporterEditorWindow>(true,"Character Importer");
     }
 
+    public void OnEnable()
+    {
+        intZipFilePath = EditorPrefs.GetString(InteriorZipFilePathKey, null);
+        extZipFilePath = EditorPrefs.GetString(ExteriorZipFilePathKey, null);
+    }
+    public void OnDisable()
+    {
+        if (!string.IsNullOrEmpty(intZipFilePath))
+        {
+            EditorPrefs.SetString(InteriorZipFilePathKey, intZipFilePath);
+        }
+        if (!string.IsNullOrEmpty(extZipFilePath))
+        {
+            EditorPrefs.SetString(ExteriorZipFilePathKey, extZipFilePath);
+        }
+    }
     private void OnGUI()
     {
+        bool sizeLocked = SpriteManager.Instance.HasAssetsImported();
+
         GUILayout.Space(15);
         //Interior zip file selection
+        GUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Modern Interior Zip File:", intZipFilePath ?? "None");
+        if(!string.IsNullOrEmpty(intZipFilePath))
+        {
+            if(GUILayout.Button("X",GUILayout.Width(20)))
+            {
+                intZipFilePath = "";
+                EditorPrefs.SetString(InteriorZipFilePathKey, intZipFilePath);
+            }
+        }
+        GUILayout.EndHorizontal();
         if (GUILayout.Button("Select Modern Interior zip file")) 
         {            
             intZipFilePath = EditorUtility.OpenFilePanel("Select Modern Interior zip file", "", "zip");
@@ -38,7 +68,17 @@ public class CharacterImporterEditorWindow : EditorWindow
         DrawSeparator();
 
         //Exterior zip file selection
+        GUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Modern Exterior Zip File:", extZipFilePath ?? "None");
+        if(!string.IsNullOrEmpty(extZipFilePath))
+        {
+            if(GUILayout.Button("X",GUILayout.Width(20)))
+            {
+                extZipFilePath = "";
+                EditorPrefs.SetString(ExteriorZipFilePathKey, extZipFilePath);
+            }
+        }
+        GUILayout.EndHorizontal();
         if(GUILayout.Button(" Optional : Select Modern Exterior zip file "))
         {
             extZipFilePath = EditorUtility.OpenFilePanel("Select Modern Exterior zip file", "", "zip");
@@ -53,8 +93,8 @@ public class CharacterImporterEditorWindow : EditorWindow
             maxAssetsPerType = EditorGUILayout.IntField("Assets per bodyPart", maxAssetsPerType);
             maxAssetsPerType = Mathf.Max(1, maxAssetsPerType);  // Ensure it's always a positive number
         }
-        bool assetsImported = SpriteManager.Instance.HasAssetsImported();
-        EditorGUI.BeginDisabledGroup(assetsImported);       
+        
+        EditorGUI.BeginDisabledGroup(sizeLocked);       
 
         // Size selection
         EditorGUILayout.Space(10);
@@ -64,7 +104,7 @@ public class CharacterImporterEditorWindow : EditorWindow
         SpriteManager.Instance.SelectedSizeIndex = selectedSizeIndex;        
         EditorGUI.EndDisabledGroup();
 
-        if (intZipFilePath == "")
+        if (intZipFilePath == "" && extZipFilePath == "")
         {
             EditorGUI.BeginDisabledGroup(true);
         }
@@ -81,7 +121,7 @@ public class CharacterImporterEditorWindow : EditorWindow
 
             if(!string.IsNullOrEmpty(extZipFilePath) && FingHelper.ValidateExteriorZipFile(extZipFilePath))
             {            
-                CharacterImporter.UnzipExtSprites(extZipFilePath, validSizes[selectedSizeIndex], ref unzipedAssets, validBodyParts);
+                CharacterImporter.UnzipExtSprites(extZipFilePath, validSizes[selectedSizeIndex], ref unzipedAssets,enableMaxAssetsPerType,maxAssetsPerType, validBodyParts);
             }        
             AssetDatabase.Refresh();
             CharacterImporter.ProcessImportedAssets(resourcesFolderPath, unzipedAssets, spritesPerRowList, validSizes[selectedSizeIndex]);

@@ -63,8 +63,16 @@ namespace FingTools.Internal
             }
         }
 
-        public static void UnzipExtSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, List<string> validBodyParts)
+        public static void UnzipExtSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, bool enableMaxAssetsPerType, int maxAssetsPerType,List<string> validBodyParts)
         {
+            Dictionary<ActorPartType, int> processedAssetsPerType = new Dictionary<ActorPartType, int>()
+            {
+                { ActorPartType.Accessories, 0 },
+                { ActorPartType.Bodies, 0 },
+                { ActorPartType.Eyes, 0 },
+                { ActorPartType.Hairstyles, 0 },
+                { ActorPartType.Outfits, 0 }
+            };       
             ZipArchive archive = ZipFile.OpenRead(zipFilePath);
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
@@ -77,6 +85,12 @@ namespace FingTools.Internal
 
                 if (type == null)
                     continue;                   
+                
+                if (enableMaxAssetsPerType && processedAssetsPerType[type.Value] >= maxAssetsPerType)
+                {
+                    //Debug.Log($"Reached the limit for {type.Value}");
+                    continue;
+                }
 
                 string expectedPath = $"Modern_Exteriors_{spriteSize}x{spriteSize}/Character_Generator_Addons_{spriteSize}x{spriteSize}";
                 if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
@@ -86,6 +100,7 @@ namespace FingTools.Internal
                         Directory.CreateDirectory(outputPath);
 
                     entry.ExtractToFile($"{outputPath}/{entry.Name}", true);
+                    processedAssetsPerType[type.Value]++;
                     unzipedAssets++;
                 }
             }
