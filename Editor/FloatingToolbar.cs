@@ -160,13 +160,16 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
                 //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(mapName)) { level = 1, userData = mapPath });
             }
         }       
-        mapContents.Add(new GUIContent("==== Worlds ===="), "");
-        //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent("----- Worlds -----")) { level = 0 });
-        foreach (string worldPath in MapManager.Instance.existingWorlds)
+
+        if(MapManager.Instance.existingWorlds.Count > 0)
         {
-            string worldName = Path.GetFileNameWithoutExtension(worldPath);
-            mapContents.Add(new GUIContent(worldName), worldPath);            
-            //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(worldName)) { level = 1, userData = worldPath });
+            mapContents.Add(new GUIContent("==== Worlds ===="), "");
+            foreach (string worldPath in MapManager.Instance.existingWorlds)
+            {
+                string worldName = Path.GetFileNameWithoutExtension(worldPath);
+                mapContents.Add(new GUIContent(worldName), worldPath);            
+            }
+            
         }
         foreach (var mapContent in mapContents)
         {
