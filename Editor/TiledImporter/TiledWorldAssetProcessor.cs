@@ -24,7 +24,8 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
                 Debug.Log($"World asset deleted: {assetPath}");
                 MapManager.RefreshUniverse();
             }
-        }       
+        } 
+        
     }
 }
 }

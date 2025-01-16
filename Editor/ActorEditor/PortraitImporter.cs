@@ -6,12 +6,13 @@ using System.IO;
 using UnityEditor;
 
 namespace FingTools.Internal{
-    public enum PortraitPartType{Accessory,Eyes,Hairstyle,Skin}
+
     public static class PortraitImporter
     {
         private static readonly List<int>  spritesPerRowList = new List<int> {10,10,10};
         private static readonly List<string> validBodyParts = new () { "Accessory",  "Eyes", "Hairstyle", "Skin" };
         public const string resourcesPortraitFolderPath = "Assets/Resources/FingTools/PortraitSprites"; 
+        public const string portraitsFolderPath = "Assets/Resources/FingTools/Portraits";
         #if UNITY_EDITOR
         public static void UnzipUISprites(string zipFilePath, string spriteSize, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
@@ -92,6 +93,58 @@ namespace FingTools.Internal{
             }
             return importList;
         }        
+
+        public static void BuildPortraitFromActorSO(ref Actor_SO actor_SO)
+        {
+            if(actor_SO.portrait_SO == null)
+            {
+                Portrait_SO newPortrait =  ScriptableObject.CreateInstance<Portrait_SO>();
+                actor_SO.portrait_SO = newPortrait;            
+                string path = $"{portraitsFolderPath}/{actor_SO.name}.asset";
+                if(!Directory.Exists(portraitsFolderPath))
+                {
+                    Directory.CreateDirectory(portraitsFolderPath);
+                }
+                AssetDatabase.CreateAsset(newPortrait, path);
+                AssetDatabase.SaveAssets();
+            }
+            
+            //Here we should add the portrait parts here, we have the actor_SO as a source
+
+            
+
+           
+        }
+        public static void RenamePortrait(string newName,Actor_SO selectedActor)
+        {
+            string AssetPath = AssetDatabase.GetAssetPath(selectedActor.portrait_SO);
+            string error = AssetDatabase.RenameAsset(AssetPath, newName);
+            if (!string.IsNullOrEmpty(error))
+            {
+                Debug.LogError($"Failed to rename portrait asset: {error}");
+            }
+             else
+            {
+                selectedActor.name = newName; 
+            }
+            
+        }
+
+        [InitializeOnLoadMethod]
+        public static void CheckForMissingActors()
+        {
+            var portraits = Resources.LoadAll<Portrait_SO>("FingTools/Portraits");    
+            var actors = Resources.LoadAll<Actor_SO>("FingTools/Actors");    
+            foreach(var portrait in portraits)
+            {
+                bool hasCorrespondingActor = actors.Any(actor => actor.portrait_SO == portrait);
+                if (!hasCorrespondingActor)
+                {
+                    string assetPath = AssetDatabase.GetAssetPath(portrait);
+                    AssetDatabase.DeleteAsset(assetPath);
+                }
+            }
+        }
         #endif
 }
 }
