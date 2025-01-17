@@ -22,9 +22,7 @@ public class ActorPostProcessor : AssetPostprocessor
             {
             }
             else
-            {
-            
-            
+            {                        
             var path = Path.GetDirectoryName(assetPath);
             var fileName = Path.GetFileNameWithoutExtension(assetPath);
             var portraitsPath = "Assets/Resources/FingTools/Portraits/";

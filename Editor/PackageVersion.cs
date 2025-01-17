@@ -100,7 +100,15 @@ public static class PackageVersion
         Directory.CreateDirectory(targetPath);
         foreach(var folder in contentFolders)
         {
-            AssetDatabase.MoveAsset(folder,targetPath);
+            foreach(var asset in Directory.GetFiles(folder))
+            {
+                if(!Directory.Exists(targetPath+"/"+folder))
+                {
+                    Directory.CreateDirectory(targetPath+"/"+folder);
+                }
+                AssetDatabase.MoveAsset(asset,targetPath+"/"+folder);
+            }
+            
         }
     }
 
