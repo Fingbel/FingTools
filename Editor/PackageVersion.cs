@@ -117,25 +117,22 @@ public static class PackageVersion
         foreach(var folder in folders)
         {
             if(Path.GetDirectoryName(folder) == "CharacterParts") continue;
-            if(!Directory.Exists(targetPath+"/"+folder))
+            string targetFolderPath = Path.Combine(targetPath, Path.GetFileName(folder));
+            if (!AssetDatabase.IsValidFolder(targetFolderPath))
             {
-                Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
-            AssetDatabase.Refresh();
             string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
             foreach(var file in files)
             {
                 Debug.Log(file);
-                string error = AssetDatabase.MoveAsset(file, targetPath+"/"+folder.Split("\\").Last());
-                if(!string.IsNullOrEmpty(file))
+                string error = AssetDatabase.MoveAsset(file, Path.Combine(targetFolderPath, Path.GetFileName(file)));
+                if(!string.IsNullOrEmpty(error))
                 {
                     Debug.Log(error);
                 }
             }
-            
         }
-
-        
     }
 
     private static void CreateVersionFile(string version)
