@@ -132,8 +132,10 @@ public static class PackageVersion
         
         foreach(var oldFolder in oldFolders)
         {
-           DeleteEmptyFolders(sourcePath,oldFolder);
+           EditorApplication.delayCall += () =>DeleteEmptyFolders(sourcePath,oldFolder);
+           AssetDatabase.SaveAssets();
         }                
+        
     }
 
     private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
