@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Collections.Generic;
+using FingTools.Internal;
 
 [InitializeOnLoad]
 public static class PackageVersion
 {
     private const string VersionFilePath = "Assets/FingTools/Config/package_version.json";
     private const string CurrentVersion = "1.1.0";  // Update this for each release
-
+    private static List<string> oldFolders;
     static PackageVersion()
     {
         CheckForVersionUpdate();
@@ -25,6 +27,7 @@ public static class PackageVersion
         }
     }
 
+    [MenuItem("FingTools/Force Migration", false, 1)]
     private static void HandleFirstMigration()
     {
         Debug.LogWarning("No version file found. Assuming version 1.0.0. Running migration to 1.1.0");
@@ -63,8 +66,7 @@ public static class PackageVersion
 
     private static void RunMigration(string oldVersion, string newVersion)
     {
-        Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
-        //We need to :
+        oldFolders = new();
         Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
 
         // 1. Rename the Sprites folder to CharacterSprites
@@ -74,17 +76,16 @@ public static class PackageVersion
         MoveFolder("Assets/Resources/FingTools/ScriptableObjects", "Assets/Resources/FingTools/ScriptableObjects/CharacterParts");
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
-        MoveFolder("Assets/Resources/FingTools/SpriteLibrairies", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
-
+        MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
         AssetDatabase.Refresh();
-        Debug.Log("Migration completed successfully.");
+        
     }
-     private static void RenameFolder(string oldPath, string newPath)
+    private static void RenameFolder(string oldPath, string newPath)
     {
+        if(!Directory.Exists(oldPath)) return;
         if (AssetDatabase.IsValidFolder(oldPath))
         {
             AssetDatabase.MoveAsset(oldPath, newPath);
-            Debug.Log($"Renamed folder from {oldPath} to {newPath}");
         }
         else
         {
@@ -94,20 +95,68 @@ public static class PackageVersion
 
     private static void MoveFolder(string sourcePath, string targetPath)
     {
-        string parentPath = Path.GetDirectoryName(targetPath);
-        if (!AssetDatabase.IsValidFolder(parentPath))
+        List<string> folders = new();
+        if (!Directory.Exists(sourcePath))
         {
-            AssetDatabase.CreateFolder(parentPath, Path.GetFileName(targetPath));
-        }
+            Debug.LogWarning($"Source path does not exist: {sourcePath}");
+            return;
+        }            
+        string[] partFolders = Directory.GetDirectories(sourcePath);        
+        foreach (var folder in partFolders)
+        {
+            folder.Replace("\\","/");
 
-        if (AssetDatabase.IsValidFolder(sourcePath))
-        {
-            AssetDatabase.MoveAsset(sourcePath, targetPath);
-            Debug.Log($"Moved folder from {sourcePath} to {targetPath}");
+            oldFolders.Add(folder);
+            folders.Add(folder);            
         }
-        else
+        if (!Directory.Exists(targetPath))
         {
-            Debug.LogWarning($"Folder not found: {sourcePath}");
+            Directory.CreateDirectory(targetPath);
+        }      
+        EditorApplication.delayCall += ()=>{              
+        foreach(var folder in folders)
+        {
+            if (Path.GetDirectoryName(folder) == "CharacterParts") continue;
+            string targetFolderPath = Path.Combine(targetPath, Path.GetFileName(folder));
+            if (!AssetDatabase.IsValidFolder(targetFolderPath))
+            {
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
+            }
+            MoveFiles(folder, targetFolderPath);            
+        }                
+        EditorApplication.delayCall += () =>
+        {
+            foreach(var oldFolder in oldFolders)
+            {
+                DeleteEmptyFolders( oldFolder);                
+            }   
+            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
+            oldFolders.Clear();                        
+            CharacterImporterEditorWindow.LinkCharAssets();
+            AssetDatabase.Refresh();
+        };
+        };                            
+    }
+
+    private static void DeleteEmptyFolders(string folder)
+    {
+        if(Directory.Exists(folder))
+        {
+            Directory.Delete(folder, true);
+            File.Delete(folder + ".meta");
+        }         
+    }
+
+    private static void MoveFiles(string folder, string targetFolderPath)
+    {
+        string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
+        foreach (var file in files)
+        {
+            string error = AssetDatabase.MoveAsset(file, Path.Combine(targetFolderPath, Path.GetFileName(file)));
+            if (!string.IsNullOrEmpty(error))
+            {
+                Debug.Log(error);
+            }
         }
     }
 

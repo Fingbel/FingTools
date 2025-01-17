@@ -87,7 +87,7 @@ public class SpriteManager : ScriptableObject
     #if UNITY_EDITOR
     public void PopulateSpriteLists(string destinationPath)
     {
-        if(!Directory.Exists("Assets/Resources/FingTools/CharacterSprites")) return; //Early return as we don't have no directory
+        if(!Directory.Exists(destinationPath)) return; //Early return as we don't have no directory
         // Clear existing lists
         accessoryParts.Clear();
         bodyParts.Clear();
@@ -111,19 +111,28 @@ public class SpriteManager : ScriptableObject
                 // Load all sprites in the folder
                 Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/CharacterSprites/" + bodyPartName + "/" + texture.name);
 
+                //TODO : look for existing spritePartSo before creating one to prevent link break on reimport
                 // Create a SpritePart with the sprites
-                SpritePart_SO spritePart = CreateInstance<SpritePart_SO>();
-                spritePart.type = type;
-                spritePart.sprites = sprites;
-
-                // Save the SpritePart as an asset
-                string assetName = texture.name + ".asset";
-                string assetPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/CharacterParts/" + bodyPartName + "/", assetName);
-                if (!Directory.Exists(Path.GetDirectoryName(assetPath)))
+                SpritePart_SO spritePart;
+                var part = Resources.Load<SpritePart_SO>($"FingTools/ScriptableObjects/CharacterParts/{bodyPartName}/{texture.name}");
+                if(part != null)
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(assetPath));
+                    Debug.Log($"SpritePart {texture.name} found");
+                    spritePart = part;
                 }
-                AssetDatabase.CreateAsset(spritePart, assetPath);
+                else
+                {
+                    spritePart= CreateInstance<SpritePart_SO>();
+                    string assetName = texture.name + ".asset";
+                    string assetPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/CharacterParts/" + bodyPartName + "/", assetName);
+                    if (!Directory.Exists(Path.GetDirectoryName(assetPath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(assetPath));
+                    }
+                    AssetDatabase.CreateAsset(spritePart, assetPath);
+                }                
+                spritePart.type = type;
+                spritePart.sprites = sprites;                            
 
                 // Add the SpritePart to the appropriate list
                 switch (type)

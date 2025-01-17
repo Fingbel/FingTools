@@ -10,7 +10,7 @@ namespace FingTools.Internal
     public class SpriteLibraryBuilder : Editor
     {
         // Root folder where SpriteLibraries will be stored
-        private const string LibraryRootFolderName = "SpriteLibraries/CharacterParts";
+        private const string LibraryRootFolderName = "SpriteLibrairies/CharacterParts";
 
         public static void BuildAllSpriteLibraries()
         {
