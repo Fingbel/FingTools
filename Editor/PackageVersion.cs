@@ -75,7 +75,19 @@ public static class PackageVersion
         MoveFolder("Assets/Resources/FingTools/ScriptableObjects", "Assets/Resources/FingTools/ScriptableObjects/CharacterParts");
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
-        MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");                       
+        MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
+        AssetDatabase.Refresh();
+        
+        EditorApplication.delayCall += () =>
+        {
+            foreach(var oldFolder in oldFolders)
+            {
+                DeleteEmptyFolders( oldFolder);                
+            }   
+            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");
+        };
+        oldFolders.Clear();
+        Debug.Log("Migration completed successfully.");
     }
     private static void RenameFolder(string oldPath, string newPath)
     {
@@ -121,17 +133,8 @@ public static class PackageVersion
             MoveFiles(folder, targetFolderPath);
             AssetDatabase.Refresh();
         }        
-        EditorApplication.delayCall += () =>
-        {
-            foreach(var oldFolder in oldFolders)
-            {
-                DeleteEmptyFolders( oldFolder);                
-            }   
-            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");
-        };
-        oldFolders.Clear();
-        Debug.Log("Migration completed successfully.");
-        };                     
+        };             
+        
     }
 
     private static void DeleteEmptyFolders(string folder)
