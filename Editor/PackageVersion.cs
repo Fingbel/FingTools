@@ -96,21 +96,20 @@ public static class PackageVersion
 
     private static void MoveFolder(string sourcePath, string targetPath)
     {
-        var contentFolders = Directory.GetDirectories(sourcePath);
+        var partFolders = Directory.GetDirectories(sourcePath);
         Directory.CreateDirectory(targetPath);
-        foreach(var folder in contentFolders)
+        foreach(var folder in partFolders)
         {
-            foreach(var asset in Directory.GetFiles(folder))
-            {
-                
-                Debug.Log(folder);
+            Debug.Log(folder);
+            string[] assetFiles = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);            
+            foreach(var asset in assetFiles)
+            {            
                 if(!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);
                 }
-                AssetDatabase.MoveAsset(asset,folder);
-            }
-            
+                AssetDatabase.MoveAsset(asset,folder);               
+            }                                                       
         }
     }
 
