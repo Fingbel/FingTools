@@ -82,11 +82,9 @@ public static class PackageVersion
         {
             foreach(var oldFolder in oldFolders)
             {
-                DeleteEmptyFolders( oldFolder);
-                
+                DeleteEmptyFolders( oldFolder);                
             }   
-            DeleteSourceFolder("Assets/Resources/FingTools/ScriptableObjects");
-            DeleteSourceFolder("Assets/Resources/FingTools/SpriteLibraries");
+            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");
         };
         oldFolders.Clear();
         Debug.Log("Migration completed successfully.");
@@ -133,9 +131,9 @@ public static class PackageVersion
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
             MoveFiles(folder, targetFolderPath);
+            AssetDatabase.Refresh();
         }        
-        };             
-        
+        };                     
     }
 
     private static void DeleteEmptyFolders(string folder)
@@ -145,20 +143,6 @@ public static class PackageVersion
             Directory.Delete(folder, true);
             File.Delete(folder + ".meta");
         }         
-    }
-
-    private static void DeleteSourceFolder(string sourcePath)
-    {
-        if(Directory.Exists(sourcePath))
-        {
-            if (Directory.GetFiles(sourcePath, "*.asset").Length == 0)
-            {            
-                if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
-                {                    
-                    DeleteEmptyFolders(sourcePath);
-                }                                
-            }                            
-        }        
     }
 
     private static void MoveFiles(string folder, string targetFolderPath)
