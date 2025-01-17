@@ -127,12 +127,11 @@ public static class PackageVersion
         }
         };
         AssetDatabase.Refresh();
-        EditorApplication.delayCall += ()=>{
-            foreach(var oldFolder in oldFolders)
-            {
-                DeleteEmptyFolders(sourcePath, oldFolder);
-            }                
-        };
+        foreach(var oldFolder in oldFolders)
+        {
+            DeleteEmptyFolders(sourcePath, oldFolder);
+        }                
+        
     }
 
     private static void DeleteEmptyFolders(string sourcePath, string oldFolder)
