@@ -132,14 +132,13 @@ public static class PackageVersion
         
         foreach(var oldFolder in oldFolders)
         {
-            EditorApplication.delayCall += () =>{DeleteEmptyFolders(sourcePath,oldFolder);};
+           DeleteEmptyFolders(sourcePath,oldFolder);
         }                
     }
 
     private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
     {
         Debug.Log(oldFolder);
-        File.Delete(oldFolder+".meta");
         Directory.Delete(oldFolder);
         if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
         {            
