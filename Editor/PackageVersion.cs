@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
+using FingTools.Internal;
 
 [InitializeOnLoad]
 public static class PackageVersion
@@ -132,6 +133,7 @@ public static class PackageVersion
             DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
             oldFolders.Clear();            
             AssetDatabase.Refresh();
+            CharacterImporterEditorWindow.LinkCharAssets();
         };
         };                            
     }

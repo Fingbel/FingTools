@@ -172,36 +172,42 @@ public class CharacterImporterEditorWindow : EditorWindow
         EditorGUILayout.Space(10);
 
         if (GUILayout.Button("Import Assets"))
-        {
-            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
-            if (!string.IsNullOrEmpty(intZipFilePath) && FingHelper.ValidateInteriorZipFile(intZipFilePath))
-            {                           
-                CharacterImporter.UnzipIntSprites(intZipFilePath, validSizes[selectedSizeIndex], ref unzipedAssets, enableMaxAssetsPerType, maxAssetsPerType);            
-            }        
-
-            if(!string.IsNullOrEmpty(extZipFilePath) && FingHelper.ValidateExteriorZipFile(extZipFilePath))
-            {            
-                CharacterImporter.UnzipExtSprites(extZipFilePath, validSizes[selectedSizeIndex], ref unzipedAssets,enableMaxAssetsPerType,maxAssetsPerType);
-            }        
-
-            if(!string.IsNullOrEmpty(uiZipFilePath) && FingHelper.ValidateUIZipFile(uiZipFilePath))
             {
-                PortraitImporter.UnzipUISprites(uiZipFilePath,validSizes[selectedSizeIndex],enableMaxAssetsPerType,maxAssetsPerType);                
+                Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
+                if (!string.IsNullOrEmpty(intZipFilePath) && FingHelper.ValidateInteriorZipFile(intZipFilePath))
+                {
+                    CharacterImporter.UnzipIntSprites(intZipFilePath, validSizes[selectedSizeIndex], ref unzipedAssets, enableMaxAssetsPerType, maxAssetsPerType);
+                }
+
+                if (!string.IsNullOrEmpty(extZipFilePath) && FingHelper.ValidateExteriorZipFile(extZipFilePath))
+                {
+                    CharacterImporter.UnzipExtSprites(extZipFilePath, validSizes[selectedSizeIndex], ref unzipedAssets, enableMaxAssetsPerType, maxAssetsPerType);
+                }
+
+                if (!string.IsNullOrEmpty(uiZipFilePath) && FingHelper.ValidateUIZipFile(uiZipFilePath))
+                {
+                    PortraitImporter.UnzipUISprites(uiZipFilePath, validSizes[selectedSizeIndex], enableMaxAssetsPerType, maxAssetsPerType);
+                }
+                AssetDatabase.Refresh();
+                CharacterImporter.ProcessImportedAssets(validSizes[selectedSizeIndex]);
+                if (!string.IsNullOrEmpty(uiZipFilePath) && FingHelper.ValidateUIZipFile(uiZipFilePath))
+                {
+                    PortraitImporter.ProcessImportedAsset(validSizes[selectedSizeIndex]);
+                }
+                LinkCharAssets();
             }
-            AssetDatabase.Refresh();
-            CharacterImporter.ProcessImportedAssets(validSizes[selectedSizeIndex]);
-            if(!string.IsNullOrEmpty(uiZipFilePath) && FingHelper.ValidateUIZipFile(uiZipFilePath))
-            {
-                PortraitImporter.ProcessImportedAsset(validSizes[selectedSizeIndex]);
-            }            
+            EditorGUI.EndDisabledGroup();              
+    }
+
+        public static void LinkCharAssets()
+        {
             SpriteManager.Instance.PopulateSpriteLists(CharacterImporter.resourcesFolderPath);
             SpriteLibraryBuilder.BuildAllSpriteLibraries();
             Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
             AssetEnumGenerator.GenerateAssetEnum();
         }
-        EditorGUI.EndDisabledGroup();              
-    }
-    private void DrawSeparator()
+
+        private void DrawSeparator()
     {
         GUILayout.Space(5);
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
