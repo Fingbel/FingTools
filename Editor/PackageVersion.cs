@@ -76,18 +76,8 @@ public static class PackageVersion
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
         MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
-        
-        AssetDatabase.Refresh();
-        EditorApplication.delayCall += () =>
-        {
-            foreach(var oldFolder in oldFolders)
-            {
-                DeleteEmptyFolders( oldFolder);                
-            }   
-            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
-            oldFolders.Clear();
-            EditorUtility.DisplayDialog("Migration Complete", "The migration is now complete, if old folders are till present, unfocus/refocus on the Unity Editor", "OK");            
-        };
+
+        EditorApplication.QueuePlayerLoopUpdate();
     }
     private static void RenameFolder(string oldPath, string newPath)
     {
@@ -133,6 +123,16 @@ public static class PackageVersion
             }
             MoveFiles(folder, targetFolderPath);            
         }        
+        AssetDatabase.Refresh();
+        EditorApplication.delayCall += () =>
+        {
+            foreach(var oldFolder in oldFolders)
+            {
+                DeleteEmptyFolders( oldFolder);                
+            }   
+            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
+            oldFolders.Clear();            
+        };
         };                            
     }
 
