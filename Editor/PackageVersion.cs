@@ -145,6 +145,7 @@ public static class PackageVersion
                 Directory.Delete(sourcePath,true);
                 File.Delete(sourcePath+".meta");
             }            
+            return;
         }
         if(!oldFolder.Contains("SpriteLibraries"))
         {
