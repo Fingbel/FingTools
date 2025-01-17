@@ -125,12 +125,13 @@ public static class PackageVersion
             }
             MoveFiles(folder, targetFolderPath);
         }
-        };
+        
         AssetDatabase.Refresh();
         foreach(var oldFolder in oldFolders)
         {
             DeleteEmptyFolders(sourcePath, oldFolder);
-        }                
+        }   
+        };             
         
     }
 
