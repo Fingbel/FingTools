@@ -80,7 +80,7 @@ public static class PackageVersion
         AssetDatabase.Refresh();
         Debug.Log("Migration completed successfully.");
     }
-     private static void RenameFolder(string oldPath, string newPath)
+    private static void RenameFolder(string oldPath, string newPath)
     {
         if(!Directory.Exists(oldPath)) return;
         if (AssetDatabase.IsValidFolder(oldPath))
@@ -102,11 +102,13 @@ public static class PackageVersion
         {
             foreach(var asset in Directory.GetFiles(folder))
             {
-                if(!Directory.Exists(targetPath+"/"+folder))
+                var finalPath = Path.Combine(targetPath,folder);
+                Debug.Log(finalPath);
+                if(!Directory.Exists(finalPath))
                 {
-                    Directory.CreateDirectory(targetPath+"/"+folder);
+                    Directory.CreateDirectory(finalPath);
                 }
-                AssetDatabase.MoveAsset(asset,targetPath+"/"+folder);
+                AssetDatabase.MoveAsset(asset,finalPath);
             }
             
         }
