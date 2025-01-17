@@ -54,9 +54,9 @@ public class MapManager : ScriptableObject
                 if (_instance == null)
                 {
                     _instance = CreateInstance<MapManager>();
-                    if(!System.IO.Directory.Exists("Assets/Resources/FingTools"))
+                    if(!Directory.Exists("Assets/Resources/FingTools"))
                     {
-                        System.IO.Directory.CreateDirectory("Assets/Resources/FingTools");
+                        Directory.CreateDirectory("Assets/Resources/FingTools");
                     }
                     #if UNITY_EDITOR
                     AssetDatabase.CreateAsset(_instance, "Assets/Resources/FingTools/MapManager.asset");

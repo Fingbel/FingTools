@@ -439,8 +439,9 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
     }
 
     // Create the NPC asset
-    Actor_SO newNPC = ScriptableObject.CreateInstance<Actor_SO>();
+    Actor_SO newNPC = CreateInstance<Actor_SO>();
     newNPC.name = actorNameToUse;
+    PortraitImporter.BuildPortraitFromActorSO(ref newNPC);
 
     // Save the NPC asset
     AssetDatabase.CreateAsset(newNPC, actorAssetPath);
@@ -717,7 +718,7 @@ private SpritePart_SO DrawPartSelector(
             selectedActor.eyes = eyes;
             selectedActor.hairstyle = hairstyle;
             selectedActor.accessory = accessory;
-
+            PortraitImporter.BuildPortraitFromActorSO(ref selectedActor);
             OnActorUpdated?.Invoke(selectedActor);
             // Save the updated NPC_SO
             EditorUtility.SetDirty(selectedActor);
@@ -740,7 +741,8 @@ private SpritePart_SO DrawPartSelector(
             newNPC.outfit = outfit;
             newNPC.eyes = eyes;
             newNPC.hairstyle = hairstyle;
-            newNPC.accessory = accessory;
+            newNPC.accessory = accessory;            
+            PortraitImporter.BuildPortraitFromActorSO(ref newNPC);
 
             AssetDatabase.CreateAsset(newNPC, path);
             AssetDatabase.SaveAssets();
@@ -763,36 +765,34 @@ private SpritePart_SO DrawPartSelector(
         }
 
         private void RenameSelectedActorAsset(string newName)
-    {
-        if (selectedActor != null)
         {
-            // Get the current asset path
-            string oldAssetPath = AssetDatabase.GetAssetPath(selectedActor);
-            string newAssetName = actorName; // Name you want to use for the asset
-            string newAssetPath = Path.Combine(Path.GetDirectoryName(oldAssetPath), $"{newAssetName}.asset");
-
-            // Check if the asset needs to be renamed
-            if (oldAssetPath != newAssetPath)
+            if (selectedActor != null)
             {
-                // Rename the NPC asset
-                string error = AssetDatabase.RenameAsset(oldAssetPath, newAssetName);
-                if (!string.IsNullOrEmpty(error))
+                // Get the current asset path
+                string oldAssetPath = AssetDatabase.GetAssetPath(selectedActor);
+                string newAssetName = newName; // Name you want to use for the asset
+                string newAssetPath = Path.Combine(Path.GetDirectoryName(oldAssetPath), $"{newAssetName}.asset");
+
+                // Check if the asset needs to be renamed
+                if (oldAssetPath != newAssetPath)
                 {
-                    Debug.LogError($"Failed to rename NPC asset: {error}");
+                    // Rename the NPC asset
+                    string error = AssetDatabase.RenameAsset(oldAssetPath, newAssetName);
+                    if (!string.IsNullOrEmpty(error))
+                    {
+                        Debug.LogError($"Failed to rename NPC asset: {error}");
+                    }
+                    else
+                    {
+                        selectedActor.name = newAssetName; // Ensure the object's name matches the new asset name
+                        PortraitImporter.RenamePortrait(newAssetName,selectedActor);
+                    }
                 }
-                else
-                {
-                    selectedActor.name = newAssetName; // Ensure the object's name matches the new asset name
-                }
+                // Always call this to ensure changes are saved
+                AssetDatabase.SaveAssets();
             }
-
-            // Always call this to ensure changes are saved
-            AssetDatabase.SaveAssets();
-
-            // Check for any mismatch after renaming
-            string finalAssetPath = AssetDatabase.GetAssetPath(selectedActor);
         }
-    }
+       
 }
 }
 #endif

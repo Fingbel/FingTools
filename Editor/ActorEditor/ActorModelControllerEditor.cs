@@ -42,8 +42,8 @@ namespace FingTools.Internal
             ActorModelController baseController = (ActorModelController)target;            
             if(actorSO?.objectReferenceValue?.name == sO?.name)
             {
-                baseController.UpdatePreviewSprites(); //EDITOR
-                baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);//RUNTIME    
+                baseController.UpdatePreviewSprites(); //EDITOR               
+                baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);//RUNTIME                    
             }
         }
 
@@ -99,11 +99,15 @@ namespace FingTools.Internal
             if (availableActors.Length > 0)
             {
                 int newSelectedActorIndex = EditorGUILayout.Popup(selectedActorIndex, actorNames);
-                selectedActorIndex = newSelectedActorIndex;
-                actorSO.objectReferenceValue = availableActors[selectedActorIndex];                    
-                ActorModelController baseController = (ActorModelController)target;
-                EditorApplication.delayCall += () =>baseController.UpdatePreviewSprites();                    
-                baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);//RUNTIME    
+                if (newSelectedActorIndex >= 0 && newSelectedActorIndex < availableActors.Length)
+                {
+                    selectedActorIndex = newSelectedActorIndex;
+                    actorSO.objectReferenceValue = availableActors[selectedActorIndex];
+                    
+                    ActorModelController baseController = (ActorModelController)target;
+                    EditorApplication.delayCall += () => baseController.UpdatePreviewSprites();
+                    baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);
+                }
                 
             }
             else

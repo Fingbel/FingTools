@@ -123,7 +123,7 @@ public class FloatingToolbar : ToolbarOverlay
                 }              
                 if(EditorUtility.DisplayDialog("Actor Editor", "No character assets have been imported yet. Would you like to import assets now?", "Yes", "No"))
                 {
-                    CharacterImporterEditor.ShowWindow();
+                    CharacterImporterEditorWindow.ShowWindow();
                 };
             };
         }
