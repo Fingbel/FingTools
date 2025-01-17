@@ -19,6 +19,7 @@ namespace FingTools.Internal
             foreach (string guid in guids)
             {
                 string spritePartPath = AssetDatabase.GUIDToAssetPath(guid);
+                if(spritePartPath.StartsWith("Assets/copy")) continue;
                 SpritePart_SO spritePart = AssetDatabase.LoadAssetAtPath<SpritePart_SO>(spritePartPath);
 
                 if (spritePart != null)
