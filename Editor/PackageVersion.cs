@@ -97,17 +97,29 @@ public static class PackageVersion
 
     private static void MoveFolder(string sourcePath, string targetPath)
     {
+        if (!Directory.Exists(sourcePath))
+        {
+            Debug.LogWarning($"Source path does not exist: {sourcePath}");
+            return;
+        }
+
+        Directory.CreateDirectory(targetPath);
+
         string[] partFolders = Directory.GetDirectories(sourcePath);
-        Directory.CreateDirectory(targetPath);        
-        foreach(var folder in partFolders)
-        {        
-            if(!Directory.Exists(targetPath))
+        foreach (var folder in partFolders)
+        {
+            string folderName = Path.GetFileName(folder);
+            string targetFolderPath = Path.Combine(targetPath, folderName);
+
+            if (AssetDatabase.IsValidFolder(folder))
             {
-                Directory.CreateDirectory(targetPath);
+                AssetDatabase.MoveAsset(folder, targetFolderPath);
+                Debug.Log($"Moved folder from {folder} to {targetFolderPath}");
             }
-            Debug.Log(folder);
-            Debug.Log(targetPath);
-            AssetDatabase.MoveAsset(folder,targetPath);                                                                               
+            else
+            {
+                Debug.LogWarning($"Folder not found or invalid: {folder}");
+            }
         }
     }
 
