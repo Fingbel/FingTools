@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 [InitializeOnLoad]
 public static class PackageVersion
@@ -99,17 +100,18 @@ public static class PackageVersion
 
     private static void MoveFolder(string sourcePath, string targetPath)
     {
+        List<string> folders = new();
         if (!Directory.Exists(sourcePath))
         {
             Debug.LogWarning($"Source path does not exist: {sourcePath}");
             return;
-        }
-        if (!Directory.Exists(targetPath))
-        {
-            Directory.CreateDirectory(targetPath);
-        }        
+        }            
         string[] partFolders = Directory.GetDirectories(sourcePath);
         foreach (var folder in partFolders)
+        {
+            folders.Add(folder);            
+        }
+        foreach(var folder in folders)
         {
             if (AssetDatabase.IsValidFolder(folder))
             {
@@ -124,6 +126,11 @@ public static class PackageVersion
                 Debug.LogWarning($"Folder not found or invalid: {folder}");
             }
         }
+
+        if (!Directory.Exists(targetPath))
+        {
+            Directory.CreateDirectory(targetPath);
+        }    
     }
 
     private static void CreateVersionFile(string version)
