@@ -125,9 +125,10 @@ public static class PackageVersion
             EditorApplication.delayCall += () => 
             {
                 MoveFiles(folder, targetFolderPath); 
+                Directory.Delete(folder);
                 if(Directory.GetFiles(sourcePath,"*.*",SearchOption.AllDirectories).Length == 0)
                 {
-                    Directory.Delete(sourcePath);
+                    Directory.Delete(sourcePath,true);
                 }
             };
         }
@@ -145,7 +146,7 @@ public static class PackageVersion
                 Debug.Log(error);
             }
         }
-        Directory.Delete(folder);
+        
     }
 
     private static void CreateVersionFile(string version)
