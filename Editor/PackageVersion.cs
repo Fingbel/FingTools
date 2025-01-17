@@ -113,26 +113,25 @@ public static class PackageVersion
         if (!Directory.Exists(targetPath))
         {
             Directory.CreateDirectory(targetPath);
-        }    
-        Debug.Log(targetPath);
+        }            
         foreach(var folder in folders)
         {
             if(Path.GetDirectoryName(folder) == "CharacterParts") continue;
             if(!Directory.Exists(targetPath+"/"+folder))
             {
                 Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
-                string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
-                foreach(var file in files)
-                {
-                    AssetDatabase.MoveAsset(file, targetPath+"/"+folder.Split("\\").Last());
-                }
-                
-                
             }
-            else
+            string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
+            foreach(var file in files)
             {
-                Debug.LogWarning($"Folder not found or invalid: {folder}");
+                Debug.Log(file);
+                string error = AssetDatabase.MoveAsset(file, targetPath+"/"+folder.Split("\\").Last());
+                if(!string.IsNullOrEmpty(file))
+                {
+                    Debug.Log(error);
+                }
             }
+            
         }
 
         
