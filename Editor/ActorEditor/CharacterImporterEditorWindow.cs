@@ -190,7 +190,10 @@ public class CharacterImporterEditorWindow : EditorWindow
             }
             AssetDatabase.Refresh();
             CharacterImporter.ProcessImportedAssets(validSizes[selectedSizeIndex]);
-            PortraitImporter.ProcessImportedAsset(validSizes[selectedSizeIndex]);
+            if(!string.IsNullOrEmpty(uiZipFilePath) && FingHelper.ValidateUIZipFile(uiZipFilePath))
+            {
+                PortraitImporter.ProcessImportedAsset(validSizes[selectedSizeIndex]);
+            }            
             SpriteManager.Instance.PopulateSpriteLists(CharacterImporter.resourcesFolderPath);
             SpriteLibraryBuilder.BuildAllSpriteLibraries();
             Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
