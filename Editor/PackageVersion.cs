@@ -139,12 +139,13 @@ public static class PackageVersion
     private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
     {
         Debug.Log(oldFolder);
+        File.Delete(oldFolder+".meta");
         Directory.Delete(oldFolder);
         if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
         {            
             if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
             {
-                Directory.Delete(sourcePath);
+                Directory.Delete(sourcePath,true);
                 File.Delete(sourcePath+".meta");
             }            
         }
