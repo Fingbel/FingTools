@@ -102,13 +102,13 @@ public static class PackageVersion
         {
             foreach(var asset in Directory.GetFiles(folder))
             {
-                var finalPath = Path.Combine(targetPath,folder);
-                Debug.Log(finalPath);
-                if(!Directory.Exists(finalPath))
+                
+                Debug.Log(folder);
+                if(!Directory.Exists(folder))
                 {
-                    Directory.CreateDirectory(finalPath);
+                    Directory.CreateDirectory(folder);
                 }
-                AssetDatabase.MoveAsset(asset,finalPath);
+                AssetDatabase.MoveAsset(asset,folder);
             }
             
         }
