@@ -15,7 +15,7 @@ public class ActorPostProcessor : AssetPostprocessor
             if(path == "Assets\\Resources\\FingTools\\Actors")
             {
                 var portraitPath = Path.Combine(portraitsPath,fileName+".asset");
-                bool isDeleted = (AssetDatabase.DeleteAsset(portraitPath));                
+                bool isDeleted = AssetDatabase.DeleteAsset(portraitPath);                
                 if(!isDeleted)
                 {
                     Debug.LogError($"We failed to delete a portrait named :{fileName}, from {path}");
