@@ -101,12 +101,13 @@ public static class PackageVersion
         Directory.CreateDirectory(targetPath);        
         foreach(var folder in partFolders)
         {        
-            string finalPath = targetPath;
-            if(!Directory.Exists(finalPath))
+            if(!Directory.Exists(targetPath))
             {
-                Directory.CreateDirectory(finalPath);
+                Directory.CreateDirectory(targetPath);
             }
-            AssetDatabase.MoveAsset(folder,finalPath);                                                                               
+            Debug.Log(folder);
+            Debug.Log(targetPath);
+            AssetDatabase.MoveAsset(folder,targetPath);                                                                               
         }
     }
 
