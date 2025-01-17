@@ -76,7 +76,7 @@ public static class PackageVersion
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
         MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
-
+        AssetDatabase.Refresh();
         
     }
     private static void RenameFolder(string oldPath, string newPath)
@@ -122,9 +122,7 @@ public static class PackageVersion
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
             MoveFiles(folder, targetFolderPath);            
-        }        
-        AssetDatabase.Refresh();
-        EditorApplication.QueuePlayerLoopUpdate();
+        }                
         EditorApplication.delayCall += () =>
         {
             foreach(var oldFolder in oldFolders)
@@ -133,8 +131,8 @@ public static class PackageVersion
             }   
             DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
             oldFolders.Clear();            
+            AssetDatabase.Refresh();
         };
-        EditorApplication.QueuePlayerLoopUpdate();
         };                            
     }
 
