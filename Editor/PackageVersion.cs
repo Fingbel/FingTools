@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Linq;
 
 [InitializeOnLoad]
 public static class PackageVersion
@@ -100,15 +101,15 @@ public static class PackageVersion
         Directory.CreateDirectory(targetPath);
         foreach(var folder in partFolders)
         {
-            Debug.Log(folder);
+            Debug.Log(targetPath+"/"+folder.Split("\\").Last());
             string[] assetFiles = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);            
             foreach(var asset in assetFiles)
             {            
-                if(!Directory.Exists(folder))
+                if(!Directory.Exists(targetPath+"/"+folder.Split("\\").Last()))
                 {
-                    Directory.CreateDirectory(folder);
+                    Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
                 }
-                AssetDatabase.MoveAsset(asset,folder);               
+                AssetDatabase.MoveAsset(asset,targetPath+"/"+folder.Split("\\").Last());               
             }                                                       
         }
     }
