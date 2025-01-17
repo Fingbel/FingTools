@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using FingTools.Internal;
 using UnityEditor;
@@ -9,6 +10,21 @@ public class ActorPostProcessor : AssetPostprocessor
     {
         foreach (string assetPath in deletedAssets)
         {
+            FileInfo fi = null;
+            try
+            {
+            fi = new System.IO.FileInfo(assetPath);
+            }
+            catch (ArgumentException) { }
+            catch (PathTooLongException) { }
+            catch (NotSupportedException) { }
+            if (ReferenceEquals(fi, null))
+            {
+            }
+            else
+            {
+            
+            
             var path = Path.GetDirectoryName(assetPath);
             var fileName = Path.GetFileNameWithoutExtension(assetPath);
             var portraitsPath = "Assets/Resources/FingTools/Portraits/";
@@ -20,6 +36,7 @@ public class ActorPostProcessor : AssetPostprocessor
                 {
                     Debug.LogError($"We failed to delete a portrait named :{fileName}, from {path}");
                 }
+            }
             }
         }
 

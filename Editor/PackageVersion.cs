@@ -25,6 +25,7 @@ public static class PackageVersion
         }
     }
 
+    [MenuItem("FingTools/Force Migration", false, 1)]
     private static void HandleFirstMigration()
     {
         Debug.LogWarning("No version file found. Assuming version 1.0.0. Running migration to 1.1.0");
@@ -74,13 +75,14 @@ public static class PackageVersion
         MoveFolder("Assets/Resources/FingTools/ScriptableObjects", "Assets/Resources/FingTools/ScriptableObjects/CharacterParts");
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
-        MoveFolder("Assets/Resources/FingTools/SpriteLibrairies", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
+        MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
 
         AssetDatabase.Refresh();
         Debug.Log("Migration completed successfully.");
     }
      private static void RenameFolder(string oldPath, string newPath)
     {
+        if(!Directory.Exists(oldPath)) return;
         if (AssetDatabase.IsValidFolder(oldPath))
         {
             AssetDatabase.MoveAsset(oldPath, newPath);
@@ -94,20 +96,11 @@ public static class PackageVersion
 
     private static void MoveFolder(string sourcePath, string targetPath)
     {
-        string parentPath = Path.GetDirectoryName(targetPath);
-        if (!AssetDatabase.IsValidFolder(parentPath))
+        var contentFolders = Directory.GetDirectories(sourcePath);
+        Directory.CreateDirectory(targetPath);
+        foreach(var folder in contentFolders)
         {
-            AssetDatabase.CreateFolder(parentPath, Path.GetFileName(targetPath));
-        }
-
-        if (AssetDatabase.IsValidFolder(sourcePath))
-        {
-            AssetDatabase.MoveAsset(sourcePath, targetPath);
-            Debug.Log($"Moved folder from {sourcePath} to {targetPath}");
-        }
-        else
-        {
-            Debug.LogWarning($"Folder not found: {sourcePath}");
+            AssetDatabase.MoveAsset(folder,targetPath);
         }
     }
 
