@@ -119,7 +119,7 @@ public static class PackageVersion
         {
             Debug.Log(folder);
             Debug.Log(targetPath);
-            if (AssetDatabase.IsValidFolder(folder))
+            if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath))
             {
                 string error = AssetDatabase.MoveAsset(folder, targetPath);
                 if(string.IsNullOrEmpty(error))
