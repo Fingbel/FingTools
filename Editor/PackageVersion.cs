@@ -116,21 +116,26 @@ public static class PackageVersion
         }            
         foreach(var folder in folders)
         {
-            if(Path.GetDirectoryName(folder) == "CharacterParts") continue;
+            if (Path.GetDirectoryName(folder) == "CharacterParts") continue;
             string targetFolderPath = Path.Combine(targetPath, Path.GetFileName(folder));
             if (!AssetDatabase.IsValidFolder(targetFolderPath))
             {
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
-            string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
-            foreach(var file in files)
+            EditorApplication.delayCall += () =>MoveFiles(folder, targetFolderPath);
+        }
+    }
+
+    private static void MoveFiles(string folder, string targetFolderPath)
+    {
+        string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
+        foreach (var file in files)
+        {
+            Debug.Log(file);
+            string error = AssetDatabase.MoveAsset(file, Path.Combine(targetFolderPath, Path.GetFileName(file)));
+            if (!string.IsNullOrEmpty(error))
             {
-                Debug.Log(file);
-                string error = AssetDatabase.MoveAsset(file, Path.Combine(targetFolderPath, Path.GetFileName(file)));
-                if(!string.IsNullOrEmpty(error))
-                {
-                    Debug.Log(error);
-                }
+                Debug.Log(error);
             }
         }
     }
