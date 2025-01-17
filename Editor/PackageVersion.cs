@@ -142,17 +142,16 @@ public static class PackageVersion
         {
             Directory.Delete(oldFolder,true);
         }
-        if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
-        {            
-            if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
-            {
-                if(Directory.Exists(sourcePath))
-                {
+        if(Directory.Exists(sourcePath))
+        {
+            if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
+            {            
+                if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
+                {                    
                     Directory.Delete(sourcePath,true);
                     File.Delete(sourcePath+".meta");
                 }                                
-            }            
-            return;
+            }                            
         }
         
         
