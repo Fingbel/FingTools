@@ -65,6 +65,7 @@ public static class PackageVersion
 
     private static void RunMigration(string oldVersion, string newVersion)
     {
+        AssetDatabase.StartAssetEditing();
         Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
         //We need to :
         Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
@@ -77,7 +78,8 @@ public static class PackageVersion
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
         MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts/");
-
+        AssetDatabase.StopAssetEditing();
+        AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("Migration completed successfully.");
     }
@@ -108,6 +110,8 @@ public static class PackageVersion
         string[] partFolders = Directory.GetDirectories(sourcePath);
         foreach (var folder in partFolders)
         {
+            if(folder == "Assets/Resources/FingTools/ScriptableObjects\\CharacterParts")continue;
+
             string folderName = Path.GetFileName(folder);
             string targetFolderPath = Path.Combine(targetPath, folderName);
 
