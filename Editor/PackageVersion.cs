@@ -129,10 +129,10 @@ public static class PackageVersion
         {
             DeleteEmptyFolders( oldFolder);                
         }   
-        DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");
-        };
+        DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
         oldFolders.Clear();
         Debug.Log("Migration completed successfully.");   
+        };
         
     }
 
