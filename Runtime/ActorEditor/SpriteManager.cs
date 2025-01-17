@@ -114,7 +114,7 @@ public class SpriteManager : ScriptableObject
                 //TODO : look for existing spritePartSo before creating one to prevent link break on reimport
                 // Create a SpritePart with the sprites
                 SpritePart_SO spritePart;
-                var part = Resources.Load<SpritePart_SO>($"FingTools/ScriptableObjects/{type}/{texture.name}");
+                var part = Resources.Load<SpritePart_SO>($"FingTools/ScriptableObjects/CharacterParts/{bodyPartName}/{texture.name}");
                 if(part != null)
                 {
                     Debug.Log($"SpritePart {texture.name} found");
