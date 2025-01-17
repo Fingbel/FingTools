@@ -104,7 +104,7 @@ public static class PackageVersion
             Debug.LogWarning($"Source path does not exist: {sourcePath}");
             return;
         }
-
+        Directory.CreateDirectory(targetPath);
         string[] partFolders = Directory.GetDirectories(sourcePath);
         foreach (var folder in partFolders)
         {
