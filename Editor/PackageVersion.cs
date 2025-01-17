@@ -118,7 +118,10 @@ public static class PackageVersion
         foreach(var folder in folders)
         {
             if(Path.GetDirectoryName(folder) == "CharacterParts") continue;
-            Debug.Log(folder);
+            if(!Directory.Exists(targetPath+"/"+folder))
+            {
+                Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
+            }
             
             if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath))
             {
