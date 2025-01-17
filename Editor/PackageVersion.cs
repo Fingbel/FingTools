@@ -68,9 +68,7 @@ public static class PackageVersion
     {
         AssetDatabase.StartAssetEditing();
         Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
-        //We need to :
-        Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
-
+        
         // 1. Rename the Sprites folder to CharacterSprites
         RenameFolder("Assets/Resources/FingTools/Sprites", "Assets/Resources/FingTools/CharacterSprites");
 
@@ -109,6 +107,7 @@ public static class PackageVersion
         string[] partFolders = Directory.GetDirectories(sourcePath);
         foreach (var folder in partFolders)
         {
+            folder.Replace("\\","/");
             folders.Add(folder);            
         }
         if (!Directory.Exists(targetPath))
