@@ -114,11 +114,12 @@ public static class PackageVersion
         {
             Directory.CreateDirectory(targetPath);
         }    
+        Debug.Log(targetPath);
         foreach(var folder in folders)
         {
             if(Path.GetDirectoryName(folder) == "CharacterParts") continue;
             Debug.Log(folder);
-            Debug.Log(targetPath);
+            
             if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath))
             {
                 string error = AssetDatabase.MoveAsset(folder, targetPath);
