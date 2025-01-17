@@ -78,16 +78,7 @@ public static class PackageVersion
         MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
         AssetDatabase.Refresh();
         
-        EditorApplication.delayCall += () =>
-        {
-            foreach(var oldFolder in oldFolders)
-            {
-                DeleteEmptyFolders( oldFolder);                
-            }   
-            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");
-        };
-        oldFolders.Clear();
-        Debug.Log("Migration completed successfully.");
+        
     }
     private static void RenameFolder(string oldPath, string newPath)
     {
@@ -114,7 +105,7 @@ public static class PackageVersion
         foreach (var folder in partFolders)
         {
             folder.Replace("\\","/");
-            
+
             oldFolders.Add(folder);
             folders.Add(folder);            
         }
@@ -133,8 +124,15 @@ public static class PackageVersion
             }
             MoveFiles(folder, targetFolderPath);
             AssetDatabase.Refresh();
-        }        
-        };             
+        }                                
+        foreach(var oldFolder in oldFolders)
+        {
+            DeleteEmptyFolders( oldFolder);                
+        }   
+        DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");
+        };
+        oldFolders.Clear();
+        Debug.Log("Migration completed successfully.");   
         
     }
 
