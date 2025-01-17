@@ -113,7 +113,7 @@ public static class PackageVersion
 
             if (AssetDatabase.IsValidFolder(folder))
             {
-                AssetDatabase.MoveAsset(folder, targetFolderPath);
+                AssetDatabase.MoveAsset(folder, targetPath);
 
                 string[] files = Directory.GetFiles(folder);
                 foreach (var file in files)
