@@ -113,9 +113,9 @@ public static class PackageVersion
         string[] partFolders = Directory.GetDirectories(sourcePath);        
         foreach (var folder in partFolders)
         {
-            Debug.Log(folder);
-            oldFolders.Add(folder);
             folder.Replace("\\","/");
+            
+            oldFolders.Add(folder);
             folders.Add(folder);            
         }
         if (!Directory.Exists(targetPath))
