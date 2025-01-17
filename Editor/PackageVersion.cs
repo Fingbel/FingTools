@@ -123,9 +123,9 @@ public static class PackageVersion
                 Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
             }
             
-            if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath))
+            if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath+"/"+folder.Split("\\").Last()))
             {
-                string error = AssetDatabase.MoveAsset(folder, targetPath);
+                string error = AssetDatabase.MoveAsset(folder, targetPath+"/"+folder.Split("\\").Last());
                 if(string.IsNullOrEmpty(error))
                 {
                     Debug.Log(error);
