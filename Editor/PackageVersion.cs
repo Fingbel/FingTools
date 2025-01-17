@@ -138,19 +138,26 @@ public static class PackageVersion
 
     private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
     {
+        if(Directory.Exists(oldFolder))
+        {
+            Directory.Delete(oldFolder,true);
+        }
         if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
         {            
             if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
             {
-                Directory.Delete(sourcePath,true);
-                File.Delete(sourcePath+".meta");
+                if(Directory.Exists(sourcePath))
+                {
+                    Directory.Delete(sourcePath,true);
+                    File.Delete(sourcePath+".meta");
+                }                                
             }            
             return;
         }
-        if(!oldFolder.Contains("SpriteLibraries"))
-        {
-            Directory.Delete(oldFolder,true);
-        }
+        
+        
+            
+        
         
     }
 
