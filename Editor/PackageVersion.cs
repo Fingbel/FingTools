@@ -124,6 +124,7 @@ public static class PackageVersion
             MoveFiles(folder, targetFolderPath);            
         }        
         AssetDatabase.Refresh();
+        EditorApplication.QueuePlayerLoopUpdate();
         EditorApplication.delayCall += () =>
         {
             foreach(var oldFolder in oldFolders)
