@@ -116,6 +116,7 @@ public static class PackageVersion
         }    
         foreach(var folder in folders)
         {
+            if(Path.GetDirectoryName(folder) == "CharacterParts") continue;
             Debug.Log(folder);
             Debug.Log(targetPath);
             if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath))
