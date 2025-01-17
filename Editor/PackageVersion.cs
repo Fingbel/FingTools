@@ -141,6 +141,7 @@ public static class PackageVersion
         if(Directory.Exists(oldFolder))
         {
             Directory.Delete(oldFolder,true);
+            File.Delete(oldFolder+".meta");
         }
         if(Directory.Exists(sourcePath))
         {
