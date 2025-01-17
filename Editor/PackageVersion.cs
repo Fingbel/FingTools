@@ -104,25 +104,20 @@ public static class PackageVersion
             Debug.LogWarning($"Source path does not exist: {sourcePath}");
             return;
         }
-        Directory.CreateDirectory(targetPath);
+        if (!Directory.Exists(targetPath))
+        {
+            Directory.CreateDirectory(targetPath);
+        }        
         string[] partFolders = Directory.GetDirectories(sourcePath);
         foreach (var folder in partFolders)
         {
-            string folderName = Path.GetFileName(folder);
-            string targetFolderPath = Path.Combine(targetPath, folderName);
-
             if (AssetDatabase.IsValidFolder(folder))
             {
-                AssetDatabase.MoveAsset(folder, targetPath);
-
-                // string[] files = Directory.GetFiles(folder);
-                // foreach (var file in files)
-                // {
-                //     string fileName = Path.GetFileName(file);
-                //     string targetFilePath = Path.Combine(targetFolderPath, fileName);
-                //     AssetDatabase.MoveAsset(file, targetFilePath);
-                // }
-
+                string error = AssetDatabase.MoveAsset(folder, targetPath);
+                if(string.IsNullOrEmpty(error))
+                {
+                    Debug.Log(error);
+                }
             }
             else
             {
