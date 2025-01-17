@@ -122,7 +122,7 @@ public static class PackageVersion
             {
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
-            EditorApplication.delayCall += () =>MoveFiles(folder, targetFolderPath);
+            EditorApplication.delayCall += () => MoveFiles(folder, targetFolderPath);
         }
     }
 
@@ -138,6 +138,7 @@ public static class PackageVersion
                 Debug.Log(error);
             }
         }
+        Directory.Delete(folder);
     }
 
     private static void CreateVersionFile(string version)
