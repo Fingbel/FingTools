@@ -117,6 +117,8 @@ public static class PackageVersion
         }    
         foreach(var folder in folders)
         {
+            Debug.Log(folder);
+            Debug.Log(targetPath);
             if (AssetDatabase.IsValidFolder(folder))
             {
                 string error = AssetDatabase.MoveAsset(folder, targetPath);
