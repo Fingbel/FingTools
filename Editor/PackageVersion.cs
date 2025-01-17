@@ -133,7 +133,7 @@ public static class PackageVersion
     private static void DeleteEmptyFolders(string sourcePath, string folder)
     {
         Directory.Delete(folder);
-        Debug.Log(Directory.GetFiles(sourcePath).Length);
+        Debug.Log(Directory.GetFiles(sourcePath,"*.asset").Length);
         if (Directory.GetFiles(sourcePath).Length == 0)
         {            
             Directory.Delete(sourcePath, true);
