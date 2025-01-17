@@ -129,18 +129,21 @@ public static class PackageVersion
                 MoveFiles(folder, targetFolderPath);                
             };
         }
-        EditorApplication.delayCall += () =>{
-            foreach(var oldFolder in oldFolders)
-            {
-                DeleteEmptyFolders(sourcePath,oldFolder);
-            }
-        };
         
+        foreach(var oldFolder in oldFolders)
+        {
+            EditorApplication.delayCall += () =>{DeleteEmptyFolders(sourcePath,oldFolder);};
+        }                
     }
 
     private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
     {
-        Directory.Delete(oldFolder);        
+        Directory.Delete(oldFolder);
+        if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
+        {            
+            if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries");
+            Directory.Delete(sourcePath, true);
+        }
     }
 
     private static void MoveFiles(string folder, string targetFolderPath)
