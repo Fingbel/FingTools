@@ -115,13 +115,13 @@ public static class PackageVersion
             {
                 AssetDatabase.MoveAsset(folder, targetPath);
 
-                string[] files = Directory.GetFiles(folder);
-                foreach (var file in files)
-                {
-                    string fileName = Path.GetFileName(file);
-                    string targetFilePath = Path.Combine(targetFolderPath, fileName);
-                    AssetDatabase.MoveAsset(file, targetFilePath);
-                }
+                // string[] files = Directory.GetFiles(folder);
+                // foreach (var file in files)
+                // {
+                //     string fileName = Path.GetFileName(file);
+                //     string targetFilePath = Path.Combine(targetFolderPath, fileName);
+                //     AssetDatabase.MoveAsset(file, targetFilePath);
+                // }
 
             }
             else
