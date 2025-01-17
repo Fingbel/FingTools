@@ -65,8 +65,9 @@ public static class PackageVersion
 
     private static void RunMigration(string oldVersion, string newVersion)
     {
+        oldFolders = new();
         Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
-        
+
         // 1. Rename the Sprites folder to CharacterSprites
         RenameFolder("Assets/Resources/FingTools/Sprites", "Assets/Resources/FingTools/CharacterSprites");
 
@@ -87,7 +88,7 @@ public static class PackageVersion
             DeleteSourceFolder("Assets/Resources/FingTools/ScriptableObjects");
             DeleteSourceFolder("Assets/Resources/FingTools/SpriteLibraries");
         };
-        
+        oldFolders.Clear();
         Debug.Log("Migration completed successfully.");
     }
     private static void RenameFolder(string oldPath, string newPath)
@@ -111,8 +112,7 @@ public static class PackageVersion
             Debug.LogWarning($"Source path does not exist: {sourcePath}");
             return;
         }            
-        string[] partFolders = Directory.GetDirectories(sourcePath);
-        List<string> oldFolders = new();
+        string[] partFolders = Directory.GetDirectories(sourcePath);        
         foreach (var folder in partFolders)
         {
             oldFolders.Add(folder);
@@ -138,12 +138,12 @@ public static class PackageVersion
         
     }
 
-    private static void DeleteEmptyFolders(string oldFolder)
+    private static void DeleteEmptyFolders(string folder)
     {
-        if(Directory.Exists(oldFolder))
+        if(Directory.Exists(folder))
         {
-            Directory.Delete(oldFolder, true);
-            File.Delete(oldFolder + ".meta");
+            Directory.Delete(folder, true);
+            File.Delete(folder + ".meta");
         }         
     }
 
@@ -155,8 +155,7 @@ public static class PackageVersion
             {            
                 if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
                 {                    
-                    Directory.Delete(sourcePath, true);
-                    File.Delete(sourcePath + ".meta");
+                    DeleteEmptyFolders(sourcePath);
                 }                                
             }                            
         }        
