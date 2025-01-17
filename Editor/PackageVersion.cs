@@ -113,7 +113,8 @@ public static class PackageVersion
         if (!Directory.Exists(targetPath))
         {
             Directory.CreateDirectory(targetPath);
-        }                    
+        }      
+        EditorApplication.delayCall += ()=>{              
         foreach(var folder in folders)
         {
             if (Path.GetDirectoryName(folder) == "CharacterParts") continue;
@@ -124,7 +125,7 @@ public static class PackageVersion
             }
             MoveFiles(folder, targetFolderPath);
         }
-        
+        };
         AssetDatabase.Refresh();
         EditorApplication.delayCall += ()=>{
             foreach(var oldFolder in oldFolders)
