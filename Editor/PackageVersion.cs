@@ -121,6 +121,7 @@ public static class PackageVersion
             {
                 Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
             }
+            AssetDatabase.Refresh();
             string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
             foreach(var file in files)
             {
