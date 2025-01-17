@@ -14,8 +14,9 @@ namespace FingTools.Internal
             Dictionary<ActorPartType,List<string>> assets = new();
 
             foreach (var guid in guids)
-            {
+            {                
                 string path = AssetDatabase.GUIDToAssetPath(guid);
+                if(path.StartsWith("Assets/copy")) continue;
                 SpritePart_SO spritePart = AssetDatabase.LoadAssetAtPath<SpritePart_SO>(path);
 
                 if(!assets.ContainsKey(spritePart.type))
