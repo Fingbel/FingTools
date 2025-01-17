@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -8,6 +9,7 @@ namespace FingTools.Internal{
         public SpritePart_SO outfit;
         public SpritePart_SO eyes;
         public SpritePart_SO hairstyle;
-        public SpritePart_SO accessory;        
+        public SpritePart_SO accessory;   
+             
     }
 }

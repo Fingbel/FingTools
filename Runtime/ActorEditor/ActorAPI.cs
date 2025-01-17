@@ -21,10 +21,11 @@ namespace FingTools{
 
     public class ActorAPI : MonoBehaviour
     {
-        private ActorModelController modelController;
+        public ActorModelController modelController;
+        private void Awake() 
+        {
+            modelController = GetComponent<ActorModelController>();  
 
-    private void Awake() {
-            modelController = GetComponent<ActorModelController>();
         }
 
         /// <summary>

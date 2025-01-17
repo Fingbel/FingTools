@@ -13,7 +13,7 @@ namespace FingTools.Internal
         private string[] actorNames;
         private int selectedActorIndex;
         private Vector2 scrollPosition;
-
+        
         private void OnEnable()
         {
             actorSO = serializedObject.FindProperty("actor_SO");
@@ -34,7 +34,7 @@ namespace FingTools.Internal
 
             // Subscribe to the update event
             EditorApplication.update += OnEditorUpdate;
-            ActorEditorWindow.OnActorUpdated += Redraw;
+            ActorEditorWindow.OnActorUpdated += Redraw;       
         }
 
         private void Redraw(Actor_SO sO)
@@ -42,7 +42,8 @@ namespace FingTools.Internal
             ActorModelController baseController = (ActorModelController)target;            
             if(actorSO?.objectReferenceValue?.name == sO?.name)
             {
-                baseController.SetPreviewSprites();
+                baseController.UpdatePreviewSprites(); //EDITOR
+                baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);//RUNTIME    
             }
         }
 
@@ -98,20 +99,12 @@ namespace FingTools.Internal
             if (availableActors.Length > 0)
             {
                 int newSelectedActorIndex = EditorGUILayout.Popup(selectedActorIndex, actorNames);
-
-                if (newSelectedActorIndex != selectedActorIndex)
-                {
-                    selectedActorIndex = newSelectedActorIndex;
-                    actorSO.objectReferenceValue = availableActors[selectedActorIndex];
-
-                    // Safely update preview sprites
-                    EditorApplication.delayCall += () =>
-                    {
-                        ActorModelController baseController = (ActorModelController)target;
-                        baseController.SetPreviewSprites(); //EDITOR
-                        baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);//RUNTIME
-                    };
-                }
+                selectedActorIndex = newSelectedActorIndex;
+                actorSO.objectReferenceValue = availableActors[selectedActorIndex];                    
+                ActorModelController baseController = (ActorModelController)target;
+                EditorApplication.delayCall += () =>baseController.UpdatePreviewSprites();                    
+                baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);//RUNTIME    
+                
             }
             else
             {

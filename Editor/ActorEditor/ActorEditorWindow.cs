@@ -46,7 +46,7 @@ public class ActorEditorWindow : EditorWindow
     string actorsFolderPath = "Assets/Resources/FingTools/Actors";
     private Vector2 scrollPosition = Vector2.zero;
 
-    [MenuItem("FingTools/Actor Editor")]
+    [MenuItem("FingTools/Actor Editor", false, 1)]
     public static void ShowWindow()
     {
         ActorEditorWindow window = GetWindow<ActorEditorWindow>();
@@ -79,7 +79,8 @@ public class ActorEditorWindow : EditorWindow
     {
         if(Directory.Exists("Assets/Resources/FingTools"))
         {
-            if(Resources.Load<SpriteManager>("FingTools/SpriteManager").HasAssetsImported() == true)
+            var manager = Resources.Load<SpriteManager>("FingTools/SpriteManager");
+            if(manager?.HasAssetsImported() == true)
             {
                 return true;
             }
@@ -718,12 +719,10 @@ private SpritePart_SO DrawPartSelector(
             selectedActor.accessory = accessory;
 
             OnActorUpdated?.Invoke(selectedActor);
-            
             // Save the updated NPC_SO
             EditorUtility.SetDirty(selectedActor);
-            AssetDatabase.SaveAssets();        
-            
-            
+            AssetDatabase.SaveAssets();      
+            UpdateSpawnedActors();                         
         }
         else
         {
@@ -753,7 +752,17 @@ private SpritePart_SO DrawPartSelector(
         }
     }
 
-    private void RenameSelectedActorAsset(string newName)
+        private void UpdateSpawnedActors()
+        {
+            //We need to gather all the ActorAPI of the scene
+            var actorAPIs = FindObjectsByType<ActorAPI>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+            foreach(var actorApi in actorAPIs)
+            {
+                actorApi.GetComponent<ActorModelController>().UpdatePreviewSprites();
+            }
+        }
+
+        private void RenameSelectedActorAsset(string newName)
     {
         if (selectedActor != null)
         {

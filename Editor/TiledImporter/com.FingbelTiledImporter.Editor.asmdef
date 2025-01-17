@@ -1,8 +1,10 @@
 {
-    "name": "com.FingbelActorEditor.RunTime",
+    "name": "com.FingbelTiledImporter.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:41524c21c95e5fe4dbc5b48bd21995a4"
+        "GUID:18495c2ae79d2b14aa9ff8cb6556ffd2",
+        "GUID:e5870a2afeb86184b83934c4447d2d3f",
+        "GUID:06e56dbbb8dec4d43a0b85b0fe0dd0ca"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
