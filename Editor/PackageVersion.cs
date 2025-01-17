@@ -105,21 +105,16 @@ public static class PackageVersion
             return;
         }
 
-        Directory.CreateDirectory(targetPath);
-
         string[] partFolders = Directory.GetDirectories(sourcePath);
         foreach (var folder in partFolders)
         {
-            if(folder == "Assets/Resources/FingTools/ScriptableObjects\\CharacterParts")continue;
-
             string folderName = Path.GetFileName(folder);
             string targetFolderPath = Path.Combine(targetPath, folderName);
 
             if (AssetDatabase.IsValidFolder(folder))
             {
                 AssetDatabase.MoveAsset(folder, targetFolderPath);
-                
-                // Move all files within the folder
+
                 string[] files = Directory.GetFiles(folder);
                 foreach (var file in files)
                 {
