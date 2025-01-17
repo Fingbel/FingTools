@@ -145,6 +145,7 @@ public static class PackageVersion
             if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
             {
                 Directory.Delete(sourcePath);
+                File.Delete(sourcePath+".meta");
             }            
         }
     }
