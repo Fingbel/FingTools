@@ -121,15 +121,13 @@ public static class PackageVersion
             if(!Directory.Exists(targetPath+"/"+folder))
             {
                 Directory.CreateDirectory(targetPath+"/"+folder.Split("\\").Last());
-            }
-            
-            if (AssetDatabase.IsValidFolder(folder) && AssetDatabase.IsValidFolder(targetPath+"/"+folder.Split("\\").Last()))
-            {
-                string error = AssetDatabase.MoveAsset(folder, targetPath+"/"+folder.Split("\\").Last());
-                if(string.IsNullOrEmpty(error))
+                string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
+                foreach(var file in files)
                 {
-                    Debug.Log(error);
+                    AssetDatabase.MoveAsset(file, targetPath+"/"+folder.Split("\\").Last());
                 }
+                
+                
             }
             else
             {
