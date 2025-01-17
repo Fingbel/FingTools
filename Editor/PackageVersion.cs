@@ -129,20 +129,18 @@ public static class PackageVersion
                 MoveFiles(folder, targetFolderPath);                
             };
         }
-        foreach(var oldFolder in oldFolders)
-        {
-            EditorApplication.delayCall += () => DeleteEmptyFolders(sourcePath,oldFolder);
-        }
+        EditorApplication.delayCall += () =>{
+            foreach(var oldFolder in oldFolders)
+            {
+                DeleteEmptyFolders(sourcePath,oldFolder);
+            }
+        };
         
     }
 
     private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
     {
-        Directory.Delete(oldFolder);
-        if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
-        {            
-            Directory.Delete(sourcePath, true);
-        }
+        Directory.Delete(oldFolder);        
     }
 
     private static void MoveFiles(string folder, string targetFolderPath)
