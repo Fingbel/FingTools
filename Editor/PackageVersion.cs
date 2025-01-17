@@ -105,15 +105,17 @@ public static class PackageVersion
             return;
         }            
         string[] partFolders = Directory.GetDirectories(sourcePath);
+        List<string> oldFolders = new();
         foreach (var folder in partFolders)
         {
+            oldFolders.Add(folder);
             folder.Replace("\\","/");
             folders.Add(folder);            
         }
         if (!Directory.Exists(targetPath))
         {
             Directory.CreateDirectory(targetPath);
-        }            
+        }                    
         foreach(var folder in folders)
         {
             if (Path.GetDirectoryName(folder) == "CharacterParts") continue;
@@ -125,14 +127,19 @@ public static class PackageVersion
             EditorApplication.delayCall += () =>
             {
                 MoveFiles(folder, targetFolderPath);
-                EditorApplication.delayCall += () => DeleteEmptyFolders(sourcePath, folder);
+                
             };
         }
+        foreach(var oldFolder in oldFolders)
+        {
+            EditorApplication.delayCall += () => DeleteEmptyFolders(sourcePath, oldFolder);
+        }
+        
     }
 
-    private static void DeleteEmptyFolders(string sourcePath, string folder)
+    private static void DeleteEmptyFolders(string sourcePath, string oldFolder)
     {
-        Directory.Delete(folder);
+        Directory.Delete(oldFolder);
         Debug.Log(Directory.GetFiles(sourcePath,"*.asset").Length);
         if (Directory.GetFiles(sourcePath).Length == 0)
         {            
