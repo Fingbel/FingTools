@@ -135,7 +135,7 @@ public static class PackageVersion
             }   
             DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
             oldFolders.Clear();
-            Debug.Log("Migration completed successfully.");   
+            EditorUtility.DisplayDialog("Migration Complete", "The migration is now complete, if old folders are till present, unfocus/refocus on the Unity Editor", "OK");            
         };
         
     }
