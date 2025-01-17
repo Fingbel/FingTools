@@ -117,6 +117,8 @@ public static class PackageVersion
 
             if (AssetDatabase.IsValidFolder(folder))
             {
+                AssetDatabase.MoveAsset(folder, targetFolderPath);
+                
                 // Move all files within the folder
                 string[] files = Directory.GetFiles(folder);
                 foreach (var file in files)
@@ -126,9 +128,6 @@ public static class PackageVersion
                     AssetDatabase.MoveAsset(file, targetFilePath);
                 }
 
-                // Move the folder itself
-                AssetDatabase.MoveAsset(folder, targetFolderPath);
-                Debug.Log($"Moved folder from {folder} to {targetFolderPath}");
             }
             else
             {
