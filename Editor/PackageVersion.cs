@@ -141,8 +141,11 @@ public static class PackageVersion
         Directory.Delete(oldFolder);
         if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
         {            
-            if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries");
-            Directory.Delete(sourcePath, true);
+            if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
+            {
+                Directory.Delete(sourcePath, true);
+            }
+            
         }
     }
 
