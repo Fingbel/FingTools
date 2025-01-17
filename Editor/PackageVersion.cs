@@ -111,6 +111,10 @@ public static class PackageVersion
         {
             folders.Add(folder);            
         }
+        if (!Directory.Exists(targetPath))
+        {
+            Directory.CreateDirectory(targetPath);
+        }    
         foreach(var folder in folders)
         {
             if (AssetDatabase.IsValidFolder(folder))
@@ -127,10 +131,7 @@ public static class PackageVersion
             }
         }
 
-        if (!Directory.Exists(targetPath))
-        {
-            Directory.CreateDirectory(targetPath);
-        }    
+        
     }
 
     private static void CreateVersionFile(string version)
