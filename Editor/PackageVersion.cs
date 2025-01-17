@@ -124,14 +124,18 @@ public static class PackageVersion
             }
             MoveFiles(folder, targetFolderPath);
             AssetDatabase.Refresh();
-        }                                
-        foreach(var oldFolder in oldFolders)
+        }        
+        };          
+        EditorApplication.delayCall += () =>
         {
-            DeleteEmptyFolders( oldFolder);                
-        }   
-        DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
-        oldFolders.Clear();
-        Debug.Log("Migration completed successfully.");   
+            AssetDatabase.Refresh();
+            foreach(var oldFolder in oldFolders)
+            {
+                DeleteEmptyFolders( oldFolder);                
+            }   
+            DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
+            oldFolders.Clear();
+            Debug.Log("Migration completed successfully.");   
         };
         
     }
