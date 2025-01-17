@@ -122,15 +122,20 @@ public static class PackageVersion
             {
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
-            EditorApplication.delayCall += () => 
+            EditorApplication.delayCall += () =>
             {
-                MoveFiles(folder, targetFolderPath); 
-                Directory.Delete(folder);
-                if(Directory.GetFiles(sourcePath,"*.*",SearchOption.AllDirectories).Length == 0)
-                {
-                    Directory.Delete(sourcePath,true);
-                }
+                MoveFiles(folder, targetFolderPath);
+                EditorApplication.delayCall += () => DeleteEmptyFolders(sourcePath, folder);
             };
+        }
+    }
+
+    private static void DeleteEmptyFolders(string sourcePath, string folder)
+    {
+        Directory.Delete(folder);
+        if (Directory.GetFiles(sourcePath).Length == 0)
+        {
+            Directory.Delete(sourcePath, true);
         }
     }
 
