@@ -125,7 +125,7 @@ public static class PackageVersion
             EditorApplication.delayCall += () => 
             {
                 MoveFiles(folder, targetFolderPath); 
-                if(Directory.GetFiles(sourcePath).Length == 0)
+                if(Directory.GetFiles(sourcePath,"*.*",SearchOption.AllDirectories).Length == 0)
                 {
                     Directory.Delete(sourcePath);
                 }
