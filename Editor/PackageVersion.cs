@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 
 [InitializeOnLoad]
@@ -88,7 +87,6 @@ public static class PackageVersion
         if (AssetDatabase.IsValidFolder(oldPath))
         {
             AssetDatabase.MoveAsset(oldPath, newPath);
-            Debug.Log($"Renamed folder from {oldPath} to {newPath}");
         }
         else
         {
@@ -124,41 +122,35 @@ public static class PackageVersion
             {
                 AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolderPath), Path.GetFileName(targetFolderPath));
             }
-            EditorApplication.delayCall += () =>
-            {
-                MoveFiles(folder, targetFolderPath);                
-            };
+            MoveFiles(folder, targetFolderPath);
         }
+        
+        AssetDatabase.Refresh();
         
         foreach(var oldFolder in oldFolders)
         {
-            EditorApplication.delayCall += () =>{DeleteEmptyFolders(sourcePath,oldFolder);};
+            DeleteEmptyFolders(sourcePath, oldFolder);
         }                
     }
 
-    private static void DeleteEmptyFolders(string sourcePath,string oldFolder)
+    private static void DeleteEmptyFolders(string sourcePath, string oldFolder)
     {
         if(Directory.Exists(oldFolder))
         {
-            Directory.Delete(oldFolder,true);
-            File.Delete(oldFolder+".meta");
+            Directory.Delete(oldFolder, true);
+            File.Delete(oldFolder + ".meta");
         }
         if(Directory.Exists(sourcePath))
         {
-            if (Directory.GetFiles(sourcePath,"*.asset").Length == 0)
+            if (Directory.GetFiles(sourcePath, "*.asset").Length == 0)
             {            
                 if(sourcePath == "Assets/Resources/FingTools/SpriteLibraries")
                 {                    
-                    Directory.Delete(sourcePath,true);
-                    File.Delete(sourcePath+".meta");
+                    Directory.Delete(sourcePath, true);
+                    File.Delete(sourcePath + ".meta");
                 }                                
             }                            
-        }
-        
-        
-            
-        
-        
+        }        
     }
 
     private static void MoveFiles(string folder, string targetFolderPath)
@@ -166,14 +158,12 @@ public static class PackageVersion
         string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
         foreach (var file in files)
         {
-            Debug.Log(file);
             string error = AssetDatabase.MoveAsset(file, Path.Combine(targetFolderPath, Path.GetFileName(file)));
             if (!string.IsNullOrEmpty(error))
             {
                 Debug.Log(error);
             }
         }
-        
     }
 
     private static void CreateVersionFile(string version)
