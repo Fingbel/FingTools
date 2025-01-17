@@ -74,10 +74,10 @@ public static class PackageVersion
         RenameFolder("Assets/Resources/FingTools/Sprites", "Assets/Resources/FingTools/CharacterSprites");
 
         // 2. Move ScriptableObjects to ScriptableObjects/CharacterParts
-        MoveFolder("Assets/Resources/FingTools/ScriptableObjects", "Assets/Resources/FingTools/ScriptableObjects/CharacterParts/");
+        MoveFolder("Assets/Resources/FingTools/ScriptableObjects", "Assets/Resources/FingTools/ScriptableObjects/CharacterParts");
 
         // 3. Move SpriteLibrairies to SpriteLibrairies/CharacterParts
-        MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts/");
+        MoveFolder("Assets/Resources/FingTools/SpriteLibraries", "Assets/Resources/FingTools/SpriteLibrairies/CharacterParts");
         AssetDatabase.StopAssetEditing();
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
