@@ -43,7 +43,7 @@ public partial class ActorEditorWindow : EditorWindow
 
     private int globalIndex = 3;
     private int maxIndex = 3;
-    string actorsFolderPath = "Assets/Resources/FingTools/Actors";
+
     private Vector2 scrollPosition = Vector2.zero;
 
     [MenuItem("FingTools/Actor Editor", false, 1)]
@@ -313,12 +313,12 @@ private string GetUniqueActorName(string baseName)
     int index = 1;
     string uniqueName = baseName;
     
-    if(!Directory.Exists(actorsFolderPath))
+    if(!Directory.Exists(CharacterImporter.actorsFolderPath))
     {
-        Directory.CreateDirectory(actorsFolderPath);
+        Directory.CreateDirectory(CharacterImporter.actorsFolderPath);
     }
     // Check if a name with the baseName or a suffixed version already exists
-    while (AssetDatabase.FindAssets($"t:Actor_SO", new[] { actorsFolderPath })
+    while (AssetDatabase.FindAssets($"t:Actor_SO", new[] { CharacterImporter.actorsFolderPath })
                         .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                         .Any(path => Path.GetFileNameWithoutExtension(path) == uniqueName))
     {
@@ -392,7 +392,7 @@ private string GetUniqueActorName(string baseName)
         else
         {
             // Create new NPC_SO
-            string path = $"{actorsFolderPath}/{actorName}.asset";
+            string path = $"{CharacterImporter.actorsFolderPath}/{actorName}.asset";
 
             if (File.Exists(path))
             {

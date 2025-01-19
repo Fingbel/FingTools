@@ -88,9 +88,9 @@ public partial class ActorEditorWindow : EditorWindow
     }   
     private void DrawActorInfoAndPreview() 
     {
-        if(!Directory.Exists(actorsFolderPath))
+        if(!Directory.Exists(CharacterImporter.actorsFolderPath))
         {
-            Directory.CreateDirectory(actorsFolderPath);
+            Directory.CreateDirectory(CharacterImporter.actorsFolderPath);
         }
         GUILayout.BeginVertical(GUILayout.Width(300));
 
@@ -270,7 +270,7 @@ public partial class ActorEditorWindow : EditorWindow
             GUILayout.BeginVertical(GUILayout.Width(200));            
             GUILayout.Label("Select Actor", EditorStyles.boldLabel);
 
-            string[] actorGUIDs = AssetDatabase.FindAssets("t:Actor_SO", new[] { actorsFolderPath });
+            string[] actorGUIDs = AssetDatabase.FindAssets("t:Actor_SO", new[] { CharacterImporter.actorsFolderPath });
             List<Actor_SO> actorAssets = actorGUIDs
                 .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
                 .Select(path => AssetDatabase.LoadAssetAtPath<Actor_SO>(path))

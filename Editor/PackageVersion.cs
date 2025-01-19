@@ -73,7 +73,7 @@ public static class PackageVersion
         Debug.Log($"Migrating from version {oldVersion} to {newVersion}...");
 
         // 1. Rename the Sprites folder to CharacterSprites
-        RenameFolder("Assets/Resources/FingTools/Sprites", "Assets/Resources/FingTools/CharacterSprites");
+        MoveFolder("Assets/Resources/FingTools/Sprites", "Assets/Resources/FingTools/Sprites/CharacterSprites");
 
         // 2. Move ScriptableObjects to ScriptableObjects/CharacterParts
         MoveFolder("Assets/Resources/FingTools/ScriptableObjects", "Assets/Resources/FingTools/ScriptableObjects/CharacterParts");
@@ -83,19 +83,6 @@ public static class PackageVersion
         AssetDatabase.Refresh();
         
     }
-    private static void RenameFolder(string oldPath, string newPath)
-    {
-        if(!Directory.Exists(oldPath)) return;
-        if (AssetDatabase.IsValidFolder(oldPath))
-        {
-            AssetDatabase.MoveAsset(oldPath, newPath);
-        }
-        else
-        {
-            Debug.LogWarning($"Folder not found: {oldPath}");
-        }
-    }
-
     private static void MoveFolder(string sourcePath, string targetPath)
     {
         List<string> folders = new();

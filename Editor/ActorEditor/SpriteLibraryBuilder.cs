@@ -10,8 +10,7 @@ namespace FingTools.Internal
     public class SpriteLibraryBuilder : Editor
     {
         // Root folder where SpriteLibraries will be stored
-        private const string ActorLibraryRootFolderName = "SpriteLibrairies/CharacterParts";
-        private const string PortraitLibraryRootFolderName = "SpriteLibrairies/PortraitParts";
+
         public static void BuildAllPortraitSpriteLibrairies()
         {
             string[] guids = AssetDatabase.FindAssets("t:PortraitPart_SO");
@@ -24,7 +23,7 @@ namespace FingTools.Internal
 
                 // Create a folder for the CharSpriteType
                 string baseFolder = GetBaseFolder(spritePartPath, "FingTools");
-                string libraryFolder = $"{baseFolder}/{PortraitLibraryRootFolderName}/{portraitSpritePart.type}";
+                string libraryFolder = $"{baseFolder}/{CharacterImporter.PortraitLibraryRootFolderName}/{portraitSpritePart.type}";
 
                 CreateFolderHierarchy(libraryFolder);
 
@@ -56,7 +55,7 @@ namespace FingTools.Internal
 
                     // Create a folder for the CharSpriteType
                     string baseFolder = GetBaseFolder(spritePartPath, "FingTools");
-                    string libraryFolder = $"{baseFolder}/{ActorLibraryRootFolderName}/{actorSpritePart.type}";
+                    string libraryFolder = $"{baseFolder}/{CharacterImporter.ActorLibraryRootFolderName}/{actorSpritePart.type}";
 
                     // Ensure the subfolder exists
                     CreateFolderHierarchy(libraryFolder);

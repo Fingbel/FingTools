@@ -11,8 +11,7 @@ namespace FingTools.Internal{
     {
         private static readonly List<int>  spritesPerRowList = new List<int> {10,10,10};
         private static readonly List<string> validBodyParts = new () { "Accessory",  "Eyes", "Hairstyle", "Skin" };
-        public const string resourcesPortraitFolderPath = "Assets/Resources/FingTools/PortraitSprites"; 
-        public const string portraitsFolderPath = "Assets/Resources/FingTools/Portraits";
+        
         #if UNITY_EDITOR
         public static void BuildPortraitFromActorSO(ref Actor_SO actor_SO)
         {
@@ -20,10 +19,10 @@ namespace FingTools.Internal{
             {
                 Portrait_SO newPortrait =  ScriptableObject.CreateInstance<Portrait_SO>();
                 actor_SO.portrait_SO = newPortrait;            
-                string path = $"{portraitsFolderPath}/{actor_SO.name}.asset";
-                if(!Directory.Exists(portraitsFolderPath))
+                string path = $"{CharacterImporter.portraitsFolderPath}/{actor_SO.name}.asset";
+                if(!Directory.Exists(CharacterImporter.portraitsFolderPath))
                 {
-                    Directory.CreateDirectory(portraitsFolderPath);
+                    Directory.CreateDirectory(CharacterImporter.portraitsFolderPath);
                 }
                 AssetDatabase.CreateAsset(newPortrait, path);
                 AssetDatabase.SaveAssets();
@@ -67,7 +66,7 @@ namespace FingTools.Internal{
 
                 if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
                 {        
-                    string outputPath = resourcesPortraitFolderPath+ $"/{type}/";
+                    string outputPath = CharacterImporter.resourcesPortraitFolderPath+ $"/{type}/";
                     if (!Directory.Exists(outputPath))
                         Directory.CreateDirectory(outputPath);
 
@@ -99,7 +98,7 @@ namespace FingTools.Internal{
         private static List<string> PrepareImportList()
         {
             List<string> importList = new();
-            string[] bodyPartFolders = Directory.GetDirectories(resourcesPortraitFolderPath);
+            string[] bodyPartFolders = Directory.GetDirectories(CharacterImporter.resourcesPortraitFolderPath);
             // Iterate through body part folders and find assets
             foreach (string bodyPartFolder in bodyPartFolders)
             {

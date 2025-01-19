@@ -13,8 +13,12 @@ namespace FingTools.Internal
 {
     public static class CharacterImporter
     {        
-        public const string resourcesCharacterFolderPath = "Assets/Resources/FingTools/CharacterSprites"; 
-        public const string resourcesPortraitFolderPath = "Assets/Resources/FingTools/PortraitSprites"; 
+        public const string resourcesCharacterFolderPath = "Assets/Resources/FingTools/Sprites/CharacterSprites"; 
+        public const string resourcesPortraitFolderPath = "Assets/Resources/FingTools/Sprites/PortraitSprites"; 
+        public const string ActorLibraryRootFolderName = "SpriteLibrairies/CharacterParts";
+        public const string PortraitLibraryRootFolderName = "SpriteLibrairies/PortraitParts";
+        public const string portraitsFolderPath = "Assets/Resources/FingTools/Portraits";
+        public const string actorsFolderPath = "Assets/Resources/FingTools/Actors";
         private static readonly List<string> validBodyParts = new () { "Accessories","Accessory", "Bodies", "Eyes", "Hairstyles", "Outfits","Outfit" };
         private const int slicePerSprite = 467;         
         private static readonly List<int>  spritesPerRowList = new List<int> { 4, 24, 24, 6, 12, 12, 12, 12, 24, 48, 40, 56, 56, 24, 24, 24, 16, 24, 12, 12 };
@@ -30,7 +34,7 @@ namespace FingTools.Internal
             SpriteLibraryBuilder.BuildAllActorSpriteLibrairies();
             SpriteLibraryBuilder.BuildAllPortraitSpriteLibrairies();
 
-            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
+            Directory.CreateDirectory(actorsFolderPath);
 
             AssetEnumGenerator.GenerateAssetEnum();
             

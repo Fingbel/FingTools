@@ -105,12 +105,12 @@ public class SpriteManager : ScriptableObject
             PortraitPartType type = (PortraitPartType)GetPortraitPartTypeFromPath(portraitPartFolder);
             
             // Load all textures in the folder
-            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/PortraitSprites/" + PortraitPartName);
+            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/Sprites/PortraitSprites/" + PortraitPartName);
             // Create a SpritePart for each texture
             foreach (Texture2D texture in textures)
             {
                 // Load all sprites in the folder
-                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/PortraitSprites/" + PortraitPartName + "/" + texture.name);
+                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/Sprites/PortraitSprites/" + PortraitPartName + "/" + texture.name);
 
                 // Look for an existing SpritePart or Create a SpritePart with the sprites
                 PortraitPart_SO portraitPart;
@@ -180,13 +180,13 @@ public class SpriteManager : ScriptableObject
             }
 
             // Load all textures in the folder
-            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/CharacterSprites/" + bodyPartName);
+            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/Sprites/CharacterSprites/" + bodyPartName);
 
             // Create a SpritePart for each texture
             foreach (Texture2D texture in textures)
             {
                 // Load all sprites in the folder
-                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/CharacterSprites/" + bodyPartName + "/" + texture.name);
+                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/Sprites/CharacterSprites/" + bodyPartName + "/" + texture.name);
 
                 // Look for an existing SpritePart or Create a SpritePart with the sprites
                 ActorSpritePart_SO spritePart;
