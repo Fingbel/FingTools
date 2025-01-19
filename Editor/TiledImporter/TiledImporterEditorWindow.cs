@@ -6,17 +6,12 @@ using System.IO.Compression;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.PackageManager.Requests;
-using UnityEditor.PackageManager;
-using UnityEditor.Build;
 using FingTools.Helper;
 namespace FingTools.Tiled
 {
     public class TiledImporterEditorWindow : EditorWindow
     {
-        private static string superTiled2UnityPackageId = "com.seanba.super-tiled2unity";
-        private static string superTiled2UnityGitUrl = "https://github.com/Seanba/SuperTiled2Unity.git?path=/SuperTiled2Unity/Packages/com.seanba.super-tiled2unity";
-        private static bool? isSuperTiled2UnityInstalled = null;
+        
         private string selectedInteriorZipFile = null, selectedExteriorZipFile = null;
         private int selectedSizeIndex = 0;
         private readonly List<string> validSizes = new() { "16", "32" };
@@ -25,7 +20,7 @@ namespace FingTools.Tiled
         private List<string> availableInteriorTilesets = new (),availableExteriorTilesets = new ();
         private Vector2 interiorScrollPos, exteriorScrollPos,scrollPos;
         private bool tileSizeLocked = false;
-
+        private bool isST2UInstalled = false;
         private const string InteriorZipFilePathKey = "InteriorZipFilePath";
         private const string ExteriorZipFilePathKey = "ExteriorZipFilePath";
 
@@ -37,22 +32,26 @@ namespace FingTools.Tiled
 
         private void OnEnable()
         {
-            EditorUtility.DisplayProgressBar("Loading", "Loading tilesets, please wait ...", 0f);
-            selectedInteriorZipFile = EditorPrefs.GetString(InteriorZipFilePathKey, null);
-            selectedExteriorZipFile = EditorPrefs.GetString(ExteriorZipFilePathKey, null);
+            isST2UInstalled = ST2ULinker.CheckSuperTiled2Unity();
+            if(isST2UInstalled)
+            {
+                EditorUtility.DisplayProgressBar("Loading", "Loading tilesets, please wait ...", 0f);
+                selectedInteriorZipFile = EditorPrefs.GetString(InteriorZipFilePathKey, null);
+                selectedExteriorZipFile = EditorPrefs.GetString(ExteriorZipFilePathKey, null);
 
-            if(!string.IsNullOrEmpty(selectedInteriorZipFile))
-            {
-                availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
-                availableInteriorTilesets.Sort(CompareTilesetNames);
-            }
-            EditorUtility.DisplayProgressBar("Loading", "Loading tilesets, please wait ...", 0.5f);
-            if (!string.IsNullOrEmpty(selectedExteriorZipFile))
-            {
-                availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
-                availableExteriorTilesets.Sort(CompareTilesetNames);
-            }
-            EditorUtility.ClearProgressBar();
+                if(!string.IsNullOrEmpty(selectedInteriorZipFile))
+                {
+                    availableInteriorTilesets = GetAvailableInteriorTilesets(selectedInteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                    availableInteriorTilesets.Sort(CompareTilesetNames);
+                }
+                EditorUtility.DisplayProgressBar("Loading", "Loading tilesets, please wait ...", 0.5f);
+                if (!string.IsNullOrEmpty(selectedExteriorZipFile))
+                {
+                    availableExteriorTilesets = GetAvailableExteriorTilesets(selectedExteriorZipFile, int.Parse(validSizes[selectedSizeIndex]));
+                    availableExteriorTilesets.Sort(CompareTilesetNames);
+                }
+                EditorUtility.ClearProgressBar();
+            }            
         }
 
         private void OnDisable()
@@ -85,11 +84,8 @@ namespace FingTools.Tiled
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Width(position.width), GUILayout.Height(position.height));
 
             //EditorGUILayout.LabelField("The Tiled importer requires SuperTiled2Unity in order to work properly", EditorStyles.boldLabel);
-            if (isSuperTiled2UnityInstalled == null)
-            {
-                isSuperTiled2UnityInstalled = CheckSuperTiled2Unity();
-            }
-            if (isSuperTiled2UnityInstalled == true)
+            
+            if (isST2UInstalled)
             {
                 EditorGUILayout.LabelField("✅ SuperTiled2Unity is correctly installed", EditorStyles.boldLabel);
                 // Select the sprite size to import
@@ -106,14 +102,18 @@ namespace FingTools.Tiled
                 DrawSeparator();
                 DrawImportButton();
             }
-            else if (isSuperTiled2UnityInstalled == false)
+            else if (!isST2UInstalled)
             {
                 EditorGUILayout.LabelField("🔴 SuperTiled2Unity is not currently installed.", EditorStyles.wordWrappedLabel);
                 EditorGUILayout.LabelField("Click on the button below to add SuperTiled2Unity Package to this Unity project.");
 
                 if (GUILayout.Button("Install SuperTiled2Unity"))
                 {
-                    AddPackage(superTiled2UnityGitUrl);
+                    ST2ULinker.AddPackage();
+                }
+                if (GUILayout.Button("Visit SuperTiled2Unity Itch.io page"))
+                {
+                    Application.OpenURL("https://seanba.itch.io/supertiled2unity");
                 }
             }
             EditorGUILayout.EndScrollView();
@@ -385,81 +385,7 @@ namespace FingTools.Tiled
             GUILayout.Space(5);
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             GUILayout.Space(5);
-        }
-
-        private static bool CheckSuperTiled2Unity()
-        {
-            // Request the list of installed packages
-            ListRequest listRequest = Client.List();
-
-            // Wait for the request to finish
-            while (!listRequest.IsCompleted)
-            {
-            }
-            if (listRequest.Status == StatusCode.Success)
-            {
-                var installedPackages = listRequest.Result;
-
-                // Check if SuperTiled2Unity is installed
-                bool packageFound = installedPackages.Any(p => p.name == superTiled2UnityPackageId);
-
-                if (packageFound)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        public static void AddPackage(string packageUrl)
-        {
-            // Create a request to add the package
-            AddRequest addRequest = Client.Add(packageUrl);
-
-            // Wait for the request to complete
-            while (!addRequest.IsCompleted)
-            {
-                // You can optionally display a loading progress bar here
-                EditorUtility.DisplayProgressBar("Adding Package", "Please wait while the package is added...", 0.5f);
-            }
-            EditorUtility.ClearProgressBar();
-
-            // Check the result
-            if (addRequest.Status == StatusCode.Success)
-            {
-                UnityEngine.Debug.Log("Package added successfully: " + packageUrl);
-            }
-            else
-            {
-                UnityEngine.Debug.LogError("Failed to add package: " + packageUrl);
-            }
-
-        }
-
-        [InitializeOnLoadMethod]
-        private static void DefineSuperTiled2UnitySymbolIfNeeded()
-        {
-            if (CheckSuperTiled2Unity())
-            {                
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, "SUPER_TILED2UNITY_INSTALLED");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, "SUPER_TILED2UNITY_INSTALLED");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, "SUPER_TILED2UNITY_INSTALLED");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.iOS, "SUPER_TILED2UNITY_INSTALLED");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.EmbeddedLinux, "SUPER_TILED2UNITY_INSTALLED");
-            }
-            else
-            {
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Standalone, "");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, "");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.WebGL, "");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.iOS, "");
-                PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.EmbeddedLinux, "");
-            }
-        }
+        }       
 
         private int CompareTilesetNames(string x, string y)
         {

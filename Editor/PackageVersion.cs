@@ -26,22 +26,20 @@ public static class PackageVersion
             VersionComparison();
         }
     }
-
-    [MenuItem("FingTools/Force Migration", false, 1)]
+    #if FINGDEBUG
+    [MenuItem("FingTools/DEBUG/Force Migration", false, 999)]
+    #endif    
     private static void HandleFirstMigration()
-    {       
-        //we need to test for presence of actors / spritePart , if there is none then it's a first time installation, otherwise we need to migrate properly
-        //nevermind, we can test for the old directory structure instead
+    {               
         bool oldSpriteDir = Directory.Exists("Assets/Resources/FingTools/Sprites");
         bool oldLibr = Directory.Exists("Assets/Resources/FingTools/SpritesLibraries");
         if(oldSpriteDir || oldLibr )
         {
-            //Old structure detected, we need to run the migration process
+            //Old structure detected, we need to run the migration process            
             if (EditorUtility.DisplayDialog(
-                "Initial Package Migration",
-                "It seems you're updating from version 1.0.0 to 1.1.0. Would you like to migrate your data?",
-                "Migrate",
-                "Skip (FOR DEBUG ONLY, SHOULD BE REMOVED FOR RELEASE"))
+                "Package Update",
+                "It seems you're updating from version 1.0.0 to 1.1.0. The folder structure has been updated and need a reorganization, Please click below to start th migration process",
+                "Migrate"))
             {
                 RunMigration("1.0.0", CurrentVersion);
             }
