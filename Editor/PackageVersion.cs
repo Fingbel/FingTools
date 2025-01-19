@@ -8,7 +8,7 @@ using FingTools.Internal;
 public static class PackageVersion
 {
     private const string VersionFilePath = "Assets/FingTools/Config/package_version.json";
-    private const string CurrentVersion = "1.1.0";  // Update this for each release
+    private const string CurrentVersion = "1.1.0";
     private static List<string> oldFolders;
     static PackageVersion()
     {
@@ -23,28 +23,33 @@ public static class PackageVersion
         }
         else
         {
-            HandleVersionComparison();
+            VersionComparison();
         }
     }
 
     [MenuItem("FingTools/Force Migration", false, 1)]
     private static void HandleFirstMigration()
-    {
-        Debug.LogWarning("No version file found. Assuming version 1.0.0. Running migration to 1.1.0");
-
-        if (EditorUtility.DisplayDialog(
-            "Initial Package Migration",
-            "It seems you're updating from version 1.0.0 to 1.1.0. Would you like to migrate your data?",
-            "Migrate",
-            "Skip"))
+    {       
+        //we need to test for presence of actors / spritePart , if there is none then it's a first time installation, otherwise we need to migrate properly
+        //nevermind, we can test for the old directory structure instead
+        bool oldSpriteDir = Directory.Exists("Assets/Resources/FingTools/Sprites");
+        bool oldLibr = Directory.Exists("Assets/Resources/FingTools/SpritesLibraries");
+        if(oldSpriteDir || oldLibr )
         {
-            RunMigration("1.0.0", CurrentVersion);
-        }
-
+            //Old structure detected, we need to run the migration process
+            if (EditorUtility.DisplayDialog(
+                "Initial Package Migration",
+                "It seems you're updating from version 1.0.0 to 1.1.0. Would you like to migrate your data?",
+                "Migrate",
+                "Skip (FOR DEBUG ONLY, SHOULD BE REMOVED FOR RELEASE"))
+            {
+                RunMigration("1.0.0", CurrentVersion);
+            }
+        }        
         CreateVersionFile(CurrentVersion);
     }
 
-    private static void HandleVersionComparison()
+    private static void VersionComparison()
     {
         string json = File.ReadAllText(VersionFilePath);
         PackageVersionData versionData = JsonUtility.FromJson<PackageVersionData>(json);
