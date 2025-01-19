@@ -131,10 +131,16 @@ namespace FingTools.Internal{
         }
 
         [InitializeOnLoadMethod]
-        public static void CheckForMissingActors()
+        public static void MissingChecks()
         {
             var portraits = Resources.LoadAll<Portrait_SO>("FingTools/Portraits");    
-            var actors = Resources.LoadAll<Actor_SO>("FingTools/Actors");    
+            var actors = Resources.LoadAll<Actor_SO>("FingTools/Actors");  
+            CheckForMissingActors(portraits,actors);
+            CheckForMissingPortraits(portraits,actors);
+        }
+        private static void CheckForMissingActors(Portrait_SO[] portraits, Actor_SO[] actors)
+        {
+            
             foreach(var portrait in portraits)
             {
                 bool hasCorrespondingActor = actors.Any(actor => actor.portrait_SO == portrait);
@@ -144,6 +150,20 @@ namespace FingTools.Internal{
                     AssetDatabase.DeleteAsset(assetPath);
                 }
             }
+        }
+        private static void CheckForMissingPortraits(Portrait_SO[] portraits, Actor_SO[] actors)
+        {            
+            foreach(var actor in actors)
+            {
+                bool hasCorrespondingPortrait =
+                portraits.Any(portrait => portrait == actor.portrait_SO);
+                if (!hasCorrespondingPortrait)
+                {
+                    var tempActor = actor;
+                    BuildPortraitFromActorSO(ref tempActor);
+                }
+            }
+
         }
         #endif
 }
