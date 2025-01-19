@@ -90,19 +90,19 @@ public class SpriteManager : ScriptableObject
     }
 
     #if UNITY_EDITOR
-    public void PopulatePortraitSpriteLists(string destinationPath)
+    public static void PopulatePortraitSpriteLists(string destinationPath)
     {
         if(!Directory.Exists(destinationPath)) return;
-        bodyPortraitParts.Clear();
-        eyePortraitParts.Clear();
-        hairstylePortraitParts.Clear();
-        accessoryPortraitParts.Clear();
+        Instance.bodyPortraitParts.Clear();
+        Instance.eyePortraitParts.Clear();
+        Instance.hairstylePortraitParts.Clear();
+        Instance.accessoryPortraitParts.Clear();
 
         string[] portraitPartFolders = Directory.GetDirectories(destinationPath);
         foreach (string portraitPartFolder in portraitPartFolders)
         {
             string PortraitPartName = Path.GetFileName(portraitPartFolder);
-            PortraitPartType type = (PortraitPartType)GetPortraitPartTypeFromPath(portraitPartFolder);
+            PortraitPartType type = (PortraitPartType)Instance.GetPortraitPartTypeFromPath(portraitPartFolder);
             
             // Load all textures in the folder
             Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/Sprites/PortraitSprites/" + PortraitPartName);
@@ -137,37 +137,37 @@ public class SpriteManager : ScriptableObject
                 switch (type)
                 {
                     case PortraitPartType.Accessory:
-                        accessoryPortraitParts.Add(portraitPart);
+                        Instance.accessoryPortraitParts.Add(portraitPart);
                         break;
                     case PortraitPartType.Skin:
-                        bodyPortraitParts.Add(portraitPart);
+                        Instance.bodyPortraitParts.Add(portraitPart);
                         break;
                     case PortraitPartType.Eyes:
-                        eyePortraitParts.Add(portraitPart);
+                        Instance.eyePortraitParts.Add(portraitPart);
                         break;
                     case PortraitPartType.Hairstyle:
-                        hairstylePortraitParts.Add(portraitPart);
+                        Instance.hairstylePortraitParts.Add(portraitPart);
                         break;                    
                 }
             }
         }
     }
-    public void PopulateActorSpriteLists(string destinationPath)
+    public static void PopulateActorSpriteLists(string destinationPath)
     {
         if(!Directory.Exists(destinationPath)) return; //Early return as we don't have no directory
         // Clear existing lists
-        accessoryParts.Clear();
-        bodyParts.Clear();
-        outfitParts.Clear();
-        hairstyleParts.Clear();
-        eyeParts.Clear();
+        Instance.accessoryParts.Clear();
+        Instance.bodyParts.Clear();
+        Instance.outfitParts.Clear();
+        Instance.hairstyleParts.Clear();
+        Instance.eyeParts.Clear();
 
         // Get the body part folders in the destination path
         string[] bodyPartFolders = Directory.GetDirectories(destinationPath);
         foreach (string bodyPartFolder in bodyPartFolders)
         {
             string bodyPartName = Path.GetFileName(bodyPartFolder);
-            var ntype = GetActorSpriteTypeFromPath(bodyPartFolder);
+            var ntype = Instance.GetActorSpriteTypeFromPath(bodyPartFolder);
             ActorPartType type;
             if(ntype != null)
             {
@@ -213,26 +213,26 @@ public class SpriteManager : ScriptableObject
                 switch (type)
                 {
                     case ActorPartType.Accessories:
-                        accessoryParts.Add(spritePart);
+                        Instance.accessoryParts.Add(spritePart);
                         break;
                     case ActorPartType.Bodies:
-                        bodyParts.Add(spritePart);
+                        Instance.bodyParts.Add(spritePart);
                         break;
                     case ActorPartType.Outfits:
-                        outfitParts.Add(spritePart);
+                        Instance.outfitParts.Add(spritePart);
                         break;
                     case ActorPartType.Hairstyles:
-                        hairstyleParts.Add(spritePart);
+                        Instance.hairstyleParts.Add(spritePart);
                         break;
                     case ActorPartType.Eyes:
-                        eyeParts.Add(spritePart);
+                        Instance.eyeParts.Add(spritePart);
                         break;
                 }
             }
         }
 
         // Mark the manager as dirty and save the changes
-        EditorUtility.SetDirty(this);
+        EditorUtility.SetDirty(Instance);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();        
     }
