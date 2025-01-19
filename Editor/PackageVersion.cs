@@ -140,6 +140,10 @@ public static class PackageVersion
     private static void MoveFiles(string folder, string targetFolderPath)
     {
         string[] files = Directory.GetFiles(folder, "*.asset", SearchOption.AllDirectories);
+        if (files.Length == 0)
+        {
+            files = Directory.GetFiles(folder, "*.png", SearchOption.AllDirectories);
+        }
         foreach (var file in files)
         {
             string error = AssetDatabase.MoveAsset(file, Path.Combine(targetFolderPath, Path.GetFileName(file)));
