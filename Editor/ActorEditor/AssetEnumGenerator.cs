@@ -42,7 +42,7 @@ namespace FingTools.Internal
             File.WriteAllText(GeneratedPath, output);
             AssetDatabase.Refresh();
 
-            Debug.Log("Asset enum generated at " + GeneratedPath);
+            //Debug.Log("Asset enum generated at " + GeneratedPath);
         }
     }
 }

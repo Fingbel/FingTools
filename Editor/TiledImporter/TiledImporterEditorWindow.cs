@@ -6,8 +6,8 @@ using System.IO.Compression;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using FingTools.Helper;
-namespace FingTools.Tiled
+using FingTools.Internal;
+namespace FingTools.Internal
 {
     public class TiledImporterEditorWindow : EditorWindow
     {

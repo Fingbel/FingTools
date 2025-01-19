@@ -6,7 +6,6 @@ using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
 using System.IO;
 using FingTools.Internal;
-using FingTools.Tiled;
 using System.Linq;
 
 #if UNITY_EDITOR
@@ -188,11 +187,11 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
         {
             if (filePath.EndsWith(".tmx"))
             {
-                MapLoader.Instance.LoadMap(filePath);
+                MapLoader.LoadMap(filePath);
             }
             else if (filePath.EndsWith(".world"))
             {
-                MapLoader.Instance.LoadMap(filePath, true);
+                MapLoader.LoadMap(filePath, true);
             }
             return true;
         }

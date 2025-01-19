@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
-namespace FingTools.Tiled
+namespace FingTools.Internal
 {
 public class TiledWorldAssetProcessor : AssetPostprocessor
 {
