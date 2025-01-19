@@ -13,11 +13,11 @@ public partial class ActorEditorWindow : EditorWindow
     public static event Action OnActorAvailableUpdated;
     public static event Action<Actor_SO> OnActorUpdated;
     private string actorName;
-    private SpritePart_SO body;
-    private SpritePart_SO outfit;
-    private SpritePart_SO eyes;
-    private SpritePart_SO hairstyle;
-    private SpritePart_SO accessory;
+    private ActorSpritePart_SO body;
+    private ActorSpritePart_SO outfit;
+    private ActorSpritePart_SO eyes;
+    private ActorSpritePart_SO hairstyle;
+    private ActorSpritePart_SO accessory;
     private string tempActorName;
     
     private Actor_SO selectedActor;
@@ -29,11 +29,11 @@ public partial class ActorEditorWindow : EditorWindow
     private SpriteManager spriteManager;
 
     // Lists and indexes for sprite sheets
-    private List<SpritePart_SO> bodySheets = new List<SpritePart_SO>();
-    private List<SpritePart_SO> outfitSheets = new List<SpritePart_SO>();
-    private List<SpritePart_SO> eyesSheets = new List<SpritePart_SO>();
-    private List<SpritePart_SO> hairstyleSheets = new List<SpritePart_SO>();
-    private List<SpritePart_SO> accessorySheets = new List<SpritePart_SO>();
+    private List<ActorSpritePart_SO> bodySheets = new List<ActorSpritePart_SO>();
+    private List<ActorSpritePart_SO> outfitSheets = new List<ActorSpritePart_SO>();
+    private List<ActorSpritePart_SO> eyesSheets = new List<ActorSpritePart_SO>();
+    private List<ActorSpritePart_SO> hairstyleSheets = new List<ActorSpritePart_SO>();
+    private List<ActorSpritePart_SO> accessorySheets = new List<ActorSpritePart_SO>();
 
     private int bodySheetIndex = 0;
     private int outfitSheetIndex = 0;
@@ -49,7 +49,7 @@ public partial class ActorEditorWindow : EditorWindow
     [MenuItem("FingTools/Actor Editor", false, 1)]
     public static void ShowWindow()
     {
-        ActorEditorWindow window = GetWindow<ActorEditorWindow>();
+        ActorEditorWindow window = GetWindow<ActorEditorWindow>(true);
         window.titleContent = new GUIContent("Actor Editor");
 
         window.Show();
@@ -57,7 +57,7 @@ public partial class ActorEditorWindow : EditorWindow
 
     public static void ShowWindow(string _actorName,NPCSpawner npcSpawner )
     {
-        ActorEditorWindow window = GetWindow<ActorEditorWindow>();
+        ActorEditorWindow window = GetWindow<ActorEditorWindow>(true);
         window.titleContent = new GUIContent(_actorName);
         window.CreateNewActor(_actorName,npcSpawner);        
         window.Show();
@@ -68,7 +68,7 @@ public partial class ActorEditorWindow : EditorWindow
     {
         if (actor != null)
         {
-            ActorEditorWindow window = GetWindow<ActorEditorWindow>();
+            ActorEditorWindow window = GetWindow<ActorEditorWindow>(true);
             window.selectedActor = actor;
             window.LoadActorData(actor);
         }
@@ -131,33 +131,34 @@ public partial class ActorEditorWindow : EditorWindow
     private void OnGUI()
     {
         GUILayout.BeginHorizontal();  
-        GUILayout.BeginVertical(GUILayout.Width(200));        
-        
-        DrawActorList();
-        GUILayout.EndVertical();
-
-        if (selectedActor == null)
-        {
-            // No Actor selected: Show message and input field for new Actor
-            GUILayout.BeginVertical(GUILayout.Width(200));
-
-            GUILayout.Label("No Actor selected", EditorStyles.boldLabel);
-            GUILayout.Label("Select an Actor from the list or create a new one.", EditorStyles.label);
-            GUILayout.Space(10);
-        
-            // Button to create a new Actor
-            if (GUILayout.Button("Create New Actor", GUILayout.Width(150)))
-            {
-                CreateNewActor("NewActor");
-            }
-        GUILayout.EndVertical();       
-        }
-        else
-        {
-            DrawActorInfoAndPreview();
-            DrawPartSelectors();
+            GUILayout.BeginVertical(GUILayout.Width(200));        
             
-        }        
+            DrawActorList();
+            GUILayout.EndVertical();
+
+            if (selectedActor == null)
+            {
+                // No Actor selected: Show message and input field for new Actor
+                GUILayout.BeginVertical(GUILayout.Width(200));
+
+                GUILayout.Label("No Actor selected", EditorStyles.boldLabel);
+                GUILayout.Label("Select an Actor from the list or create a new one.", EditorStyles.label);
+                GUILayout.Space(10);
+            
+                // Button to create a new Actor
+                if (GUILayout.Button("Create New Actor", GUILayout.Width(150)))
+                {
+                    CreateNewActor("NewActor");
+                }
+            GUILayout.EndVertical();       
+            }
+            else
+            {                
+                DrawActorInfoAndPreview();
+                DrawPartSelectors();
+                DrawPortrait();
+                
+            }        
         GUILayout.EndHorizontal();
 
         // Handle Enter key press for the name input field

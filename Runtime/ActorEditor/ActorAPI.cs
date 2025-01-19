@@ -74,8 +74,8 @@ namespace FingTools{
         /// <param name="partName"></param>
         public bool EquipBodyPart(string partName)
         {
-            var spriteType = SpriteManager.Instance.GetSpriteTypeFromAssetName(partName);
-            var part = SpriteManager.Instance.GetSpritePart(spriteType, partName);
+            var spriteType = SpriteManager.Instance.GetActorSpriteTypeFromAssetName(partName);
+            var part = SpriteManager.Instance.GetActorSpritePart(spriteType, partName);
             if(part != null)
             {
                 modelController.UpdatePart(spriteType,part);    

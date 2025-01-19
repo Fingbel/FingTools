@@ -135,7 +135,7 @@ public static class PackageVersion
             }   
             DeleteEmptyFolders("Assets/Resources/FingTools/SpriteLibraries");        
             oldFolders.Clear();                        
-            CharacterImporterEditorWindow.LinkCharAssets();
+            CharacterImporter.LinkCharAssets();
             AssetDatabase.Refresh();
         };
         };                            

@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using FingTools;
-using UnityEditor;
-
 using UnityEngine;
 
 namespace FingTools.Internal
@@ -151,7 +148,7 @@ namespace FingTools.Internal
             
         }
 
-        public void UpdatePart(ActorPartType type, SpritePart_SO spritePart) 
+        public void UpdatePart(ActorPartType type, ActorSpritePart_SO spritePart) 
         {
             partControllers[type].UpdateLibrary(spritePart?.spriteLibraryAsset ?? null);
         }

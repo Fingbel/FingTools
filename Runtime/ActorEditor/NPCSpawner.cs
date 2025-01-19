@@ -32,7 +32,7 @@ namespace FingTools.Internal
             Vector3 position = transform.position;
 
             // Define the order in which the sprites are drawn (bodies, outfits, etc.)
-            var parts = new SpritePart_SO[]
+            var parts = new ActorSpritePart_SO[]
             {
                 npcTemplate.body,
                 npcTemplate.outfit,

@@ -34,11 +34,16 @@ public class SpriteManager : ScriptableObject
                 return _instance;
             }
         }
-    public List<SpritePart_SO> accessoryParts = new();
-    public List<SpritePart_SO> bodyParts = new();
-    public List<SpritePart_SO> outfitParts = new();
-    public List<SpritePart_SO> hairstyleParts = new();
-    public List<SpritePart_SO> eyeParts = new();           
+    public List<ActorSpritePart_SO> accessoryParts = new();
+    public List<ActorSpritePart_SO> bodyParts = new();
+    public List<ActorSpritePart_SO> outfitParts = new();
+    public List<ActorSpritePart_SO> hairstyleParts = new();
+    public List<ActorSpritePart_SO> eyeParts = new();           
+    public List<PortraitPart_SO> bodyPortraitParts = new();
+    public List<PortraitPart_SO> eyePortraitParts = new();
+    public List<PortraitPart_SO> hairstylePortraitParts = new();
+    public List<PortraitPart_SO> accessoryPortraitParts = new();
+
     private int selectedSizeIndex;
     public int SelectedSizeIndex { get => selectedSizeIndex; set => selectedSizeIndex = value;}
     private Dictionary<ActorPartType, int> spriteCounts = new Dictionary<ActorPartType, int>(); //TODO : remove this dictionary and use the scriptable list to count
@@ -71,7 +76,7 @@ public class SpriteManager : ScriptableObject
         eyeParts?.Count > 0;
     }
 
-    public SpritePart_SO GetSpritePart(ActorPartType type,string name)
+    public ActorSpritePart_SO GetActorSpritePart(ActorPartType type,string name)
     {
         return type switch
         {
@@ -85,7 +90,69 @@ public class SpriteManager : ScriptableObject
     }
 
     #if UNITY_EDITOR
-    public void PopulateSpriteLists(string destinationPath)
+    public void PopulatePortraitSpriteLists(string destinationPath)
+    {
+        if(!Directory.Exists(destinationPath)) return;
+        bodyPortraitParts.Clear();
+        eyePortraitParts.Clear();
+        hairstylePortraitParts.Clear();
+        accessoryPortraitParts.Clear();
+
+        string[] portraitPartFolders = Directory.GetDirectories(destinationPath);
+        foreach (string portraitPartFolder in portraitPartFolders)
+        {
+            string PortraitPartName = Path.GetFileName(portraitPartFolder);
+            PortraitPartType type = (PortraitPartType)GetPortraitPartTypeFromPath(portraitPartFolder);
+            
+            // Load all textures in the folder
+            Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/PortraitSprites/" + PortraitPartName);
+            // Create a SpritePart for each texture
+            foreach (Texture2D texture in textures)
+            {
+                // Load all sprites in the folder
+                Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/PortraitSprites/" + PortraitPartName + "/" + texture.name);
+
+                // Look for an existing SpritePart or Create a SpritePart with the sprites
+                PortraitPart_SO portraitPart;
+                var part = Resources.Load<PortraitPart_SO>($"FingTools/ScriptableObjects/PortraitParts/{PortraitPartName}/{texture.name}");
+                if(part != null)
+                {                    
+                    portraitPart = part;
+                }
+                else
+                {
+                    portraitPart= CreateInstance<PortraitPart_SO>();
+                    string assetName = texture.name + ".asset";
+                    string assetPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/PortraitParts/" + PortraitPartName + "/", assetName);
+                    if (!Directory.Exists(Path.GetDirectoryName(assetPath)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(assetPath));
+                    }
+                    AssetDatabase.CreateAsset(portraitPart, assetPath);
+                }       
+                portraitPart.type = type;
+                portraitPart.sprites = sprites;                            
+
+                // Add the SpritePart to the appropriate list
+                switch (type)
+                {
+                    case PortraitPartType.Accessory:
+                        accessoryPortraitParts.Add(portraitPart);
+                        break;
+                    case PortraitPartType.Skin:
+                        bodyPortraitParts.Add(portraitPart);
+                        break;
+                    case PortraitPartType.Eyes:
+                        eyePortraitParts.Add(portraitPart);
+                        break;
+                    case PortraitPartType.Hairstyle:
+                        hairstylePortraitParts.Add(portraitPart);
+                        break;                    
+                }
+            }
+        }
+    }
+    public void PopulateActorSpriteLists(string destinationPath)
     {
         if(!Directory.Exists(destinationPath)) return; //Early return as we don't have no directory
         // Clear existing lists
@@ -100,7 +167,17 @@ public class SpriteManager : ScriptableObject
         foreach (string bodyPartFolder in bodyPartFolders)
         {
             string bodyPartName = Path.GetFileName(bodyPartFolder);
-            ActorPartType type = GetSpriteTypeFromPath(bodyPartFolder);
+            var ntype = GetActorSpriteTypeFromPath(bodyPartFolder);
+            ActorPartType type;
+            if(ntype != null)
+            {
+                type = (ActorPartType)ntype;
+            }
+            else
+            {
+                Debug.LogError($"Type undefined for {bodyPartFolder}");
+                return;
+            }
 
             // Load all textures in the folder
             Texture2D[] textures = Resources.LoadAll<Texture2D>("FingTools/CharacterSprites/" + bodyPartName);
@@ -111,18 +188,16 @@ public class SpriteManager : ScriptableObject
                 // Load all sprites in the folder
                 Sprite[] sprites = Resources.LoadAll<Sprite>("FingTools/CharacterSprites/" + bodyPartName + "/" + texture.name);
 
-                //TODO : look for existing spritePartSo before creating one to prevent link break on reimport
-                // Create a SpritePart with the sprites
-                SpritePart_SO spritePart;
-                var part = Resources.Load<SpritePart_SO>($"FingTools/ScriptableObjects/CharacterParts/{bodyPartName}/{texture.name}");
+                // Look for an existing SpritePart or Create a SpritePart with the sprites
+                ActorSpritePart_SO spritePart;
+                var part = Resources.Load<ActorSpritePart_SO>($"FingTools/ScriptableObjects/CharacterParts/{bodyPartName}/{texture.name}");
                 if(part != null)
                 {
-                    Debug.Log($"SpritePart {texture.name} found");
                     spritePart = part;
                 }
                 else
                 {
-                    spritePart= CreateInstance<SpritePart_SO>();
+                    spritePart= CreateInstance<ActorSpritePart_SO>();
                     string assetName = texture.name + ".asset";
                     string assetPath = Path.Combine("Assets/Resources/FingTools/ScriptableObjects/CharacterParts/" + bodyPartName + "/", assetName);
                     if (!Directory.Exists(Path.GetDirectoryName(assetPath)))
@@ -162,36 +237,50 @@ public class SpriteManager : ScriptableObject
         AssetDatabase.Refresh();        
     }
     #endif
-    public ActorPartType GetSpriteTypeFromPath(string folderPath)
-{
-    if (folderPath.Contains("Accessories"))
-        return ActorPartType.Accessories;
-    if (folderPath.Contains("Bodies"))
-        return ActorPartType.Bodies;
-    if (folderPath.Contains("Outfits"))
-        return ActorPartType.Outfits;
-    if (folderPath.Contains("Hairstyles"))
-        return ActorPartType.Hairstyles;
-    if (folderPath.Contains("Eyes"))
-        return ActorPartType.Eyes;
+    public ActorPartType? GetActorSpriteTypeFromPath(string folderPath)
+    {
+        if (folderPath.Contains("Accessories"))
+            return ActorPartType.Accessories;
+        if (folderPath.Contains("Bodies"))
+            return ActorPartType.Bodies;
+        if (folderPath.Contains("Outfits"))
+            return ActorPartType.Outfits;
+        if (folderPath.Contains("Hairstyles"))
+            return ActorPartType.Hairstyles;
+        if (folderPath.Contains("Eyes"))
+            return ActorPartType.Eyes;
+        
+        return null; // Default case
+    }
     
-    return ActorPartType.Accessories; // Default case
-}
-public ActorPartType GetSpriteTypeFromAssetName(string assetName)
-{
-    if (assetName.Contains("Accessory"))
-        return ActorPartType.Accessories;
-    if (assetName.Contains("Body"))
-        return ActorPartType.Bodies;
-    if (assetName.Contains("Outfit"))
-        return ActorPartType.Outfits;
-    if (assetName.Contains("Hairstyle"))
-        return ActorPartType.Hairstyles;
-    if (assetName.Contains("Eyes"))
-        return ActorPartType.Eyes;
-    
-    return ActorPartType.Accessories; // Default case
-}
+    public ActorPartType GetActorSpriteTypeFromAssetName(string assetName)
+    {
+        if (assetName.Contains("Accessory"))
+            return ActorPartType.Accessories;
+        if (assetName.Contains("Body"))
+            return ActorPartType.Bodies;
+        if (assetName.Contains("Outfit"))
+            return ActorPartType.Outfits;
+        if (assetName.Contains("Hairstyle"))
+            return ActorPartType.Hairstyles;
+        if (assetName.Contains("Eyes"))
+            return ActorPartType.Eyes;
+        
+        return ActorPartType.Accessories; // Default case
+    }
+    public PortraitPartType? GetPortraitPartTypeFromPath(string folderPath)
+    {
+        if (folderPath.Contains("Accessory"))
+            return PortraitPartType.Accessory;
+        if (folderPath.Contains("Eyes"))
+            return PortraitPartType.Eyes;
+        if (folderPath.Contains("Hairstyle"))
+            return PortraitPartType.Hairstyle;
+        if (folderPath.Contains("Skin"))
+            return PortraitPartType.Skin;
+        
+        return null; // Default case
+    }
 }
 
 

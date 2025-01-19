@@ -13,7 +13,7 @@ public class ActorPostProcessor : AssetPostprocessor
             FileInfo fi = null;
             try
             {
-            fi = new System.IO.FileInfo(assetPath);
+            fi = new FileInfo(assetPath);
             }
             catch (ArgumentException) { }
             catch (PathTooLongException) { }

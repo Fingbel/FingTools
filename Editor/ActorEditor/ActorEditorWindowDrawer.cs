@@ -11,6 +11,19 @@ namespace FingTools.Internal
 {
 public partial class ActorEditorWindow : EditorWindow
 {
+    private void DrawPortrait()
+    {
+        GUILayout.Space(40);   
+        GUILayout.BeginVertical(GUILayout.Width(300));
+        GUILayout.Space(40);   
+        GUILayout.Label("PORTRAIT GO HERE");
+        GUILayout.Label("===============");
+        GUILayout.Label("===============");
+        GUILayout.Label("===============");
+        GUILayout.Label("===============");
+        GUILayout.Label("PORTRAIT GO HERE");
+        GUILayout.EndVertical();
+    }
     private void DrawPartSelectors()
     {   
         GUILayout.Space(20);     
@@ -27,7 +40,7 @@ public partial class ActorEditorWindow : EditorWindow
         DrawSaveDiscardButtons();
         GUILayout.EndVertical();
     }    
-    private static void DrawSprite(SpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
+    private static void DrawSprite(ActorSpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
     {
         if (part != null && part.sprites.Length > 0)
         {
@@ -82,20 +95,20 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.BeginVertical(GUILayout.Width(300));
 
         GUILayout.BeginHorizontal();
-        // "Create New Actor" Button
-        if (GUILayout.Button("Create New Actor", GUILayout.Width(150)))
-        {
-            CreateNewActor("NewActor");
-        }
-
-        // Delete Selected Actor Button
-        if (selectedActor != null)
-        {
-            if (GUILayout.Button("Delete this Actor",GUILayout.Width(150)))
+            // "Create New Actor" Button
+            if (GUILayout.Button("Create New Actor", GUILayout.Width(150)))
             {
-                DeleteSelectedActor();
+                CreateNewActor("NewActor");
             }
-        }
+
+            // Delete Selected Actor Button
+            if (selectedActor != null)
+            {
+                if (GUILayout.Button("Delete this Actor",GUILayout.Width(150)))
+                {
+                    DeleteSelectedActor();
+                }
+            }
         GUILayout.EndHorizontal();
 
         // Actor Info
@@ -103,25 +116,25 @@ public partial class ActorEditorWindow : EditorWindow
         
         GUILayout.BeginHorizontal();
 
-        // Display current Actor name
-        GUILayout.Label("Current Name: " + selectedActor?.name, EditorStyles.label, GUILayout.Width(150));
+            // Display current Actor name
+            GUILayout.Label("Current Name: " + selectedActor?.name, EditorStyles.label, GUILayout.Width(150));
 
-        // Input field for new name    
-        tempActorName = EditorGUILayout.TextField(tempActorName);
+            // Input field for new name    
+            tempActorName = EditorGUILayout.TextField(tempActorName);
 
-        // Checkmark button to confirm the name change
-        if (GUILayout.Button("✔", GUILayout.Width(30)))
-        {
-            actorName = tempActorName;            
-            
-            // Call the method to rename the asset
-            UpdateActorName();
-            tempActorName = string.Empty;
-            GUI.FocusControl(null);
+            // Checkmark button to confirm the name change
+            if (GUILayout.Button("✔", GUILayout.Width(30)))
+            {
+                actorName = tempActorName;            
+                
+                // Call the method to rename the asset
+                UpdateActorName();
+                tempActorName = string.Empty;
+                GUI.FocusControl(null);
 
-            AssetDatabase.SaveAssets();
-            EditorUtility.SetDirty(selectedActor);        
-        }
+                AssetDatabase.SaveAssets();
+                EditorUtility.SetDirty(selectedActor);        
+            }
 
         GUILayout.EndHorizontal();
 
@@ -169,9 +182,9 @@ public partial class ActorEditorWindow : EditorWindow
         OnActorAvailableUpdated?.Invoke();
     }
 
-    private SpritePart_SO DrawPartSelector(
+    private ActorSpritePart_SO DrawPartSelector(
     string label, 
-    List<SpritePart_SO> sheets, 
+    List<ActorSpritePart_SO> sheets, 
     int currentIndex, 
     Action<int> onIndexChanged)
     {

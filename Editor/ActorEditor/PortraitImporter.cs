@@ -14,6 +14,25 @@ namespace FingTools.Internal{
         public const string resourcesPortraitFolderPath = "Assets/Resources/FingTools/PortraitSprites"; 
         public const string portraitsFolderPath = "Assets/Resources/FingTools/Portraits";
         #if UNITY_EDITOR
+        public static void BuildPortraitFromActorSO(ref Actor_SO actor_SO)
+        {
+            if(actor_SO.portrait_SO == null)
+            {
+                Portrait_SO newPortrait =  ScriptableObject.CreateInstance<Portrait_SO>();
+                actor_SO.portrait_SO = newPortrait;            
+                string path = $"{portraitsFolderPath}/{actor_SO.name}.asset";
+                if(!Directory.Exists(portraitsFolderPath))
+                {
+                    Directory.CreateDirectory(portraitsFolderPath);
+                }
+                AssetDatabase.CreateAsset(newPortrait, path);
+                AssetDatabase.SaveAssets();
+            }
+            
+            //Here we should add the portrait parts here, we have the actor_SO as a source
+            //But first we need to build the scriptables and librairies
+
+        }        
         public static void UnzipUISprites(string zipFilePath, string spriteSize, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
             Dictionary<PortraitPartType, int> processedAssetsPerType = new Dictionary<PortraitPartType, int>()
@@ -94,27 +113,7 @@ namespace FingTools.Internal{
             return importList;
         }        
 
-        public static void BuildPortraitFromActorSO(ref Actor_SO actor_SO)
-        {
-            if(actor_SO.portrait_SO == null)
-            {
-                Portrait_SO newPortrait =  ScriptableObject.CreateInstance<Portrait_SO>();
-                actor_SO.portrait_SO = newPortrait;            
-                string path = $"{portraitsFolderPath}/{actor_SO.name}.asset";
-                if(!Directory.Exists(portraitsFolderPath))
-                {
-                    Directory.CreateDirectory(portraitsFolderPath);
-                }
-                AssetDatabase.CreateAsset(newPortrait, path);
-                AssetDatabase.SaveAssets();
-            }
-            
-            //Here we should add the portrait parts here, we have the actor_SO as a source
-
-            
-
-           
-        }
+        
         public static void RenamePortrait(string newName,Actor_SO selectedActor)
         {
             string AssetPath = AssetDatabase.GetAssetPath(selectedActor.portrait_SO);

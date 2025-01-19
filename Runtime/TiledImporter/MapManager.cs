@@ -77,6 +77,7 @@ public class MapManager : ScriptableObject
     {
 #if UNITY_EDITOR
         Instance.existingMaps.Clear();
+        if(!Directory.Exists("Assets/FingTools/Tiled/Tilemaps")) return;
         string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/FingTools/Tiled/Tilemaps" });
         foreach (string guid in guids)
         {
@@ -95,10 +96,7 @@ public class MapManager : ScriptableObject
     {
         #if UNITY_EDITOR
         Instance.existingWorlds.Clear();
-        if(!Directory.Exists("Assets/FingTools/Tiled/Tiledworlds") )
-        {
-            Directory.CreateDirectory("Assets/FingTools/Tiled/Tiledworlds");            
-        }
+        if(!Directory.Exists("Assets/FingTools/Tiled/Tiledworlds") ) return;
         string[] guids = AssetDatabase.FindAssets("", new[] { "Assets/FingTools/Tiled/Tiledworlds" });
         foreach (string guid in guids)
         {

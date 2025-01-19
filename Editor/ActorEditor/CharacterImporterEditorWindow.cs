@@ -192,20 +192,11 @@ public class CharacterImporterEditorWindow : EditorWindow
                 {
                     PortraitImporter.ProcessImportedAsset(validSizes[selectedSizeIndex]);
                 }
-                LinkCharAssets();
+                CharacterImporter.LinkCharAssets();
             }
             EditorGUI.EndDisabledGroup();              
-    }
-
-        public static void LinkCharAssets()
-        {
-            SpriteManager.Instance.PopulateSpriteLists(CharacterImporter.resourcesFolderPath);
-            SpriteLibraryBuilder.BuildAllSpriteLibraries();
-            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
-            AssetEnumGenerator.GenerateAssetEnum();
-        }
-
-        private void DrawSeparator()
+    }      
+    private void DrawSeparator()
     {
         GUILayout.Space(5);
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);

@@ -13,10 +13,30 @@ namespace FingTools.Internal
 {
     public static class CharacterImporter
     {        
-        public const string resourcesFolderPath = "Assets/Resources/FingTools/CharacterSprites"; 
+        public const string resourcesCharacterFolderPath = "Assets/Resources/FingTools/CharacterSprites"; 
+        public const string resourcesPortraitFolderPath = "Assets/Resources/FingTools/PortraitSprites"; 
         private static readonly List<string> validBodyParts = new () { "Accessories","Accessory", "Bodies", "Eyes", "Hairstyles", "Outfits","Outfit" };
         private const int slicePerSprite = 467;         
         private static readonly List<int>  spritesPerRowList = new List<int> { 4, 24, 24, 6, 12, 12, 12, 12, 24, 48, 40, 56, 56, 24, 24, 24, 16, 24, 12, 12 };
+
+        #if FINGDEBUG
+        [MenuItem("FingTools/DEBUG/Rebuild Assets")]
+        #endif
+        public static void LinkCharAssets()
+        {
+            SpriteManager.Instance.PopulateActorSpriteLists(resourcesCharacterFolderPath);
+            SpriteManager.Instance.PopulatePortraitSpriteLists(resourcesPortraitFolderPath);
+
+            SpriteLibraryBuilder.BuildAllActorSpriteLibrairies();
+            SpriteLibraryBuilder.BuildAllPortraitSpriteLibrairies();
+
+            Directory.CreateDirectory("Assets/Resources/FingTools/Actors");
+
+            AssetEnumGenerator.GenerateAssetEnum();
+            
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
         public static void UnzipIntSprites(string zipFilePath, string spriteSize, ref int unzipedAssets, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
             unzipedAssets = 0;     
@@ -56,7 +76,7 @@ namespace FingTools.Internal
                 
                 if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
                 {
-                    string outputPath = resourcesFolderPath+ $"/{type}/";
+                    string outputPath = resourcesCharacterFolderPath+ $"/{type}/";
                     if (!Directory.Exists(outputPath))
                         Directory.CreateDirectory(outputPath);
 
@@ -103,7 +123,7 @@ namespace FingTools.Internal
                 string expectedPath = $"Modern_Exteriors_{spriteSize}x{spriteSize}/Character_Generator_Addons_{spriteSize}x{spriteSize}";
                 if (entry.FullName.StartsWith(expectedPath) && entry.FullName.EndsWith(".png"))
                 {
-                    string outputPath = resourcesFolderPath+ $"/{type}/";
+                    string outputPath = resourcesCharacterFolderPath+ $"/{type}/";
                     if (!Directory.Exists(outputPath))
                         Directory.CreateDirectory(outputPath);
 
@@ -121,8 +141,8 @@ namespace FingTools.Internal
         public static void ProcessImportedAssets(string selectedSize)
         {            
             int i = 0;
-            if(!Directory.Exists(resourcesFolderPath)) return; //Early return as we don't have no directory
-            var importList = PrepareImportList(resourcesFolderPath);
+            if(!Directory.Exists(resourcesCharacterFolderPath)) return; //Early return as we don't have no directory
+            var importList = PrepareImportList(resourcesCharacterFolderPath);
             int totalAssetsToProcess = importList.Count;
             foreach (var assetFile in importList)
             {
