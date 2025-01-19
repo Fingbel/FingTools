@@ -1,5 +1,5 @@
 using System.IO;
-namespace FingTools.Helper
+namespace FingTools.Internal
 {
 public static class FingHelper
 {

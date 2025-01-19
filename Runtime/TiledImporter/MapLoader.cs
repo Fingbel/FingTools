@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using FingTools.Tiled;
+using FingTools.Internal;
 
 namespace FingTools
 {
@@ -40,7 +40,6 @@ public class MapLoader : MonoBehaviour
     [InitializeOnLoadMethod]
     static void Initialize()
     {
-        Debug.Log("MapLoader initialized");
         var mapManager = MapManager.Instance;
         if(mapManager == null)
         {
@@ -50,7 +49,7 @@ public class MapLoader : MonoBehaviour
         EditorApplication.delayCall += () =>{
             if(!Application.isPlaying)
             {
-                Instance.LoadMap(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
+                LoadMap(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
             };
         };
         
@@ -71,14 +70,14 @@ public class MapLoader : MonoBehaviour
             world.SetActive(false);
         }
     }
-    public void LoadMap(string mapObjectName,bool isWorld = false)
+    public static void LoadMap(string mapObjectName,bool isWorld = false)
     {
         mapObjectName = Path.GetFileNameWithoutExtension(mapObjectName);        
-        spawnedMaps.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));
-        spawnedWorlds.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));        
+        Instance.spawnedMaps.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));
+        Instance.spawnedWorlds.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));        
         if(isWorld)
         {
-            GameObject world = spawnedWorlds.FirstOrDefault(x => x.name == mapObjectName);
+            GameObject world = Instance.spawnedWorlds.FirstOrDefault(x => x.name == mapObjectName);
             if(world != null)
             {
                 world.SetActive(true);
@@ -88,7 +87,7 @@ public class MapLoader : MonoBehaviour
         }
         else
         {
-            GameObject map = spawnedMaps.FirstOrDefault(x => x.name == mapObjectName);
+            GameObject map = Instance.spawnedMaps.FirstOrDefault(x => x.name == mapObjectName);
             if(map != null)
             {
                 map.SetActive(true);                              

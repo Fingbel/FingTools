@@ -7,7 +7,7 @@ using Debug = UnityEngine.Debug;
 using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEditor;
 
-namespace FingTools.Tiled{
+namespace FingTools.Internal{
 public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";

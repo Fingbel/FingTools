@@ -1,13 +1,15 @@
 using System.Linq;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Compilation;
 
-#if UNITY_EDITOR
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
+namespace FingTools.Internal{
 public static class ST2ULinker
 {
     private static string superTiled2UnityPackageId = "com.seanba.super-tiled2unity";
@@ -145,5 +147,6 @@ public static class CompilationErrorHandler
             ST2ULinker.DefineAllST2USymbol();
         }
     }
+}
 }
 #endif

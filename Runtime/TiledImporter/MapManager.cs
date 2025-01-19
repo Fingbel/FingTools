@@ -2,9 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 using System.IO;
-using System;
 
-namespace FingTools.Tiled
+namespace FingTools.Internal
 {
 public class MapManager : ScriptableObject
 {

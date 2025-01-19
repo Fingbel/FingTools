@@ -1,7 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 
-namespace FingTools.Tiled
+namespace FingTools.Internal
 {
 [CustomEditor(typeof(MapManager))]
 public class MapManagerEditorWindow : Editor

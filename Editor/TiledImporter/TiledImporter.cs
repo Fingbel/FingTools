@@ -3,17 +3,17 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System;
-using FingTools.Helper;
+using System.Linq;
+
 
 
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity;
 #endif
 #if UNITY_EDITOR
-namespace FingTools.Tiled
+namespace FingTools.Internal
 {
 
     public static class TiledImporter

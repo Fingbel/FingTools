@@ -5,7 +5,7 @@ using Debug = UnityEngine.Debug;
 
 #if UNITY_EDITOR
 using UnityEditor;
-namespace FingTools.Tiled{
+namespace FingTools.Internal{
 public class CreateNewTiledMapWindow : EditorWindow
 {
     private int width = 30;
