@@ -1,10 +1,7 @@
 using System.Linq;
-using Mono.Cecil.Cil;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Compilation;
-
-
 
 #if UNITY_EDITOR
 using UnityEditor.PackageManager;
@@ -133,7 +130,9 @@ public static class CompilationErrorHandler
         bool hasPackageErrors = false;
         foreach (var message in messages)
         {
-            if (message.type == CompilerMessageType.Error && message.message.Contains("FingTools"))
+            Debug.Log(message.message);
+            if (message.type == CompilerMessageType.Error 
+            && (message.message.Contains("FingTools") || message.message.Contains("com.fingcorp.fingtools")))
             {
                 hasPackageErrors = true;
             }
