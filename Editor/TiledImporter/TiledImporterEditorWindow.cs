@@ -104,14 +104,14 @@ namespace FingTools.Tiled
             }
             else if (!isST2UInstalled)
             {
-                EditorGUILayout.LabelField("🔴 SuperTiled2Unity is not currently installed.", EditorStyles.wordWrappedLabel);
+                EditorGUILayout.LabelField("🔴 SuperTiled2Unity is required for this tool to work and is not currently installed.", EditorStyles.wordWrappedLabel);
                 EditorGUILayout.LabelField("Click on the button below to add SuperTiled2Unity Package to this Unity project.");
 
-                if (GUILayout.Button("Install SuperTiled2Unity"))
+                if (GUILayout.Button("Install SuperTiled2Unity",GUILayout.Height(40)))
                 {
                     ST2ULinker.AddPackage();
                 }
-                if (GUILayout.Button("Visit SuperTiled2Unity Itch.io page"))
+                if (GUILayout.Button("Visit SuperTiled2Unity Itch.io page",GUILayout.Height(40)))
                 {
                     Application.OpenURL("https://seanba.itch.io/supertiled2unity");
                 }

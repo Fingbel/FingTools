@@ -38,7 +38,7 @@ public static class PackageVersion
             //Old structure detected, we need to run the migration process            
             if (EditorUtility.DisplayDialog(
                 "Package Update",
-                "It seems you're updating from version 1.0.0 to 1.1.0. The folder structure has been updated and need a reorganization, Please click below to start th migration process",
+                "It seems you're updating from version 1.0.0 to 1.1.0. The folder structure has been updated and need a reorganization. Please click below to start the migration process",
                 "Migrate"))
             {
                 RunMigration("1.0.0", CurrentVersion);
