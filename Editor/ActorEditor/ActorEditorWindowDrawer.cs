@@ -15,13 +15,13 @@ public partial class ActorEditorWindow : EditorWindow
     {
         GUILayout.Space(40);   
         GUILayout.BeginVertical(GUILayout.Width(300));
-        GUILayout.Space(40);   
-        GUILayout.Label("PORTRAIT GO HERE");
-        GUILayout.Label("===============");
-        GUILayout.Label("===============");
-        GUILayout.Label("===============");
-        GUILayout.Label("===============");
-        GUILayout.Label("PORTRAIT GO HERE");
+        GUILayout.Space(40);  
+        GUILayout.Label("Portrait Preview  : ") ;
+        Rect previewRect = GUILayoutUtility.GetRect(64, 64, GUILayout.ExpandWidth(false));
+        DrawSprite(selectedActor.portrait_SO.body,globalIndex,previewRect,3);
+        DrawSprite(selectedActor.portrait_SO.accessory,globalIndex,previewRect,3);
+        DrawSprite(selectedActor.portrait_SO.hairstyle,globalIndex,previewRect,3);
+        DrawSprite(selectedActor.portrait_SO.eyes,globalIndex,previewRect,3);
         GUILayout.EndVertical();
     }
     private void DrawPartSelectors()
@@ -40,7 +40,7 @@ public partial class ActorEditorWindow : EditorWindow
         DrawSaveDiscardButtons();
         GUILayout.EndVertical();
     }    
-    private static void DrawSprite(ActorSpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
+    private static void DrawSprite(SpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
     {
         if (part != null && part.sprites.Length > 0)
         {
