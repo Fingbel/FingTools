@@ -103,10 +103,8 @@ namespace FingTools.Internal
                 {
                     selectedActorIndex = newSelectedActorIndex;
                     actorSO.objectReferenceValue = availableActors[selectedActorIndex];
-                    
-                    ActorModelController baseController = (ActorModelController)target;
-                    EditorApplication.delayCall += () => baseController.UpdatePreviewSprites();
-                    baseController.ApplyPrebuiltLibraries(availableActors[selectedActorIndex]);
+                                                            
+                    Redraw(availableActors[selectedActorIndex]);
                 }
                 
             }

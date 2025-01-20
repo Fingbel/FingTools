@@ -1,10 +1,11 @@
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System;
+using System.Collections.Generic;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.Compilation;
-
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
@@ -15,8 +16,102 @@ public static class ST2ULinker
     private static string superTiled2UnityPackageId = "com.seanba.super-tiled2unity";
     private static string superTiled2UnityGitUrl = "https://github.com/Seanba/SuperTiled2Unity.git?path=/SuperTiled2Unity/Packages/com.seanba.super-tiled2unity";
     public static bool? isSuperTiled2UnityInstalled{get;private set;}
+        
+    internal static void GenerateTSXFile(string fileName, string tilesetName, string tileSet, int width, int height, int tileSize)
+    {
+        // Calculate tile count based on the image size and tile size
+        int tileCount = width * height / (tileSize * tileSize);
 
-    public static bool CheckSuperTiled2Unity()
+        // Define the TSX file content
+        string content =
+            $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            $"<tileset version=\"1.10\" tiledversion=\"1.11.0\" name=\"{tilesetName}\" " +
+            $"tilewidth=\"{tileSize}\" tileheight=\"{tileSize}\" tilecount=\"{tileCount}\" columns=\"{width / tileSize}\">\n" +
+            $" <image source=\"{tileSet}\" width=\"{width}\" height=\"{height}\"/>\n" +
+            $"</tileset>";
+
+        // Define the file path in the Unity project's directory
+        string filePath = Path.Combine(Application.dataPath, "..", fileName);
+
+        try
+        {
+            // Write the content to the file
+            File.WriteAllText(filePath, content);
+
+            // Notify the user that the file was successfully created
+            UnityEngine.Debug.Log($"TSX file generated at: {filePath}");
+        }
+        catch (IOException e)
+        {
+            // Handle any potential file write errors
+            UnityEngine.Debug.LogError($"Failed to generate TSX file: {e.Message}");
+        }
+    }
+    internal static void AutoFixTextures(string tilesetPath)
+    {
+        #if SUPER_TILED2UNITY_INSTALLED
+        // Get all .tsx files in the specified directory
+        string[] tsxFiles = Directory.GetFiles(tilesetPath, "*.tsx", SearchOption.TopDirectoryOnly);
+        AssetDatabase.StartAssetEditing();
+        // Iterate over the .tsx files and attempt to find ImportErrors
+        foreach (string tsxFile in tsxFiles)
+        {                
+            SuperTiled2Unity.ImportErrors importErrors = AssetDatabase.LoadAssetAtPath(tsxFile, typeof(SuperTiled2Unity.ImportErrors)) as SuperTiled2Unity.ImportErrors;                
+            if (importErrors != null)
+            {
+                // Iterate over the missing sprites in the ImportErrors and handle them
+                foreach (SuperTiled2Unity.ImportErrors.MissingTileSprites missingTileSprite in importErrors.m_MissingTileSprites)
+                {
+                    // Call method to add missing sprites
+                    CallAddSpritesToTexture(missingTileSprite.m_TextureAssetPath, missingTileSprite.m_MissingSprites.Select(m => m.m_Rect));
+                }                    
+            }
+        }
+        AssetDatabase.StopAssetEditing();
+        #endif
+    }        
+    
+    internal static void CallAddSpritesToTexture(string textureAssetPath, IEnumerable<Rect> missingSpritesRects)
+    {
+        Assembly targetAssembly = null;
+
+        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        foreach (var assembly in assemblies)
+        {
+            if (assembly.FullName.Contains("Super Tiled2Unity Editor"))
+            {
+                targetAssembly = assembly;
+                break;
+            }
+        }
+        // Proceed if the assembly is found
+        if (targetAssembly != null)
+        {
+            Type targetType = targetAssembly.GetType("SuperTiled2Unity.Editor.AddST2USpritesToTexture");
+            if (targetType != null)
+            {
+                MethodInfo methodInfo = targetType.GetMethod("AddSpritesToTextureAsset", BindingFlags.NonPublic | BindingFlags.Static);
+                if (methodInfo != null)
+                {
+                    // Invoke the method using reflection
+                    methodInfo.Invoke(null, new object[] { textureAssetPath, missingSpritesRects });
+                }
+                else
+                {
+                    Debug.LogError("Method not found.");
+                }
+            }
+            else
+            {
+                Debug.LogError("Class not found.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Assembly not found.");
+        }
+    }
+    internal static bool CheckSuperTiled2Unity()
     {
         // Request the list of installed packages
         ListRequest listRequest = Client.List();
@@ -46,7 +141,7 @@ public static class ST2ULinker
         return false;
     }
 
-    public static void AddPackage()
+    internal static void AddPackage()
     {
         // Create a request to add the package
         AddRequest addRequest = Client.Add(superTiled2UnityGitUrl);
@@ -70,83 +165,7 @@ public static class ST2ULinker
         }
 
     }
-
-    [InitializeOnLoadMethod,
-    #if FINGDEBUG
-    MenuItem("FingTools/DEBUG/Force Define Scripting Symbols Update")
-    #endif
-    ]
-    public static void DefineAllST2USymbol()
-    {
-        CheckSuperTiled2Unity();
-        NamedBuildTarget[] builds = { NamedBuildTarget.Standalone, NamedBuildTarget.Android, NamedBuildTarget.WebGL };
-        foreach (NamedBuildTarget namedBuildTarget in builds)
-        {
-            DefineST2USymbol(namedBuildTarget);
-        }
-        
-    }
-
-    private static void DefineST2USymbol(NamedBuildTarget build)
-    {
-        if (isSuperTiled2UnityInstalled == true)
-        {
-            var scriptingString = PlayerSettings.GetScriptingDefineSymbols(build);
-            if (string.IsNullOrEmpty(scriptingString))
-            {
-                PlayerSettings.SetScriptingDefineSymbols(build, "SUPER_TILED2UNITY_INSTALLED");
-            }
-            else if (!scriptingString.Contains("SUPER_TILED2UNITY_INSTALLED"))
-            {
-                scriptingString += ";SUPER_TILED2UNITY_INSTALLED";
-                PlayerSettings.SetScriptingDefineSymbols(build, scriptingString);
-            }
-        }
-        else
-        {
-            var scriptingString = PlayerSettings.GetScriptingDefineSymbols(build);
-            if (scriptingString.Contains("SUPER_TILED2UNITY_INSTALLED"))
-            {
-                // Remove the "SUPER_TILED2UNITY_INSTALLED" entry from the string
-                var defines = scriptingString.Split(';')
-                                            .Where(define => define != "SUPER_TILED2UNITY_INSTALLED")
-                                            .ToArray();
-
-                // Join the remaining defines and update the symbols
-                PlayerSettings.SetScriptingDefineSymbols(build, string.Join(";", defines));
-            }
-        }
-    }
-}
-[InitializeOnLoad]
-public static class CompilationErrorHandler
-{
-    static CompilationErrorHandler()
-    {
-        CompilationPipeline.assemblyCompilationFinished += OnAssemblyCompilationFinished;
-    }
-
-    private static void OnAssemblyCompilationFinished(string assembly, CompilerMessage[] messages)
-    {
-        // Check if any of the compiler messages are errors
-        bool hasPackageErrors = false;
-        foreach (var message in messages)
-        {
-            Debug.Log(message.message);
-            if (message.type == CompilerMessageType.Error 
-            && (message.message.Contains("FingTools") || message.message.Contains("com.fingcorp.fingtools")))
-            {
-                hasPackageErrors = true;
-            }
-        }
-
-        if (hasPackageErrors)
-        {
-            // Custom logic to execute on compilation failure
-            Debug.LogWarning("Compilation failed because SuperTiled2Unity has been removed. Re-checking define symbol");
-            ST2ULinker.DefineAllST2USymbol();
-        }
-    }
 }
 }
+
 #endif

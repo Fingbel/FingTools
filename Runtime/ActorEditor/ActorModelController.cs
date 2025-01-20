@@ -132,12 +132,12 @@ namespace FingTools.Internal
             }
         }
 
-        public void ApplyPrebuiltLibraries(Actor_SO actorSO)
+        public bool ApplyPrebuiltLibraries(Actor_SO actorSO)
         {
             if (actorSO == null)
             {
                 Debug.LogWarning($"An Actor has not been assigned to the object: {transform.parent?.name}", this);
-                return;
+                return false;
             }
             // Assign prebuilt libraries to sprite controllers
             bodySpriteController?.UpdateLibrary(actorSO.body?.spriteLibraryAsset);
@@ -145,7 +145,7 @@ namespace FingTools.Internal
             outfitSpriteController?.UpdateLibrary(actorSO.outfit?.spriteLibraryAsset ?? null);
             eyeSpriteController?.UpdateLibrary(actorSO.eyes?.spriteLibraryAsset ?? null);
             accessorySpriteController?.UpdateLibrary(actorSO.accessory?.spriteLibraryAsset ?? null);
-            
+            return true;
         }
 
         public void UpdatePart(ActorPartType type, ActorSpritePart_SO spritePart) 

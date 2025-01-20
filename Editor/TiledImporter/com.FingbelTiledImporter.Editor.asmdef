@@ -14,6 +14,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.seanba.super-tiled2unity",
+            "expression": "2.2.4",
+            "define": "SUPER_TILED2UNITY_INSTALLED"
+        }
+    ],
     "noEngineReferences": false
 }
