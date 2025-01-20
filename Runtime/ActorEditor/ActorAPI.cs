@@ -14,7 +14,6 @@ namespace FingTools{
         private void Awake() 
         {
             modelController = GetComponent<ActorModelController>();  
-
         }
 
         /// <summary>
@@ -32,8 +31,7 @@ namespace FingTools{
             else
             {                
                 return false;
-            }
-            
+            }            
         }
 
         /// <summary>

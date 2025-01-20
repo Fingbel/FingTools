@@ -30,10 +30,10 @@ public class FloatingToolbar : ToolbarOverlay
             {        
                 MapManager.RefreshUniverse();
                 string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
-                bool tilesetDetected = File.Exists(projectPath);
+                bool tiledProjectFileDetected = File.Exists(projectPath);
                 bool mapDetected = MapManager.Instance.HasMaps();
                 // Check if Tiled project is detected
-                if(!tilesetDetected)
+                if(!tiledProjectFileDetected)
                 {
                     if(EditorUtility.DisplayDialog("Map Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
                     {
@@ -74,7 +74,25 @@ public class FloatingToolbar : ToolbarOverlay
         {
             text = "Tiled";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
-            clicked += TiledLinker.OpenTiled;
+            clicked += () =>{
+                string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
+                bool tilesetDetected = File.Exists(projectPath);
+                if(!tilesetDetected)
+                {
+                    if(EditorUtility.DisplayDialog("Tiled Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
+                    {
+                            TiledImporterEditorWindow.ShowWindow();
+                            return;
+                    }
+                    return;
+                }
+                else
+                {
+                    TiledLinker.CheckForTiled();
+                    TiledLinker.OpenTiled();
+                }
+                    
+                };
         }
     }
     [EditorToolbarElement(Id, typeof(EditorWindow))]
@@ -153,14 +171,16 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
             mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
         }        
         Dictionary<GUIContent,string> mapContents = new ();
-        mapContents.Add(new GUIContent("==== Maps ===="), "");
+        if(MapManager.Instance.existingWorlds.Count > 0) //Only show separator if we have worlds to show
+        {
+            mapContents.Add(new GUIContent("==== Maps ===="), "");
+        }
         foreach (string mapPath in MapManager.Instance.existingMaps)
         {
             string mapName = Path.GetFileNameWithoutExtension(mapPath);
             if (!mapsInWorlds.Contains(mapName))
             {
-                mapContents.Add(new GUIContent(mapName), mapPath);
-                //searchTreeEntries.Add(new SearchTreeEntry(new GUIContent(mapName)) { level = 1, userData = mapPath });
+                mapContents.Add(new GUIContent(mapName), mapPath);               
             }
         }       
 

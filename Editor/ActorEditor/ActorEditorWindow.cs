@@ -29,11 +29,11 @@ public partial class ActorEditorWindow : EditorWindow
     private SpriteManager spriteManager;
 
     // Lists and indexes for sprite sheets
-    private List<ActorSpritePart_SO> bodySheets = new List<ActorSpritePart_SO>();
-    private List<ActorSpritePart_SO> outfitSheets = new List<ActorSpritePart_SO>();
-    private List<ActorSpritePart_SO> eyesSheets = new List<ActorSpritePart_SO>();
-    private List<ActorSpritePart_SO> hairstyleSheets = new List<ActorSpritePart_SO>();
-    private List<ActorSpritePart_SO> accessorySheets = new List<ActorSpritePart_SO>();
+    private static List<ActorSpritePart_SO> bodySheets = new List<ActorSpritePart_SO>();
+    private static List<ActorSpritePart_SO> outfitSheets = new List<ActorSpritePart_SO>();
+    private static List<ActorSpritePart_SO> eyesSheets = new List<ActorSpritePart_SO>();
+    private static List<ActorSpritePart_SO> hairstyleSheets = new List<ActorSpritePart_SO>();
+    private static List<ActorSpritePart_SO> accessorySheets = new List<ActorSpritePart_SO>();
 
     private int bodySheetIndex = 0;
     private int outfitSheetIndex = 0;

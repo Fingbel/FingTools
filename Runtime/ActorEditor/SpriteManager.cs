@@ -34,15 +34,15 @@ public class SpriteManager : ScriptableObject
                 return _instance;
             }
         }
-    public List<ActorSpritePart_SO> accessoryParts = new();
-    public List<ActorSpritePart_SO> bodyParts = new();
-    public List<ActorSpritePart_SO> outfitParts = new();
-    public List<ActorSpritePart_SO> hairstyleParts = new();
-    public List<ActorSpritePart_SO> eyeParts = new();           
-    public List<PortraitPart_SO> bodyPortraitParts = new();
-    public List<PortraitPart_SO> eyePortraitParts = new();
-    public List<PortraitPart_SO> hairstylePortraitParts = new();
-    public List<PortraitPart_SO> accessoryPortraitParts = new();
+    public  List<ActorSpritePart_SO> accessoryParts = new();
+    public  List<ActorSpritePart_SO> bodyParts = new();
+    public  List<ActorSpritePart_SO> outfitParts = new();
+    public  List<ActorSpritePart_SO> hairstyleParts = new();
+    public  List<ActorSpritePart_SO> eyeParts = new();           
+    public  List<PortraitPart_SO> bodyPortraitParts = new();
+    public  List<PortraitPart_SO> eyePortraitParts = new();
+    public  List<PortraitPart_SO> hairstylePortraitParts = new();
+    public  List<PortraitPart_SO> accessoryPortraitParts = new();
 
     private int selectedSizeIndex;
     public int SelectedSizeIndex { get => selectedSizeIndex; set => selectedSizeIndex = value;}

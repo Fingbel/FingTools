@@ -10,5 +10,6 @@ namespace FingTools.Internal{
         public ActorSpritePart_SO accessory;   
 
         public Portrait_SO portrait_SO;
+
     }
 }

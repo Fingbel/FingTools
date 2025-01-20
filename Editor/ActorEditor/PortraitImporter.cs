@@ -25,12 +25,10 @@ namespace FingTools.Internal{
                     Directory.CreateDirectory(CharacterImporter.portraitsFolderPath);
                 }
                 AssetDatabase.CreateAsset(newPortrait, path);
-                AssetDatabase.SaveAssets();
+                
             }
-            
-            //Here we should add the portrait parts here, we have the actor_SO as a source
-            //But first we need to build the scriptables and librairies
-
+            actor_SO.portrait_SO.RefreshPortrait(actor_SO);
+            AssetDatabase.SaveAssets();
         }        
         public static void UnzipUISprites(string zipFilePath, string spriteSize, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
