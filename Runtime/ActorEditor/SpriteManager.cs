@@ -34,25 +34,18 @@ public class SpriteManager : ScriptableObject
                 return _instance;
             }
         }
-    public  List<ActorSpritePart_SO> accessoryParts = new();
-    public  List<ActorSpritePart_SO> bodyParts = new();
-    public  List<ActorSpritePart_SO> outfitParts = new();
-    public  List<ActorSpritePart_SO> hairstyleParts = new();
-    public  List<ActorSpritePart_SO> eyeParts = new();           
-    public  List<PortraitPart_SO> bodyPortraitParts = new();
-    public  List<PortraitPart_SO> eyePortraitParts = new();
-    public  List<PortraitPart_SO> hairstylePortraitParts = new();
-    public  List<PortraitPart_SO> accessoryPortraitParts = new();
+    public List<ActorSpritePart_SO> accessoryParts = new();
+    public List<ActorSpritePart_SO> bodyParts = new();
+    public List<ActorSpritePart_SO> outfitParts = new();
+    public List<ActorSpritePart_SO> hairstyleParts = new();
+    public List<ActorSpritePart_SO> eyeParts = new();           
+    public List<PortraitPart_SO> bodyPortraitParts = new();
+    public List<PortraitPart_SO> eyePortraitParts = new();
+    public List<PortraitPart_SO> hairstylePortraitParts = new();
+    public List<PortraitPart_SO> accessoryPortraitParts = new();
 
     private int selectedSizeIndex;
     public int SelectedSizeIndex { get => selectedSizeIndex; set => selectedSizeIndex = value;}
-    private Dictionary<ActorPartType, int> spriteCounts = new Dictionary<ActorPartType, int>(); //TODO : remove this dictionary and use the scriptable list to count
-
-    // Method to set the count for a specific CharSpriteType
-    public void SetSpriteCount(ActorPartType type, int count)
-    {
-        spriteCounts[type] = count; // Update the count
-    }
 
     public int GetSpriteCount(ActorPartType type)
     {
@@ -90,13 +83,13 @@ public class SpriteManager : ScriptableObject
     }
 
     #if UNITY_EDITOR
-    public static void PopulatePortraitSpriteLists(string destinationPath)
+    public void PopulatePortraitSpriteLists(string destinationPath)
     {
         if(!Directory.Exists(destinationPath)) return;
-        Instance.bodyPortraitParts.Clear();
-        Instance.eyePortraitParts.Clear();
-        Instance.hairstylePortraitParts.Clear();
-        Instance.accessoryPortraitParts.Clear();
+        bodyPortraitParts = new ();
+        eyePortraitParts = new ();
+        hairstylePortraitParts = new ();
+        accessoryPortraitParts = new ();
 
         string[] portraitPartFolders = Directory.GetDirectories(destinationPath);
         foreach (string portraitPartFolder in portraitPartFolders)
@@ -152,15 +145,15 @@ public class SpriteManager : ScriptableObject
             }
         }
     }
-    public static void PopulateActorSpriteLists(string destinationPath)
+    public void PopulateActorSpriteLists(string destinationPath)
     {
         if(!Directory.Exists(destinationPath)) return; //Early return as we don't have no directory
         // Clear existing lists
-        Instance.accessoryParts.Clear();
-        Instance.bodyParts.Clear();
-        Instance.outfitParts.Clear();
-        Instance.hairstyleParts.Clear();
-        Instance.eyeParts.Clear();
+        accessoryParts = new ();
+        bodyParts = new ();
+        outfitParts = new ();
+        hairstyleParts = new ();
+        eyeParts = new ();
 
         // Get the body part folders in the destination path
         string[] bodyPartFolders = Directory.GetDirectories(destinationPath);
@@ -213,28 +206,26 @@ public class SpriteManager : ScriptableObject
                 switch (type)
                 {
                     case ActorPartType.Accessories:
-                        Instance.accessoryParts.Add(spritePart);
+                        accessoryParts.Add(spritePart);
                         break;
                     case ActorPartType.Bodies:
-                        Instance.bodyParts.Add(spritePart);
+                        bodyParts.Add(spritePart);
                         break;
                     case ActorPartType.Outfits:
-                        Instance.outfitParts.Add(spritePart);
+                        outfitParts.Add(spritePart);
                         break;
                     case ActorPartType.Hairstyles:
-                        Instance.hairstyleParts.Add(spritePart);
+                        hairstyleParts.Add(spritePart);
                         break;
                     case ActorPartType.Eyes:
-                        Instance.eyeParts.Add(spritePart);
+                        eyeParts.Add(spritePart);
                         break;
                 }
             }
         }
 
         // Mark the manager as dirty and save the changes
-        EditorUtility.SetDirty(Instance);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();        
+        EditorUtility.SetDirty(Instance);   
     }
     #endif
     public ActorPartType? GetActorSpriteTypeFromPath(string folderPath)

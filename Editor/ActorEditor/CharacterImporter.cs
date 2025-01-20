@@ -28,14 +28,14 @@ namespace FingTools.Internal
         #endif
         public static void LinkCharAssets()
         {
-            SpriteManager.PopulateActorSpriteLists(resourcesCharacterFolderPath);
-            SpriteManager.PopulatePortraitSpriteLists(resourcesPortraitFolderPath);
-
+            AssetDatabase.StartAssetEditing();
+            SpriteManager.Instance.PopulateActorSpriteLists(resourcesCharacterFolderPath);
+            SpriteManager.Instance.PopulatePortraitSpriteLists(resourcesPortraitFolderPath);
+            AssetDatabase.StopAssetEditing();
+            
+            Directory.CreateDirectory(actorsFolderPath);
             SpriteLibraryBuilder.BuildAllActorSpriteLibrairies();
             SpriteLibraryBuilder.BuildAllPortraitSpriteLibrairies();
-
-            Directory.CreateDirectory(actorsFolderPath);
-
             AssetEnumGenerator.GenerateAssetEnum();
             
             AssetDatabase.SaveAssets();

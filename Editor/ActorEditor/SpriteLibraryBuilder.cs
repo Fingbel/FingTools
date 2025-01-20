@@ -75,6 +75,11 @@ namespace FingTools.Internal
 
         private static void AddPortraitSpritesToLibrary(PortraitPart_SO portraitPart_SO, SpriteLibraryAsset library)
         {
+            if (portraitPart_SO.sprites == null || portraitPart_SO.sprites.Length == 0)
+            {
+                Debug.LogWarning($"SpritePart_SO {portraitPart_SO.name} has no sprites assigned.");
+                return;
+            }
             var portraitAnimationConfigs = new (string category,int spritesPerDirection,bool fixedDirection)[]
             {
                 ("Talk",10,true),
@@ -84,7 +89,7 @@ namespace FingTools.Internal
             int lastIndex = 0;
             foreach (var (category, spritesPerDirection, fixedDirection) in portraitAnimationConfigs)
             {
-                library = AddSpritesToLibrary(lastIndex, category, spritesPerDirection, library, portraitPart_SO, out lastIndex, fixedDirection);
+                library = AddPortraitSpritesToLibrary(lastIndex, category, spritesPerDirection, library, portraitPart_SO, out lastIndex, fixedDirection);
             }
         }
         private static void AddActorSpritesToLibrary(ActorSpritePart_SO spritePart, SpriteLibraryAsset library)
@@ -126,16 +131,52 @@ namespace FingTools.Internal
 
             foreach (var (category, spritesPerDirection, fixedDirection) in actorAnimationConfigs)
             {
-                library = AddSpritesToLibrary(lastIndex, category, spritesPerDirection, library, spritePart, out lastIndex, fixedDirection);
+                library = AddActorSpritesToLibrary(lastIndex, category, spritesPerDirection, library, spritePart, out lastIndex, fixedDirection);
             }
         }
 
-        private static SpriteLibraryAsset AddSpritesToLibrary(
+        private static SpriteLibraryAsset AddActorSpritesToLibrary(
             int startIndex,
             string category,
             int spritesPerDirection,
             SpriteLibraryAsset library,
-            SpritePart_SO spritePart,
+            ActorSpritePart_SO spritePart,
+            out int nextIndex,
+            bool fixedDirection = false)
+        {
+            int index = startIndex;
+            var directions = Enum.GetNames(typeof(CardinalDirection));
+            if (fixedDirection)
+            {
+                directions = new string[] { CardinalDirection.S.ToString() };
+            }
+
+            foreach (var direction in directions)
+            {
+                for (int i = 0; i < spritesPerDirection; i++)
+                {
+                    if (index >= spritePart.sprites.Length)
+                    {
+                        Debug.LogError($"Index out of bounds for {spritePart.name} in {category}.");
+                        nextIndex = index;
+                        return library;
+                    }
+
+                    string label = $"{direction}_{i}";
+                    library.AddCategoryLabel(spritePart.sprites[index], category, label);
+                    index++;
+                }
+            }
+
+            nextIndex = index;
+            return library;
+        }
+        private static SpriteLibraryAsset AddPortraitSpritesToLibrary(
+            int startIndex,
+            string category,
+            int spritesPerDirection,
+            SpriteLibraryAsset library,
+            PortraitPart_SO spritePart,
             out int nextIndex,
             bool fixedDirection = false)
         {

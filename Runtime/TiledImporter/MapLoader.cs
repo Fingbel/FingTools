@@ -46,12 +46,10 @@ public class MapLoader : MonoBehaviour
             Debug.LogError("MapManager not found");
             return;
         }
-        EditorApplication.delayCall += () =>{
-            if(!Application.isPlaying)
-            {
-                LoadMap(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
-            };
-        };
+        if(mapManager.existingMaps.Count>0)
+        {
+            LoadMap(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
+        }
         
     }
     #endif

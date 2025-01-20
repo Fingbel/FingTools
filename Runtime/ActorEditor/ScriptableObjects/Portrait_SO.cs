@@ -12,20 +12,28 @@ namespace FingTools.Internal{
         public PortraitPart_SO body;        
         public void RefreshPortrait(Actor_SO actor_SO)
         {            
-            if(actor_SO.accessory != null) ResolvePortraitPart(PortraitPartType.Accessory,actor_SO.accessory.name);                
-            else accessory = null;
+            if(actor_SO.accessory != null) 
+                accessory = ResolvePortraitPart(PortraitPartType.Accessory,actor_SO.accessory.name);                
+            else 
+                accessory = null;
                 
-            if(actor_SO.eyes != null) ResolvePortraitPart(PortraitPartType.Eyes,actor_SO.eyes.name);
-            else eyes = null;
+            if(actor_SO.eyes != null) 
+                eyes = ResolvePortraitPart(PortraitPartType.Eyes,actor_SO.eyes.name);
+            else
+                eyes = null;
 
-            if(actor_SO.hairstyle != null) ResolvePortraitPart(PortraitPartType.Hairstyle,actor_SO.hairstyle.name);
-            else hairstyle = null;
+            if(actor_SO.hairstyle != null) 
+                hairstyle = ResolvePortraitPart(PortraitPartType.Hairstyle,actor_SO.hairstyle.name);
+            else
+                hairstyle = null;
 
-            if(actor_SO.body != null) ResolvePortraitPart(PortraitPartType.Skin,actor_SO.body.name);
-            else body = null;
+            if(actor_SO.body != null)
+                body = ResolvePortraitPart(PortraitPartType.Skin,actor_SO.body.name);
+            else
+                body = null;
         }
 
-        private void ResolvePortraitPart(PortraitPartType portraitPartType, string actorPartName)
+        private PortraitPart_SO ResolvePortraitPart(PortraitPartType portraitPartType, string actorPartName)
         {
             // Step 1: Add the "PG_" prefix to the actorPartName
             string expectedPortraitPartName = "PG_" + actorPartName;
@@ -41,7 +49,7 @@ namespace FingTools.Internal{
                     var newAccessory = SpriteManager.Instance.accessoryPortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
                     if (newAccessory != null)
                     {
-                        accessory = newAccessory;
+                        return newAccessory;
                     }
                     break;
 
@@ -49,7 +57,7 @@ namespace FingTools.Internal{
                     var newEyes = SpriteManager.Instance.eyePortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
                     if (newEyes != null)
                     {
-                        eyes = newEyes;
+                        return  newEyes;
                     }
                     break;
 
@@ -61,7 +69,7 @@ namespace FingTools.Internal{
                     var newHairstyle = SpriteManager.Instance.hairstylePortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
                     if (newHairstyle != null)
                     {
-                        hairstyle = newHairstyle;
+                       return  newHairstyle;
                     }
                     break;
 
@@ -74,10 +82,11 @@ namespace FingTools.Internal{
                     var newSkin = SpriteManager.Instance.bodyPortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
                     if (newSkin != null)
                     {
-                        body = newSkin;                    
+                        return  newSkin;                    
                     }
                     break;
             }
+            return null;
         }
     }
 }

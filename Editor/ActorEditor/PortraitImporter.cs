@@ -32,7 +32,7 @@ namespace FingTools.Internal{
         }        
         public static void UnzipUISprites(string zipFilePath, string spriteSize, bool enableMaxAssetsPerType, int maxAssetsPerType)
         {
-            Dictionary<PortraitPartType, int> processedAssetsPerType = new Dictionary<PortraitPartType, int>()
+            Dictionary<PortraitPartType, int> processedAssetsPerType = new ()
             {
                 { PortraitPartType.Accessory, 0 },
                 { PortraitPartType.Eyes, 0 },
@@ -91,6 +91,10 @@ namespace FingTools.Internal{
                 i++;
             }
             EditorUtility.ClearProgressBar();
+            foreach (var assetPath in importList)
+            {
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+            }
         }
 
         private static List<string> PrepareImportList()
