@@ -15,6 +15,19 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
                 Debug.Log($"World asset imported: {assetPath}");
                 MapManager.RefreshUniverse();
             }
+             if (assetPath.EndsWith(".tiled-session"))
+            {
+                // Retrieve the AssetImporter for this asset
+                AssetImporter importer = AssetImporter.GetAtPath(assetPath);
+                
+                // Set the importer to not import the asset by clearing its import settings
+                importer.assetBundleName = null; 
+                importer.userData = "Ignored"; 
+
+                // Returning here prevents Unity from further processing the asset
+                return;
+
+            }
         }
 
         foreach (string assetPath in deletedAssets)

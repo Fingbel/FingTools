@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using FingTools.Internal;
+using UnityEngine.SceneManagement;
 
 namespace FingTools
 {
@@ -22,20 +23,29 @@ public class MapLoader : MonoBehaviour
             if (_instance == null)
             {
                 _instance = FindFirstObjectByType<MapLoader>();
-                if (_instance == null)
-                {
-                    GameObject mapManagerGameObject = new GameObject("MapLoader");
-                    _instance = mapManagerGameObject.AddComponent<MapLoader>();        
-                    _instance.mapHolder = new GameObject("MapHolder");
-                    _instance.mapHolder.transform.SetParent(_instance.transform);
-                    _instance.worldHolder = new GameObject("WorldHolder");
-                    _instance.worldHolder.transform.SetParent(_instance.transform);
-                }
+                if (_instance == null){
+                    if(EditorUtility.DisplayDialog("MissingMapLoader", "An action requiring a MapLoader has been detected and no MapLoader has been found in the active scene.",$"Add MapLoader to {SceneManager.GetActiveScene().name}","Cancel"))
+                    {
+                        GameObject mapManagerGameObject = new GameObject("MapLoader");                        
+                        _instance = mapManagerGameObject.AddComponent<MapLoader>();                             
+                        _instance.mapHolder = new GameObject("MapHolder");
+                        _instance.mapHolder.transform.SetParent(_instance.transform);
+                        _instance.worldHolder = new GameObject("WorldHolder");
+                        _instance.worldHolder.transform.SetParent(_instance.transform);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }                
+            }
+            if (Application.isPlaying)
+            {
+                DontDestroyOnLoad(Instance);
             }
             return _instance;
         }
     }    
-
     #if UNITY_EDITOR
     [InitializeOnLoadMethod]
     static void Initialize()
@@ -45,12 +55,7 @@ public class MapLoader : MonoBehaviour
         {
             Debug.LogError("MapManager not found");
             return;
-        }
-        if(mapManager.existingMaps.Count>0)
-        {
-            LoadMap(mapManager.LoadedMapObject, mapManager.IsLoadedMapObjectAWorld);
-        }
-        
+        }        
     }
     #endif
 

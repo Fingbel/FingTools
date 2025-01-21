@@ -37,15 +37,15 @@ public class CreateNewTiledMapWindow : EditorWindow
     }
 
     private void OnGUI()
-    {
+    {        
         GUILayout.Label("Create New Tiled Map", EditorStyles.boldLabel);
-
+        if(MapLoader.Instance != null) MapLoader.Instance.RefreshMapObjects();
         if (!tiledProjectDetected)
         {
             EditorGUILayout.HelpBox("No Tiled project detected. Please create or open a Tiled project first.", MessageType.Warning);
             return;
         }
-
+        MapManager.RefreshUniverse();
         mapName = EditorGUILayout.TextField("Map Name:", mapName);
         width = EditorGUILayout.IntField("Map Width:", width);
         height = EditorGUILayout.IntField("Map Height:", height);
@@ -86,6 +86,7 @@ public class CreateNewTiledMapWindow : EditorWindow
         AssetDatabase.Refresh();
         Debug.Log($"New Tiled map created at: {outputPath}");
         MapManager.RefreshUniverse();
+        MapLoader.Instance.RefreshMapObjects();
         TiledLinker.OpenTiledWithProjectAndMap(outputPath);
         Close();
     }

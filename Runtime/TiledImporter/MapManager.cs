@@ -69,8 +69,7 @@ public class MapManager : ScriptableObject
     public static void RefreshUniverse()
     {
         RefreshMaps();
-        RefreshWorlds();
-        MapLoader.Instance.RefreshMapObjects();
+        RefreshWorlds();        
     }
     
     private static void RefreshMaps()

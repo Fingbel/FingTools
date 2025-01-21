@@ -12,10 +12,6 @@ public class MapManagerEditorWindow : Editor
 
         MapManager mapManager = (MapManager)target;
     }
-
-    private void OnEnable() {
-        MapManager.RefreshUniverse();
-    }
 }
 }
 #endif

@@ -29,6 +29,10 @@ public class FloatingToolbar : ToolbarOverlay
             clicked += () =>
             {        
                 MapManager.RefreshUniverse();
+                if(MapLoader.Instance != null) 
+                    MapLoader.Instance.RefreshMapObjects();
+                else
+                    return;
                 string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
                 bool tiledProjectFileDetected = File.Exists(projectPath);
                 bool mapDetected = MapManager.Instance.HasMaps();
@@ -76,6 +80,10 @@ public class FloatingToolbar : ToolbarOverlay
             text = "Tiled";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
             clicked += () =>{
+                if(MapLoader.Instance != null) 
+                    MapLoader.Instance.RefreshMapObjects();
+                else
+                    return;
                 string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
                 bool tilesetDetected = File.Exists(projectPath);
                 bool mapDetected = MapManager.Instance.HasMaps();
@@ -119,6 +127,10 @@ public class FloatingToolbar : ToolbarOverlay
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/newMap.png");
             clicked += () =>
             {
+                if(MapLoader.Instance != null) 
+                    MapLoader.Instance.RefreshMapObjects();
+                else
+                    return;
                 bool tilesetDetected = File.Exists(Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project"));
                 if(!tilesetDetected)
                 {
