@@ -156,7 +156,7 @@ namespace FingTools.Internal
                 EditorUtility.DisplayProgressBar("Processing Assets", $"Slicing asset {i + 1} of {totalAssetsToProcess} ", (i + 1) / (float)totalAssetsToProcess);
                 i++;
             }
-
+            
             EditorUtility.ClearProgressBar();
             foreach (var assetPath in importList)
             {

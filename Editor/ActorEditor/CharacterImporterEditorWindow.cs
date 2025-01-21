@@ -144,6 +144,7 @@ public class CharacterImporterEditorWindow : EditorWindow
                 
         //Test Mode
         DrawSeparator();
+        #if FINGDEBUG
         enableMaxAssetsPerType = EditorGUILayout.Toggle("Test Mode", enableMaxAssetsPerType);
         if (enableMaxAssetsPerType)
         {
@@ -151,7 +152,7 @@ public class CharacterImporterEditorWindow : EditorWindow
             maxAssetsPerType = EditorGUILayout.IntField("Assets per bodyPart", maxAssetsPerType);
             maxAssetsPerType = Mathf.Max(1, maxAssetsPerType);  // Ensure it's always a positive number
         }
-        
+        #endif
         EditorGUI.BeginDisabledGroup(sizeLocked);       
 
         // Size selection

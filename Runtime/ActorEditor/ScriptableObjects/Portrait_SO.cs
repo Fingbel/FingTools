@@ -33,7 +33,7 @@ namespace FingTools.Internal{
                 body = null;
         }
 
-        private PortraitPart_SO ResolvePortraitPart(PortraitPartType portraitPartType, string actorPartName)
+        public PortraitPart_SO ResolvePortraitPart(PortraitPartType portraitPartType, string actorPartName)
         {
             // Step 1: Add the "PG_" prefix to the actorPartName
             string expectedPortraitPartName = "PG_" + actorPartName;

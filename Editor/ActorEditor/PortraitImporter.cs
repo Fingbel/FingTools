@@ -28,6 +28,7 @@ namespace FingTools.Internal{
                 
             }
             actor_SO.portrait_SO.RefreshPortrait(actor_SO);
+            EditorUtility.SetDirty(actor_SO);
             AssetDatabase.SaveAssets();
         }        
         public static void UnzipUISprites(string zipFilePath, string spriteSize, bool enableMaxAssetsPerType, int maxAssetsPerType)
@@ -74,7 +75,7 @@ namespace FingTools.Internal{
                         entry.ExtractToFile(outputFilePath, false);
                     }
                     processedAssetsPerType[type.Value]++;
-                }
+                }   
             }
             archive.Dispose();
         }
@@ -87,7 +88,7 @@ namespace FingTools.Internal{
                 string relativeAssetPath = assetFile.Replace(Application.dataPath, "").Replace("\\", "/");
                 CommonImporter.ApplyImportSettings(AssetImporter.GetAtPath(relativeAssetPath) as TextureImporter, selectedSize,2048);
                 CommonImporter.AutoSliceTexture(relativeAssetPath, spritesPerRowList, selectedSize,true);
-                EditorUtility.DisplayProgressBar("Processing Assets", $"Slicing asset",0.5f);
+                EditorUtility.DisplayProgressBar("Processing Assets", $"Slicing asset{i + 1} of {importList.Count}",(i + 1) / (float)importList.Count);
                 i++;
             }
             EditorUtility.ClearProgressBar();

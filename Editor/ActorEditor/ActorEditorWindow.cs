@@ -44,7 +44,8 @@ public partial class ActorEditorWindow : EditorWindow
     private int globalIndex = 3;
     private int maxIndex = 3;
 
-    private Vector2 scrollPosition = Vector2.zero;
+    private Vector2 actorListScrollPosition = Vector2.zero;
+    private Vector2 globalScrollPosition = Vector2.zero;
 
     [MenuItem("FingTools/Actor Editor", false, 1)]
     public static void ShowWindow()
@@ -130,6 +131,7 @@ public partial class ActorEditorWindow : EditorWindow
 
     private void OnGUI()
     {
+        GUILayout.BeginScrollView(globalScrollPosition);
         GUILayout.BeginHorizontal();  
             GUILayout.BeginVertical(GUILayout.Width(200));        
             
@@ -154,15 +156,17 @@ public partial class ActorEditorWindow : EditorWindow
             }
             else
             {                
+                GUILayout.BeginVertical();
                 DrawActorInfoAndPreview();
-                DrawPartSelectors();
                 DrawPortrait();
-                
+                GUILayout.EndVertical();                
+                DrawPartSelectors();
             }        
         GUILayout.EndHorizontal();
 
         // Handle Enter key press for the name input field
         HandleEnterKeyPress();
+        GUILayout.EndScrollView();
     }
 
 
@@ -223,6 +227,11 @@ public partial class ActorEditorWindow : EditorWindow
         hairstyle = actor.hairstyle;
         accessory = actor.accessory;
 
+        bodyPortrait = actor.portrait_SO.body;
+        hairPortrait = actor.portrait_SO.hairstyle;
+        eyesPortrait = actor.portrait_SO.eyes;
+        accessoryPortrait = actor.portrait_SO.accessory;
+
         // Update sheet indices, default to -1 if part is null
         bodySheetIndex = body != null ? bodySheets.IndexOf(body) : -1;
         outfitSheetIndex = outfit != null ? outfitSheets.IndexOf(outfit) : -1;
@@ -232,7 +241,7 @@ public partial class ActorEditorWindow : EditorWindow
 
         // Create a snapshot of the current data
         originalactorData = CreateSnapshot(actor);
-
+        
         Repaint();
     }
 
@@ -382,10 +391,11 @@ private string GetUniqueActorName(string baseName)
             selectedActor.eyes = eyes;
             selectedActor.hairstyle = hairstyle;
             selectedActor.accessory = accessory;
+                        
             PortraitImporter.BuildPortraitFromActorSO(ref selectedActor);
             OnActorUpdated?.Invoke(selectedActor);
             // Save the updated NPC_SO
-            EditorUtility.SetDirty(selectedActor);
+            EditorUtility.SetDirty(selectedActor.portrait_SO);
             AssetDatabase.SaveAssets();      
             UpdateSpawnedActors();                         
         }
@@ -407,7 +417,7 @@ private string GetUniqueActorName(string baseName)
             newNPC.hairstyle = hairstyle;
             newNPC.accessory = accessory;            
             PortraitImporter.BuildPortraitFromActorSO(ref newNPC);
-
+            EditorUtility.SetDirty(newNPC.portrait_SO);
             AssetDatabase.CreateAsset(newNPC, path);
             AssetDatabase.SaveAssets();
 

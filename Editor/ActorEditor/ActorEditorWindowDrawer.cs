@@ -11,34 +11,45 @@ namespace FingTools.Internal
 {
 public partial class ActorEditorWindow : EditorWindow
 {
+    private PortraitPart_SO bodyPortrait;
+    private PortraitPart_SO hairPortrait;
+    private PortraitPart_SO eyesPortrait;
+    private PortraitPart_SO accessoryPortrait ;
     private void DrawPortrait()
-    {
-        GUILayout.Space(40);   
-        GUILayout.BeginVertical(GUILayout.Width(300));
-        GUILayout.Space(40);  
+    {                
         GUILayout.Label("Portrait Preview  : ") ;
-        Rect previewRect = GUILayoutUtility.GetRect(64, 64, GUILayout.ExpandWidth(false));
-        DrawSprite(selectedActor.portrait_SO.body,globalIndex,previewRect,3);
-        DrawSprite(selectedActor.portrait_SO.accessory,globalIndex,previewRect,3);
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(100);  
+        GUILayout.BeginVertical(GUILayout.Width(200));
+        Rect previewRect = GUILayoutUtility.GetRect(128, 128, GUILayout.ExpandWidth(false));
+        GUILayout.Space(40);  
+        DrawSprite(selectedActor.portrait_SO.body,globalIndex,previewRect,3);        
         DrawSprite(selectedActor.portrait_SO.hairstyle,globalIndex,previewRect,3);
         DrawSprite(selectedActor.portrait_SO.eyes,globalIndex,previewRect,3);
+        DrawSprite(selectedActor.portrait_SO.accessory,globalIndex,previewRect,3);
         GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
     }
     private void DrawPartSelectors()
     {   
-        GUILayout.Space(20);     
+        GUILayout.BeginArea(new Rect(550,0,280,500));
         GUILayout.BeginVertical();
         GUILayout.Space(40);
 
         // Part selectors
-        body = DrawPartSelector("Body", bodySheets, bodySheetIndex, (index) => bodySheetIndex = index);
-        outfit = DrawPartSelector("Outfit", outfitSheets, outfitSheetIndex, (index) => outfitSheetIndex = index);
-        eyes = DrawPartSelector("Eyes", eyesSheets, eyesSheetIndex, (index) => eyesSheetIndex = index);
-        hairstyle = DrawPartSelector("Hairstyle", hairstyleSheets, hairstyleSheetIndex, (index) => hairstyleSheetIndex = index);
-        accessory = DrawPartSelector("Accessory", accessorySheets, accessorySheetIndex, (index) => accessorySheetIndex = index);
+        body = DrawPartSelector( bodySheets, bodySheetIndex, (index) =>bodySheetIndex = index);
+        //DrawSeparator();
+        outfit = DrawPartSelector( outfitSheets, outfitSheetIndex, (index) => outfitSheetIndex = index);
+        //DrawSeparator();
+        eyes = DrawPartSelector( eyesSheets, eyesSheetIndex, (index) => eyesSheetIndex = index);
+        //DrawSeparator();
+        hairstyle = DrawPartSelector( hairstyleSheets, hairstyleSheetIndex, (index) => hairstyleSheetIndex = index);
+        //DrawSeparator();
+        accessory = DrawPartSelector( accessorySheets, accessorySheetIndex, (index) =>accessorySheetIndex = index);
 
         DrawSaveDiscardButtons();
         GUILayout.EndVertical();
+        GUILayout.EndArea();
     }    
     private static void DrawSprite(SpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
     {
@@ -183,28 +194,58 @@ public partial class ActorEditorWindow : EditorWindow
     }
 
     private ActorSpritePart_SO DrawPartSelector(
-    string label, 
     List<ActorSpritePart_SO> sheets, 
     int currentIndex, 
     Action<int> onIndexChanged)
     {
         GUILayout.BeginHorizontal();
-
+        
         // Previous Sheet button
-        if (GUILayout.Button("<", GUILayout.Width(20), GUILayout.Height(20)))
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("<", GUILayout.Width(28), GUILayout.Height(28)))
         {
             if (sheets.Count > 0)
             {
                 int newIndex = (currentIndex - 1 + sheets.Count) % sheets.Count;
                 onIndexChanged(newIndex);
+
                 Repaint();
             }
         }
-
+        GUILayout.FlexibleSpace();
+        // Display the previewed sprite
+        if (sheets.Count > 0 && currentIndex >= 0 && currentIndex < sheets.Count && sheets[currentIndex] != null)
+        {            
+            Rect rect = GUILayoutUtility.GetRect(32, 64, GUILayout.ExpandWidth(false),GUILayout.ExpandHeight(false));
+            rect.y -= 16;
+            if (Event.current.type == EventType.Repaint)
+            {
+                DrawSprite(sheets[currentIndex], 0, rect);
+            }
+        }
+        else
+        {
+            Rect rect = GUILayoutUtility.GetRect(32, 64, GUILayout.ExpandWidth(false),GUILayout.ExpandHeight(false));
+        }
+        // Next Sheet button
+        if (GUILayout.Button(">", GUILayout.Width(28), GUILayout.Height(28)))
+        {
+            if (sheets.Count > 0)
+            {
+                int newIndex = (currentIndex + 1) % sheets.Count;
+                onIndexChanged(newIndex);
+                Repaint();
+            }
+        }
         GUILayout.Space(5); // Adjust space as needed
-
+        // Clear button
+        if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20)))
+        {
+            onIndexChanged(-1);
+            Repaint();
+        }
         // Dropdown Button
-        if (GUILayout.Button(sheets.ElementAtOrDefault(currentIndex)?.name ?? "Select Part", EditorStyles.popup, GUILayout.Width(150), GUILayout.Height(20)))
+        if (GUILayout.Button(sheets.ElementAtOrDefault(currentIndex)?.name ?? "Select Part", EditorStyles.popup, GUILayout.Width(150)))
         {
             GenericMenu menu = new GenericMenu();
 
@@ -219,47 +260,15 @@ public partial class ActorEditorWindow : EditorWindow
                 menu.AddItem(new GUIContent(menuItem), i == currentIndex, () =>
                 {
                     // Update the sheet index without using ref in the lambda
-                    onIndexChanged(index);
+                    onIndexChanged(index);                    
                     Repaint();
                 });
             }
 
             menu.ShowAsContext();
         }
-        // Next Sheet button
-        if (GUILayout.Button(">", GUILayout.Width(20), GUILayout.Height(20)))
-        {
-            if (sheets.Count > 0)
-            {
-                int newIndex = (currentIndex + 1) % sheets.Count;
-                onIndexChanged(newIndex);
-                Repaint();
-            }
-        }
-        // Display the previewed sprite with tooltip
-        if (sheets.Count > 0 && currentIndex >= 0 && currentIndex < sheets.Count && sheets[currentIndex] != null)
-        {
-            Rect previewRect = GUILayoutUtility.GetRect(48, 48, GUILayout.ExpandWidth(false));
-            GUIContent content = new GUIContent
-            {
-                tooltip = sheets[currentIndex].name // Set the tooltip to the sprite sheet name
-            };
-
-            if (Event.current.type == EventType.Repaint)
-            {
-                GUI.Button(previewRect, content, GUIStyle.none);
-                DrawSprite(sheets[currentIndex], 0, previewRect);
-            }
-
-            // Clear button
-            if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20)))
-            {
-                onIndexChanged(-1);
-                Repaint();
-            }
-        }
-
-        GUILayout.Space(5); 
+        
+        
         GUILayout.EndHorizontal();
 
         // Return the selected sheet or null if no valid index
@@ -276,7 +285,7 @@ public partial class ActorEditorWindow : EditorWindow
                 .Select(path => AssetDatabase.LoadAssetAtPath<Actor_SO>(path))
                 .Where(actor => actor != null)
                 .ToList();
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            actorListScrollPosition = GUILayout.BeginScrollView(actorListScrollPosition);
             foreach (var actor in actorAssets)
             {
                 if (GUILayout.Button(actor.name, GUILayout.Height(30)))
@@ -360,7 +369,15 @@ public partial class ActorEditorWindow : EditorWindow
 
         GUILayout.EndHorizontal();
     }
-
+     private void DrawSeparator(bool horizontal = true,int beforeSpace =0,int afterSpace=0)
+        {
+            GUILayout.Space(beforeSpace);
+            if(horizontal)
+                EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            else
+                EditorGUILayout.LabelField("", GUI.skin.verticalSlider);
+            GUILayout.Space(afterSpace);
+        }     
 }
 }
 #endif
