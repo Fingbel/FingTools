@@ -17,18 +17,45 @@ public partial class ActorEditorWindow : EditorWindow
     private PortraitPart_SO eyesPortrait;
     private PortraitPart_SO accessoryPortrait ;
     bool renaming = false;
+    private float animationTick;
+    private int currentPortraitFrame = 0;
+    private int portraitDelta =0;
+    private string portraitAnimation = "Shake";
     private void DrawPortrait()
     {                
         GUILayout.Label("Portrait Preview  : ") ;
+        GUILayout.BeginHorizontal();
+        if(GUILayout.Button("Fixed",GUILayout.Width(50)))
+        {
+            portraitAnimation = "Fixed";
+            currentPortraitFrame=0;
+        }
+        if(GUILayout.Button("Talk",GUILayout.Width(50)))
+        {
+            portraitAnimation = "Talk";
+            currentPortraitFrame=0;
+        }
+        if(GUILayout.Button("Nod",GUILayout.Width(50)))
+        {
+            portraitAnimation = "Nod";
+            currentPortraitFrame=10;
+        }
+        if(GUILayout.Button("Shake",GUILayout.Width(50)))
+        {
+            portraitAnimation = "Shake";
+            currentPortraitFrame=20;
+        }
+        GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
         GUILayout.Space(100);  
         GUILayout.BeginVertical(GUILayout.Width(200));
         Rect previewRect = GUILayoutUtility.GetRect(128, 128, GUILayout.ExpandWidth(false));
         GUILayout.Space(40);  
-        DrawSprite(bodyPortrait,globalIndex,previewRect,3);        
-        DrawSprite(hairPortrait,globalIndex,previewRect,3);
-        DrawSprite(eyesPortrait,globalIndex,previewRect,3);
-        DrawSprite(accessoryPortrait,globalIndex,previewRect,3);
+
+        DrawSprite(bodyPortrait,currentPortraitFrame,previewRect,1);        
+        DrawSprite(hairPortrait,currentPortraitFrame,previewRect,1);
+        DrawSprite(eyesPortrait,currentPortraitFrame,previewRect,1);
+        DrawSprite(accessoryPortrait,currentPortraitFrame,previewRect,1);
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
     }

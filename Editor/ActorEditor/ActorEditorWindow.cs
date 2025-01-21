@@ -105,6 +105,37 @@ public partial class ActorEditorWindow : EditorWindow
         {
             LoadActorData(selectedActor);
         }
+        switch(portraitAnimation)
+        {
+            case "Talk":portraitDelta = 0; break;
+            case "Nod":portraitDelta = 10; break;
+            case "Shake":portraitDelta = 20; break;
+        }
+        currentPortraitFrame = portraitDelta;
+        EditorApplication.update += RefreshPortrait;
+    }
+    private void RefreshPortrait()
+    {   
+        if(portraitAnimation == "Fixed") return;
+        animationTick += Time.deltaTime;
+        if(animationTick >= 3f)
+        {
+            switch(portraitAnimation)
+            {
+                case "Talk":portraitDelta = 0; break;
+                case "Nod":portraitDelta = 10; break;
+                case "Shake":portraitDelta = 20; break;
+            }
+            currentPortraitFrame++;
+            if(currentPortraitFrame >= portraitDelta+10)
+                currentPortraitFrame = portraitDelta;            
+            animationTick = 0;
+            Repaint();
+        }
+        
+    }
+    private void OnDisable() {
+        EditorApplication.update -= RefreshPortrait;
     }
 
     private void LoadSpriteSheets()
