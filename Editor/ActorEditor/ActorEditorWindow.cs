@@ -274,6 +274,10 @@ public partial class ActorEditorWindow : EditorWindow
         hairstyle = actor.hairstyle;
         accessory = actor.accessory;
 
+        if(actor.portrait_SO == null) 
+        {
+            PortraitImporter.BuildPortraitFromActorSO(ref actor);
+        }
         bodyPortrait = actor.portrait_SO.body;
         hairPortrait = actor.portrait_SO.hairstyle;
         eyesPortrait = actor.portrait_SO.eyes;
