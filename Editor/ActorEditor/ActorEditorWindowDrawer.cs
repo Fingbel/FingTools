@@ -16,15 +16,21 @@ public partial class ActorEditorWindow : EditorWindow
     private PortraitPart_SO hairPortrait;
     private PortraitPart_SO eyesPortrait;
     private PortraitPart_SO accessoryPortrait ;
+    private int globalIndex = 0;
+    //private int maxIndex = 4;
     bool renaming = false;
-    private float animationTick;
+    private float actorAnimationTick;
+    private float portraitAnimationTick;
     private int currentPortraitFrame = 0;
-    private int portraitDelta =0;
-    private string portraitAnimation = "Shake";
+    private int currentActorFrame = 0;
+    private int portraitAnimationDelta =0;
+    private int actorAnimationDelta = 22;
+    private string portraitAnimation = "Fixed";
+    private string actorAnimation = "Fixed";
     private void DrawPortrait()
     {                
-        GUILayout.Label("Portrait Preview  : ") ;
         GUILayout.BeginHorizontal();
+        GUILayout.Label("Portrait Preview: ",GUILayout.Width(100)) ;        
         if(GUILayout.Button("Fixed",GUILayout.Width(50)))
         {
             portraitAnimation = "Fixed";
@@ -80,11 +86,19 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.EndVertical();
         GUILayout.EndArea();
     }    
+    private void DrawActorPreview(Rect rect)
+    {
+        if (body != null) DrawSprite(body,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+        if (outfit != null) DrawSprite(outfit,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+        if (eyes != null) DrawSprite(eyes,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+        if (hairstyle != null) DrawSprite(hairstyle,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+        if (accessory != null) DrawSprite(accessory,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+    }   
     private static void DrawSprite(SpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
     {
         if (part != null && part.sprites.Length > 0)
         {
-            spriteIndex = Mathf.Clamp(spriteIndex, localIndex, part.sprites.Length - 1); //THE 3 IS CORRECT, THIS IS THE FACING SOUTH FRAME, WE WANT THIS
+            spriteIndex = Mathf.Clamp(spriteIndex, localIndex, part.sprites.Length - 1); 
 
             Sprite sprite = part.sprites[spriteIndex];
             if (sprite != null)
@@ -118,14 +132,7 @@ public partial class ActorEditorWindow : EditorWindow
         }
     }
 
-    private void DrawActorPreview(Rect rect)
-    {
-        if (body != null) DrawSprite(body, globalIndex, rect,globalIndex);
-        if (outfit != null) DrawSprite(outfit, globalIndex, rect,globalIndex);
-        if (eyes != null) DrawSprite(eyes, globalIndex, rect,globalIndex);
-        if (hairstyle != null) DrawSprite(hairstyle, globalIndex, rect,globalIndex);
-        if (accessory != null) DrawSprite(accessory, globalIndex, rect,globalIndex);
-    }   
+    
     private void DrawActorInfoAndPreview() 
     {
         if(!Directory.Exists(CharacterImporter.actorsFolderPath))
@@ -192,12 +199,22 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.Space(10);
         GUILayout.BeginHorizontal();
         // Actor Preview
-        GUILayout.Label("Actor Preview", EditorStyles.boldLabel);
+        GUILayout.Label("Actor Preview", EditorStyles.boldLabel,GUILayout.Width(100));        
+        if(GUILayout.Button("Fixed",GUILayout.Width(50)))
+        {
+            actorAnimation = "Fixed";
+            currentActorFrame = 0;
+            actorAnimationTick = 0;
+        };
+        if(GUILayout.Button("Idle",GUILayout.Width(50)))
+        {
+            actorAnimation = "Idle";
+            currentActorFrame = 0;
+            actorAnimationTick = 0;
+        };
         GUILayout.EndHorizontal();
-
         Rect previewRect = GUILayoutUtility.GetRect(200, 200);
         DrawActorPreview(previewRect);
-
         GUILayout.Space(10);
 
         // Navigation buttons
@@ -420,22 +437,25 @@ public partial class ActorEditorWindow : EditorWindow
         // Left button
         if (GUILayout.Button("<"))
         {
-            globalIndex = (globalIndex - 1 + maxIndex + 1) % (maxIndex + 1);
+            globalIndex -= 6;
+            if(globalIndex <-18)
+                globalIndex = 0;
             Repaint();
         }
 
         GUILayout.FlexibleSpace();
 
         // Direction label
-        CardinalDirection direction = (CardinalDirection)globalIndex;
-        GUILayout.Label($"Direction: {direction} ({globalIndex + 1}/{maxIndex + 1})", GUILayout.Width(100));
+        //GUILayout.Label($"Direction: {globalIndex} ({globalIndex + 1}/{maxIndex})", GUILayout.Width(100));
 
         GUILayout.FlexibleSpace();
 
         // Right button
         if (GUILayout.Button(">"))
         {
-            globalIndex = (globalIndex + 1) % (maxIndex + 1);
+            globalIndex += 6;
+            if(globalIndex >0)
+                globalIndex = -18;
             Repaint();
         }
 

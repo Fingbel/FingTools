@@ -41,8 +41,7 @@ public partial class ActorEditorWindow : EditorWindow
     private int hairstyleSheetIndex = 0;
     private int accessorySheetIndex = 0;
 
-    private int globalIndex = 3;
-    private int maxIndex = 3;
+
 
     private Vector2 actorListScrollPosition = Vector2.zero;
     private Vector2 globalScrollPosition = Vector2.zero;
@@ -104,39 +103,53 @@ public partial class ActorEditorWindow : EditorWindow
         if (selectedActor != null)
         {
             LoadActorData(selectedActor);
-        }
-        switch(portraitAnimation)
-        {
-            case "Talk":portraitDelta = 0; break;
-            case "Nod":portraitDelta = 10; break;
-            case "Shake":portraitDelta = 20; break;
-        }
-        currentPortraitFrame = portraitDelta;
-        EditorApplication.update += RefreshPortrait;
+        }        
+        EditorApplication.update += RefreshPortraitPreview;
+        EditorApplication.update += RefreshActorPreview;
+
     }
-    private void RefreshPortrait()
+    private void OnDisable() {
+        EditorApplication.update -= RefreshPortraitPreview;
+        EditorApplication.update -= RefreshActorPreview;
+    }
+    private void RefreshActorPreview()
+    {
+        if(actorAnimation == "Fixed") return;
+        actorAnimationTick += Time.deltaTime;
+        if(actorAnimationTick >= 4f)
+        {
+            switch(actorAnimation)
+            {                
+                case "Idle":portraitAnimationDelta = 22; break;
+            }
+            currentActorFrame++;
+            if(currentActorFrame >= 5)
+                currentActorFrame = 0;
+            actorAnimationTick = 0;
+            Repaint();
+        }
+    }
+    private void RefreshPortraitPreview()
     {   
         if(portraitAnimation == "Fixed") return;
-        animationTick += Time.deltaTime;
-        if(animationTick >= 3f)
+        portraitAnimationTick += Time.deltaTime;
+        if(portraitAnimationTick >= 3f)
         {
             switch(portraitAnimation)
             {
-                case "Talk":portraitDelta = 0; break;
-                case "Nod":portraitDelta = 10; break;
-                case "Shake":portraitDelta = 20; break;
+                case "Talk":portraitAnimationDelta = 0; break;
+                case "Nod":portraitAnimationDelta = 10; break;
+                case "Shake":portraitAnimationDelta = 20; break;
             }
             currentPortraitFrame++;
-            if(currentPortraitFrame >= portraitDelta+10)
-                currentPortraitFrame = portraitDelta;            
-            animationTick = 0;
+            if(currentPortraitFrame >= portraitAnimationDelta+10)
+                currentPortraitFrame = portraitAnimationDelta;            
+            portraitAnimationTick = 0;
             Repaint();
         }
         
     }
-    private void OnDisable() {
-        EditorApplication.update -= RefreshPortrait;
-    }
+    
 
     private void LoadSpriteSheets()
     {
@@ -155,9 +168,7 @@ public partial class ActorEditorWindow : EditorWindow
         outfitSheetIndex = outfitSheets.Count > 0 ? 0 : -1;
         eyesSheetIndex = eyesSheets.Count > 0 ? 0 : -1;
         hairstyleSheetIndex = hairstyleSheets.Count > 0 ? 0 : -1;
-        accessorySheetIndex = accessorySheets.Count > 0 ? 0 : -1;
-
-        globalIndex = Mathf.Clamp(globalIndex, 0, maxIndex);
+        accessorySheetIndex = accessorySheets.Count > 0 ? 0 : -1;        
     }
 
     private void OnGUI()
