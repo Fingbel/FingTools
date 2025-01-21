@@ -131,7 +131,6 @@ public partial class ActorEditorWindow : EditorWindow
             }
         }
     }
-
     
     private void DrawActorInfoAndPreview() 
     {
@@ -200,17 +199,20 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.BeginHorizontal();
         // Actor Preview
         GUILayout.Label("Actor Preview", EditorStyles.boldLabel,GUILayout.Width(100));        
-        if(GUILayout.Button("Fixed",GUILayout.Width(50)))
+        if(GUILayout.Button("Fixed",GUILayout.Width(60)))
         {
             actorAnimation = "Fixed";
             currentActorFrame = 0;
-            actorAnimationTick = 0;
         };
-        if(GUILayout.Button("Idle",GUILayout.Width(50)))
+        if(GUILayout.Button("Idle",GUILayout.Width(60)))
         {
             actorAnimation = "Idle";
             currentActorFrame = 0;
-            actorAnimationTick = 0;
+        };
+        if(GUILayout.Button("Walking",GUILayout.Width(60)))
+        {
+            actorAnimation = "Walking";
+            currentActorFrame = 0;
         };
         GUILayout.EndHorizontal();
         Rect previewRect = GUILayoutUtility.GetRect(200, 200);

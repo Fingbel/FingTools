@@ -114,14 +114,16 @@ public partial class ActorEditorWindow : EditorWindow
     }
     private void RefreshActorPreview()
     {
-        if(actorAnimation == "Fixed") return;
+        if(actorAnimation == "Fixed") {actorAnimationDelta =3;Repaint();return;}
+        switch(actorAnimation)
+        {                
+            case "Idle":actorAnimationDelta = 22; break;
+            case "Walking":actorAnimationDelta = 46; break;
+        }
         actorAnimationTick += Time.deltaTime;
         if(actorAnimationTick >= 4f)
         {
-            switch(actorAnimation)
-            {                
-                case "Idle":portraitAnimationDelta = 22; break;
-            }
+            
             currentActorFrame++;
             if(currentActorFrame >= 5)
                 currentActorFrame = 0;
@@ -131,16 +133,17 @@ public partial class ActorEditorWindow : EditorWindow
     }
     private void RefreshPortraitPreview()
     {   
-        if(portraitAnimation == "Fixed") return;
+        if(portraitAnimation == "Fixed") {portraitAnimationDelta = 0;Repaint();return;}
+        switch(portraitAnimation)
+        {
+            case "Talk":portraitAnimationDelta = 0; break;
+            case "Nod":portraitAnimationDelta = 10; break;
+            case "Shake":portraitAnimationDelta = 20; break;
+        }
         portraitAnimationTick += Time.deltaTime;
         if(portraitAnimationTick >= 3f)
         {
-            switch(portraitAnimation)
-            {
-                case "Talk":portraitAnimationDelta = 0; break;
-                case "Nod":portraitAnimationDelta = 10; break;
-                case "Shake":portraitAnimationDelta = 20; break;
-            }
+            
             currentPortraitFrame++;
             if(currentPortraitFrame >= portraitAnimationDelta+10)
                 currentPortraitFrame = portraitAnimationDelta;            
