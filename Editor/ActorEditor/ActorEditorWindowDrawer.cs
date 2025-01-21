@@ -208,7 +208,7 @@ public partial class ActorEditorWindow : EditorWindow
             if (sheets.Count > 0)
             {
                 int newIndex = (currentIndex - 1 + sheets.Count) % sheets.Count;
-                Process(actorPartType,onIndexChanged, newIndex);
+                ProcessPortraitPreview(actorPartType,onIndexChanged, newIndex);
             }
         }
         GUILayout.FlexibleSpace();
@@ -232,15 +232,14 @@ public partial class ActorEditorWindow : EditorWindow
             if (sheets.Count > 0)
             {
                 int newIndex = (currentIndex + 1) % sheets.Count;
-                Process(actorPartType,onIndexChanged, newIndex);
+                ProcessPortraitPreview(actorPartType,onIndexChanged, newIndex);
             }
         }
         GUILayout.Space(5); // Adjust space as needed
         // Clear button
         if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20)))
         {
-            onIndexChanged(-1);
-            Process(actorPartType,onIndexChanged,-1);
+            ProcessPortraitPreview(actorPartType,onIndexChanged,-1);
             Repaint();
         }
         // Dropdown Button
@@ -258,7 +257,7 @@ public partial class ActorEditorWindow : EditorWindow
                 int index = i; // Capture the current index
                 menu.AddItem(new GUIContent(menuItem), i == currentIndex, () =>
                 {
-                    Process(actorPartType,onIndexChanged, index);
+                    ProcessPortraitPreview(actorPartType,onIndexChanged, index);
                 });
             }
 
@@ -272,7 +271,7 @@ public partial class ActorEditorWindow : EditorWindow
         return currentIndex >= 0 && currentIndex < sheets.Count ? sheets[currentIndex] : null;
     }
 
-        private void Process(ActorPartType type, Action<int> onIndexChanged, int index)
+        private void ProcessPortraitPreview(ActorPartType type, Action<int> onIndexChanged, int index)
         {
             onIndexChanged(index);
             
@@ -354,7 +353,7 @@ public partial class ActorEditorWindow : EditorWindow
             GUIStyle customStyle = new GUIStyle(EditorStyles.radioButton);
             customStyle.fontSize = 14;
             customStyle.normal.textColor = Color.red;
-            
+                        
             if (GUILayout.Button("Discard Changes", GUILayout.Height(30), GUILayout.Width(120)))
             {
                 DiscardActorChanges();
@@ -368,7 +367,7 @@ public partial class ActorEditorWindow : EditorWindow
                 else
                     EditorUtility.DisplayDialog("Error", "An actor canno't be saved without a body", "OK");
             }
-
+            EditorGUI.EndDisabledGroup();
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);

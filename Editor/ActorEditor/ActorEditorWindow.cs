@@ -340,14 +340,19 @@ private string GetUniqueActorName(string baseName)
     private void DiscardActorChanges()
 {
     if (originalactorData != null)
-    {
+    {        
         // Restore data from the snapshot
-        actorName = originalactorData.name;
-        body = originalactorData.body;
-        outfit = originalactorData.outfit;
-        eyes = originalactorData.eyes;
-        hairstyle = originalactorData.hairstyle;
-        accessory = originalactorData.accessory;
+        actorName = selectedActor.name;
+        body = selectedActor.body;
+        outfit = selectedActor.outfit;
+        eyes = selectedActor.eyes;
+        hairstyle = selectedActor.hairstyle;
+        accessory = selectedActor.accessory;
+
+        bodyPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Skin,body.name);
+        eyesPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Eyes,eyes.name);
+        hairPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Hairstyle,hairstyle.name);
+        accessoryPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Accessory,accessory.name);
 
         // Update sheet indexes
         bodySheetIndex = body != null ? bodySheets.IndexOf(body) : -1;
@@ -357,7 +362,9 @@ private string GetUniqueActorName(string baseName)
         accessorySheetIndex = accessory != null ? accessorySheets.IndexOf(accessory) : -1;
 
         // Reset any other state as necessary
-        originalactorData = null; // Clear snapshot after discarding changes
+        originalactorData = null;
+        AssetDatabase.SaveAssets();   
+        LoadActorData(selectedActor);
         Repaint(); // Force repaint to update GUI state
     }
 }
