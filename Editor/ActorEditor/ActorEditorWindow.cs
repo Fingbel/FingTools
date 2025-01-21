@@ -47,7 +47,6 @@ public partial class ActorEditorWindow : EditorWindow
     {
         ActorEditorWindow window = GetWindow<ActorEditorWindow>(true);
         window.titleContent = new GUIContent("Actor Editor");
-
         window.Show();
     }
 
@@ -57,7 +56,6 @@ public partial class ActorEditorWindow : EditorWindow
         window.titleContent = new GUIContent(_actorName);
         window.CreateNewActor(_actorName,npcSpawner);        
         window.Show();
-
     }
 
     public static void SetActorToPreview(Actor_SO actor)
@@ -102,12 +100,13 @@ public partial class ActorEditorWindow : EditorWindow
         }        
         EditorApplication.update += RefreshPortraitPreview;
         EditorApplication.update += RefreshActorPreview;
-
     }
+
     private void OnDisable() {
         EditorApplication.update -= RefreshPortraitPreview;
         EditorApplication.update -= RefreshActorPreview;
     }
+
     private void RefreshActorPreview()
     {
         if(actorAnimation == "Fixed") {actorAnimationDelta = 22;Repaint();return;}
@@ -125,7 +124,6 @@ public partial class ActorEditorWindow : EditorWindow
                 currentActorFrame = 0;
             actorAnimationTick = 0;
             Repaint();
-
         }
     }
     private void RefreshPortraitPreview()
@@ -147,7 +145,6 @@ public partial class ActorEditorWindow : EditorWindow
             portraitAnimationTick = 0;
             Repaint();
         }
-        
     }
     
     private void LoadSpriteSheets()
@@ -213,20 +210,12 @@ public partial class ActorEditorWindow : EditorWindow
     private void HandleEnterKeyPress()
     {
         Event e = Event.current;
-
-        // Check for Enter key press when in the GUI
         if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Return)
         {
-            // Only act if a text field is focused
             if (GUI.GetNameOfFocusedControl() == "TempNameField")
             {
-                // Trigger the same action as the checkmark button
                 UpdateActorName();
-
-                // Remove focus from the text field
                 GUI.FocusControl(null);
-
-                // Consume the event to prevent further processing
                 e.Use();
             }
         }
@@ -248,9 +237,7 @@ public partial class ActorEditorWindow : EditorWindow
         if (selectedActor != null)
         {        
             actorName = tempActorName;        
-            // Rename the asset to reflect the updated name
             RenameSelectedActorAsset(actorName);
-            
             AssetDatabase.SaveAssets();
             EditorUtility.SetDirty(selectedActor);
             
