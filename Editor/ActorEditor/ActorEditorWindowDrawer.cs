@@ -174,11 +174,9 @@ public partial class ActorEditorWindow : EditorWindow
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             // Input field for new name    
-            tempActorName = EditorGUILayout.TextField(selectedActor.name);
+            tempActorName = EditorGUILayout.TextField(tempActorName);
             if (GUILayout.Button("✔", GUILayout.Width(30)))
             {
-                actorName = tempActorName;            
-                
                 // Call the method to rename the asset
                 renaming = !UpdateActorName();
                 tempActorName = string.Empty;
@@ -406,18 +404,15 @@ public partial class ActorEditorWindow : EditorWindow
 
             GUILayout.BeginHorizontal();
 
-            // Discard Changes Button
-            GUIStyle customStyle = new GUIStyle(EditorStyles.radioButton);
-            customStyle.fontSize = 14;
-            customStyle.normal.textColor = Color.red;
-                        
-            if (GUILayout.Button("Discard Changes", GUILayout.Height(30), GUILayout.Width(120)))
+            
+
+            if(GUILayout.Button("Discard Changes", GUILayout.Height(30), GUILayout.Width(120)))
             {
                 DiscardActorChanges();
-            }
+            }            
             GUILayout.Space(20);
             // Save modifications Button
-            if (GUILayout.Button("Save Actor", GUILayout.Height(30), GUILayout.Width(120)))
+            if (GUILayout.Button("Save Changes", GUILayout.Height(30), GUILayout.Width(120)))
             {
                 if (body != null)
                     SaveActor();
@@ -431,7 +426,15 @@ public partial class ActorEditorWindow : EditorWindow
             // Restore original GUI.enabled state
             GUI.enabled = originalGUIState;
         }
-
+        Texture2D MakeTex(int width, int height, Color col)
+        {
+            Color[] pix = new Color[width * height];
+            for (int i = 0; i < pix.Length; i++) pix[i] = col;
+            Texture2D result = new Texture2D(width, height);
+            result.SetPixels(pix);
+            result.Apply();
+            return result;
+        }
         private void DrawNavigationButtons()
     {
         GUILayout.BeginHorizontal();
@@ -448,7 +451,7 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.FlexibleSpace();
 
         // Direction label
-        //GUILayout.Label($"Direction: {globalIndex} ({globalIndex + 1}/{maxIndex})", GUILayout.Width(100));
+        GUILayout.Label($"Direction: {globalIndex} ({globalIndex + 1}/4", GUILayout.Width(100));
 
         GUILayout.FlexibleSpace();
 
