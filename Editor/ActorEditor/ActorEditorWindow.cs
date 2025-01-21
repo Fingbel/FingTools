@@ -125,6 +125,7 @@ public partial class ActorEditorWindow : EditorWindow
                 currentActorFrame = 0;
             actorAnimationTick = 0;
             Repaint();
+
         }
     }
     private void RefreshPortraitPreview()
@@ -149,6 +150,28 @@ public partial class ActorEditorWindow : EditorWindow
         
     }
 
+    private void RefreshPortraitPreview()
+    {   
+        if(portraitAnimation == "Fixed") {portraitAnimationDelta = 0;Repaint();return;}
+        switch(portraitAnimation)
+        {
+            case "Talk":portraitAnimationDelta = 0; break;
+            case "Nod":portraitAnimationDelta = 10; break;
+            case "Shake":portraitAnimationDelta = 20; break;
+        }
+        portraitAnimationTick += Time.deltaTime;
+        if(portraitAnimationTick >= 3f)
+        {
+            
+            currentPortraitFrame++;
+            if(currentPortraitFrame >= portraitAnimationDelta+10)
+                currentPortraitFrame = portraitAnimationDelta;            
+            portraitAnimationTick = 0;
+            Repaint();
+        }
+        
+    }
+    
     private void LoadSpriteSheets()
     {
         if (spriteManager == null)
@@ -270,6 +293,7 @@ public partial class ActorEditorWindow : EditorWindow
         {
             PortraitImporter.BuildPortraitFromActorSO(ref actor);
         }
+
         bodyPortrait = actor.portrait_SO.body;
         hairPortrait = actor.portrait_SO.hairstyle;
         eyesPortrait = actor.portrait_SO.eyes;
