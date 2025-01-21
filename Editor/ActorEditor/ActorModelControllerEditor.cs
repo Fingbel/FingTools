@@ -104,7 +104,7 @@ namespace FingTools.Internal
                     selectedActorIndex = newSelectedActorIndex;
                     actorSO.objectReferenceValue = availableActors[selectedActorIndex];
                                                             
-                    Redraw(availableActors[selectedActorIndex]);
+                    Redraw(availableActors[newSelectedActorIndex]);
                 }
                 
             }

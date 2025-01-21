@@ -114,7 +114,7 @@ public partial class ActorEditorWindow : EditorWindow
     }
     private void RefreshActorPreview()
     {
-        if(actorAnimation == "Fixed") {actorAnimationDelta =3;Repaint();return;}
+        if(actorAnimation == "Fixed") {actorAnimationDelta = 22;Repaint();return;}
         switch(actorAnimation)
         {                
             case "Idle":actorAnimationDelta = 22; break;
@@ -125,7 +125,7 @@ public partial class ActorEditorWindow : EditorWindow
         {
             
             currentActorFrame++;
-            if(currentActorFrame >= 5)
+            if(currentActorFrame >= 6)
                 currentActorFrame = 0;
             actorAnimationTick = 0;
             Repaint();
@@ -288,7 +288,12 @@ public partial class ActorEditorWindow : EditorWindow
 
         // Create a snapshot of the current data
         originalactorData = CreateSnapshot(actor);
-        
+
+        //Reset animation to fixed
+        actorAnimation = "Fixed";
+        currentActorFrame = 0;
+        portraitAnimation = "Fixed";
+        currentPortraitFrame = 0;
         renaming = false;
         Repaint();
     }
