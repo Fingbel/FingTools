@@ -34,15 +34,11 @@ public partial class ActorEditorWindow : EditorWindow
     private List<ActorSpritePart_SO> eyesSheets = new List<ActorSpritePart_SO>();
     private List<ActorSpritePart_SO> hairstyleSheets = new List<ActorSpritePart_SO>();
     private List<ActorSpritePart_SO> accessorySheets = new List<ActorSpritePart_SO>();
-
     private int bodySheetIndex = 0;
     private int outfitSheetIndex = 0;
     private int eyesSheetIndex = 0;
     private int hairstyleSheetIndex = 0;
     private int accessorySheetIndex = 0;
-
-
-
     private Vector2 actorListScrollPosition = Vector2.zero;
     private Vector2 globalScrollPosition = Vector2.zero;
 
@@ -152,7 +148,6 @@ public partial class ActorEditorWindow : EditorWindow
         }
         
     }
-    
 
     private void LoadSpriteSheets()
     {
@@ -214,7 +209,6 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.EndScrollView();
     }
 
-
     private void HandleEnterKeyPress()
     {
         Event e = Event.current;
@@ -262,8 +256,6 @@ public partial class ActorEditorWindow : EditorWindow
         }
         return true;
     }
-    
-    
 
     private void LoadActorData(Actor_SO actor)
     {
