@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 
 #if UNITY_EDITOR
 namespace FingTools.Internal
@@ -212,78 +213,74 @@ public partial class ActorEditorWindow : EditorWindow
     List<ActorSpritePart_SO> sheets, 
     int currentIndex, 
     Action<int> onIndexChanged)
-    {
-        GUILayout.BeginHorizontal();
-        
-        // Previous Sheet button
-        GUILayout.FlexibleSpace();
-        if (GUILayout.Button("<", GUILayout.Width(28), GUILayout.Height(28)))
         {
-            if (sheets.Count > 0)
-            {
-                int newIndex = (currentIndex - 1 + sheets.Count) % sheets.Count;
-                ProcessPortraitPreview(actorPartType,onIndexChanged, newIndex);
-            }
-        }
-        GUILayout.FlexibleSpace();
-        // Display the previewed sprite
-        if (sheets.Count > 0 && currentIndex >= 0 && currentIndex < sheets.Count && sheets[currentIndex] != null)
-        {            
-            Rect rect = GUILayoutUtility.GetRect(32, 64, GUILayout.ExpandWidth(false),GUILayout.ExpandHeight(false));
-            rect.y -= 16;
-            if (Event.current.type == EventType.Repaint)
-            {
-                DrawSprite(sheets[currentIndex], 0, rect);
-            }
-        }
-        else
-        {
-            Rect rect = GUILayoutUtility.GetRect(32, 64, GUILayout.ExpandWidth(false),GUILayout.ExpandHeight(false));
-        }
-        // Next Sheet button
-        if (GUILayout.Button(">", GUILayout.Width(28), GUILayout.Height(28)))
-        {
-            if (sheets.Count > 0)
-            {
-                int newIndex = (currentIndex + 1) % sheets.Count;
-                ProcessPortraitPreview(actorPartType,onIndexChanged, newIndex);
-            }
-        }
-        GUILayout.Space(5); // Adjust space as needed
-        // Clear button
-        if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20)))
-        {
-            ProcessPortraitPreview(actorPartType,onIndexChanged,-1);
-            Repaint();
-        }
-        // Dropdown Button
-        if (GUILayout.Button(sheets.ElementAtOrDefault(currentIndex)?.name ?? "Select Part", EditorStyles.popup, GUILayout.Width(150)))
-        {
-            GenericMenu menu = new GenericMenu();
+            GUILayout.BeginHorizontal();
 
-            // Add menu items
-            for (int i = 0; i < sheets.Count; i++)
+            // Previous Sheet button
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("<", GUILayout.Width(28), GUILayout.Height(28)))
             {
-                var sheet = sheets[i];
-                string menuItem = sheet.name;
-
-                // Add item to the menu with an updated index
-                int index = i; // Capture the current index
-                menu.AddItem(new GUIContent(menuItem), i == currentIndex, () =>
+                if (sheets.Count > 0)
                 {
-                    ProcessPortraitPreview(actorPartType,onIndexChanged, index);
-                });
+                    int newIndex = (currentIndex - 1 + sheets.Count) % sheets.Count;
+                    ProcessPortraitPreview(actorPartType, onIndexChanged, newIndex);
+                }
+            }
+            GUILayout.FlexibleSpace();
+            // Display the previewed sprite
+            if (sheets.Count > 0 && currentIndex >= 0 && currentIndex < sheets.Count && sheets[currentIndex] != null)
+            {
+                Rect rect = GUILayoutUtility.GetRect(32, 64, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
+                rect.y -= 16;
+                if (Event.current.type == EventType.Repaint)
+                {
+                    DrawSprite(sheets[currentIndex], 0, rect);
+                }
+            }
+            else
+            {
+                Rect rect = GUILayoutUtility.GetRect(32, 64, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
+            }
+            // Next Sheet button
+            if (GUILayout.Button(">", GUILayout.Width(28), GUILayout.Height(28)))
+            {
+                if (sheets.Count > 0)
+                {
+                    int newIndex = (currentIndex + 1) % sheets.Count;
+                    ProcessPortraitPreview(actorPartType, onIndexChanged, newIndex);
+                }
+            }
+            GUILayout.Space(5); // Adjust space as needed
+                                // Clear button
+            if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20)))
+            {
+                ProcessPortraitPreview(actorPartType, onIndexChanged, -1);
+                Repaint();
             }
 
-            menu.ShowAsContext();
-        }
-        
-        
-        GUILayout.EndHorizontal();
+            // Dropdown Button
+            //We need to change the basic dropdown  for a SearchWindow
+            DrawSearchTree(actorPartType, sheets, currentIndex, onIndexChanged);
+            GUILayout.EndHorizontal();
 
-        // Return the selected sheet or null if no valid index
-        return currentIndex >= 0 && currentIndex < sheets.Count ? sheets[currentIndex] : null;
-    }
+            // Return the selected sheet or null if no valid index
+            return currentIndex >= 0 && currentIndex < sheets.Count ? sheets[currentIndex] : null;
+        }
+        private void DrawSearchTree(ActorPartType actorPartType, List<ActorSpritePart_SO> sheets, int currentIndex, Action<int> onIndexChanged)
+        {
+           if (GUILayout.Button(sheets.ElementAtOrDefault(currentIndex)?.name ?? "Select Part", EditorStyles.popup, GUILayout.Width(150)))
+            {
+                // Create and display the SearchWindow
+                var searchWindow = ScriptableObject.CreateInstance<PartSearchWindow>();
+                searchWindow.Initialize(sheets, selectedPart =>
+                {
+                    int newIndex = sheets.IndexOf(selectedPart);
+                    ProcessPortraitPreview(actorPartType, onIndexChanged, newIndex);
+                });
+
+                SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), searchWindow);
+            }  
+        }        
 
         private void ProcessPortraitPreview(ActorPartType type, Action<int> onIndexChanged, int index)
         {
@@ -416,16 +413,99 @@ public partial class ActorEditorWindow : EditorWindow
         }
 
         GUILayout.EndHorizontal();
+    }    
+}
+public class PartSearchWindow : ScriptableObject, ISearchWindowProvider
+{
+    private List<ActorSpritePart_SO> parts;
+    private Action<ActorSpritePart_SO> onPartSelected;
+
+    // Initialize the SearchWindow
+    public void Initialize(List<ActorSpritePart_SO> parts, Action<ActorSpritePart_SO> onPartSelected)
+    {
+        this.parts = parts;
+        this.onPartSelected = onPartSelected;
     }
-     private void DrawSeparator(bool horizontal = true,int beforeSpace =0,int afterSpace=0)
+
+    // Populate the SearchWindow with entries
+    public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
+    {
+        List<SearchTreeEntry> entries = new List<SearchTreeEntry>
         {
-            GUILayout.Space(beforeSpace);
-            if(horizontal)
-                EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            new SearchTreeGroupEntry(new GUIContent("Select Part"), 0) // Top-level group
+        };
+        // Categories to exclude from grouping 
+        HashSet<string> excludedCategories = new HashSet<string> { "Eyes","Body" };
+        // Dictionary to group entries by their base name
+        Dictionary<string, List<ActorSpritePart_SO>> groupedParts = new Dictionary<string, List<ActorSpritePart_SO>>();
+
+        foreach (var part in parts)
+        {
+            // Extract base name (e.g., "Accessory_01_Ladybug" from "Accessory_01_Ladybug_01")
+            string baseName = GetBaseName(part.name);
+
+            // Check if this category is excluded
+            if (excludedCategories.Contains(baseName))
+            {
+                // Add directly as a single entry
+                entries.Add(new SearchTreeEntry(new GUIContent(part.name))
+                {
+                    level = 1, // Directly under the top group
+                    userData = part
+                });
+            }
             else
-                EditorGUILayout.LabelField("", GUI.skin.verticalSlider);
-            GUILayout.Space(afterSpace);
-        }     
+            {
+                // Group other entries
+                if (!groupedParts.ContainsKey(baseName))
+                {
+                    groupedParts[baseName] = new List<ActorSpritePart_SO>();
+                }
+                groupedParts[baseName].Add(part);
+            }
+        }
+
+        // Add grouped entries to the search tree
+        foreach (var group in groupedParts)
+        {
+            // Add the group as a new tree entry
+            entries.Add(new SearchTreeGroupEntry(new GUIContent(group.Key), 1)); // Group level
+
+            // Add individual items within the group
+            foreach (var part in group.Value)
+            {
+                entries.Add(new SearchTreeEntry(new GUIContent(part.name))
+                {
+                    level = 2, // Indented under the group
+                    userData = part // Store part data
+                });
+            }
+        }
+
+        return entries;
+    }
+
+    // Helper method to extract the base name
+    private string GetBaseName(string partName)
+    {
+        // Split by underscore and remove the last numeric segment
+        string[] segments = partName.Split('_');
+        if (segments.Length > 1 && int.TryParse(segments.Last(), out _))
+        {
+            return string.Join("_", segments.Take(segments.Length - 1));
+        }
+        return partName; // Return full name if no numeric suffix
+    }
+
+    // Handle selection
+    public bool OnSelectEntry(SearchTreeEntry entry, SearchWindowContext context)
+    {
+        if (entry.userData is ActorSpritePart_SO selectedPart)
+        {
+            onPartSelected?.Invoke(selectedPart); // Notify of selection
+        }
+        return true;
+    }
 }
 }
 #endif
