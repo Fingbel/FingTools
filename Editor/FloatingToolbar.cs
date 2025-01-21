@@ -24,7 +24,7 @@ public class FloatingToolbar : ToolbarOverlay
         public MapSwitch()
         {
             text = "SwitchMap";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/switchMap.png");
             
             clicked += () =>
             {        
@@ -59,10 +59,11 @@ public class FloatingToolbar : ToolbarOverlay
             };
         }
 
-        private void ShowSearchWindow()
+        private string ShowSearchWindow()
         {
             var searchWindow = ScriptableObject.CreateInstance<MapSearchWindow>();
             SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), searchWindow);
+            return "";
         }
     }
     [EditorToolbarElement(Id, typeof(EditorWindow))]
@@ -77,6 +78,7 @@ public class FloatingToolbar : ToolbarOverlay
             clicked += () =>{
                 string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
                 bool tilesetDetected = File.Exists(projectPath);
+                bool mapDetected = MapManager.Instance.HasMaps();
                 if(!tilesetDetected)
                 {
                     if(EditorUtility.DisplayDialog("Tiled Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
@@ -88,8 +90,19 @@ public class FloatingToolbar : ToolbarOverlay
                 }
                 else
                 {
-                    TiledLinker.CheckForTiled();
-                    TiledLinker.OpenTiled();
+                    if(mapDetected)
+                    {
+                        TiledLinker.CheckForTiled();
+                        TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\"+MapManager.Instance.LoadedMapObject+".tmx");
+                    }
+                    else
+                    {
+                        if(EditorUtility.DisplayDialog("Map Loader", "No Tiled maps have been created yet, would you like to create one ?", "Yes", "No"))
+                        {
+                            CreateNewTiledMapWindow.ShowWindow();
+                        };              
+                    }
+                    
                 }
                     
                 };
@@ -103,7 +116,7 @@ public class FloatingToolbar : ToolbarOverlay
         public NewMap()
         {
             text = "New Map";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/icon.png");
+            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/newMap.png");
             clicked += () =>
             {
                 bool tilesetDetected = File.Exists(Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project"));
