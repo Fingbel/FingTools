@@ -23,10 +23,10 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.BeginVertical(GUILayout.Width(200));
         Rect previewRect = GUILayoutUtility.GetRect(128, 128, GUILayout.ExpandWidth(false));
         GUILayout.Space(40);  
-        DrawSprite(selectedActor.portrait_SO.body,globalIndex,previewRect,3);        
-        DrawSprite(selectedActor.portrait_SO.hairstyle,globalIndex,previewRect,3);
-        DrawSprite(selectedActor.portrait_SO.eyes,globalIndex,previewRect,3);
-        DrawSprite(selectedActor.portrait_SO.accessory,globalIndex,previewRect,3);
+        DrawSprite(bodyPortrait,globalIndex,previewRect,3);        
+        DrawSprite(hairPortrait,globalIndex,previewRect,3);
+        DrawSprite(eyesPortrait,globalIndex,previewRect,3);
+        DrawSprite(accessoryPortrait,globalIndex,previewRect,3);
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
     }
@@ -37,15 +37,15 @@ public partial class ActorEditorWindow : EditorWindow
         GUILayout.Space(40);
 
         // Part selectors
-        body = DrawPartSelector( bodySheets, bodySheetIndex, (index) =>bodySheetIndex = index);
+        body = DrawPartSelector(ActorPartType.Bodies, bodySheets, bodySheetIndex, (index) =>bodySheetIndex = index);
         //DrawSeparator();
-        outfit = DrawPartSelector( outfitSheets, outfitSheetIndex, (index) => outfitSheetIndex = index);
+        outfit = DrawPartSelector(ActorPartType.Outfits, outfitSheets, outfitSheetIndex, (index) => outfitSheetIndex = index);
         //DrawSeparator();
-        eyes = DrawPartSelector( eyesSheets, eyesSheetIndex, (index) => eyesSheetIndex = index);
+        eyes = DrawPartSelector(ActorPartType.Eyes, eyesSheets, eyesSheetIndex, (index) => eyesSheetIndex = index);
         //DrawSeparator();
-        hairstyle = DrawPartSelector( hairstyleSheets, hairstyleSheetIndex, (index) => hairstyleSheetIndex = index);
+        hairstyle = DrawPartSelector(ActorPartType.Hairstyles, hairstyleSheets, hairstyleSheetIndex, (index) => hairstyleSheetIndex = index);
         //DrawSeparator();
-        accessory = DrawPartSelector( accessorySheets, accessorySheetIndex, (index) =>accessorySheetIndex = index);
+        accessory = DrawPartSelector(ActorPartType.Accessories, accessorySheets, accessorySheetIndex, (index) =>accessorySheetIndex = index);
 
         DrawSaveDiscardButtons();
         GUILayout.EndVertical();
@@ -194,6 +194,7 @@ public partial class ActorEditorWindow : EditorWindow
     }
 
     private ActorSpritePart_SO DrawPartSelector(
+    ActorPartType actorPartType,
     List<ActorSpritePart_SO> sheets, 
     int currentIndex, 
     Action<int> onIndexChanged)
@@ -207,9 +208,7 @@ public partial class ActorEditorWindow : EditorWindow
             if (sheets.Count > 0)
             {
                 int newIndex = (currentIndex - 1 + sheets.Count) % sheets.Count;
-                onIndexChanged(newIndex);
-
-                Repaint();
+                Process(actorPartType,onIndexChanged, newIndex);
             }
         }
         GUILayout.FlexibleSpace();
@@ -233,8 +232,7 @@ public partial class ActorEditorWindow : EditorWindow
             if (sheets.Count > 0)
             {
                 int newIndex = (currentIndex + 1) % sheets.Count;
-                onIndexChanged(newIndex);
-                Repaint();
+                Process(actorPartType,onIndexChanged, newIndex);
             }
         }
         GUILayout.Space(5); // Adjust space as needed
@@ -242,6 +240,7 @@ public partial class ActorEditorWindow : EditorWindow
         if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20)))
         {
             onIndexChanged(-1);
+            Process(actorPartType,onIndexChanged,-1);
             Repaint();
         }
         // Dropdown Button
@@ -259,9 +258,7 @@ public partial class ActorEditorWindow : EditorWindow
                 int index = i; // Capture the current index
                 menu.AddItem(new GUIContent(menuItem), i == currentIndex, () =>
                 {
-                    // Update the sheet index without using ref in the lambda
-                    onIndexChanged(index);                    
-                    Repaint();
+                    Process(actorPartType,onIndexChanged, index);
                 });
             }
 
@@ -274,7 +271,45 @@ public partial class ActorEditorWindow : EditorWindow
         // Return the selected sheet or null if no valid index
         return currentIndex >= 0 && currentIndex < sheets.Count ? sheets[currentIndex] : null;
     }
-    private void DrawActorList()
+
+        private void Process(ActorPartType type, Action<int> onIndexChanged, int index)
+        {
+            onIndexChanged(index);
+            
+            switch(type)
+            {
+                case ActorPartType.Bodies:
+                if(index != -1)
+                    bodyPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Skin, bodySheets[index].name);
+                else
+                    bodyPortrait = null;
+                break;
+                
+                case ActorPartType.Eyes:
+                if(index != -1)
+                    eyesPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Eyes, eyesSheets[index].name);
+                else
+                    eyesPortrait = null;
+                break;
+
+                case ActorPartType.Hairstyles:
+                if(index != -1)
+                    hairPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Hairstyle, hairstyleSheets[index].name);
+                else
+                    hairPortrait = null;
+                break;
+
+                case ActorPartType.Accessories:
+                if(index != -1)
+                    accessoryPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Accessory, accessorySheets[index].name);
+                else
+                    accessoryPortrait = null;
+                break;
+            }
+            Repaint();
+        }
+
+        private void DrawActorList()
         {
             GUILayout.BeginVertical(GUILayout.Width(200));            
             GUILayout.Label("Select Actor", EditorStyles.boldLabel);

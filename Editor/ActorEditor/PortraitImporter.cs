@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.IO;
 using UnityEditor;
+using System.Text.RegularExpressions;
 
 namespace FingTools.Internal{
 
@@ -13,6 +14,83 @@ namespace FingTools.Internal{
         private static readonly List<string> validBodyParts = new () { "Accessory",  "Eyes", "Hairstyle", "Skin" };
         
         #if UNITY_EDITOR
+        public static void ResolvePortrait(Portrait_SO portrait_SO,Actor_SO actor_SO)
+        {            
+            if(actor_SO.accessory != null) 
+                portrait_SO.accessory = ResolvePortraitPart(PortraitPartType.Accessory,actor_SO.accessory.name);                
+            else 
+                portrait_SO.accessory = null;
+                
+            if(actor_SO.eyes != null) 
+                portrait_SO.eyes = ResolvePortraitPart(PortraitPartType.Eyes,actor_SO.eyes.name);
+            else
+                portrait_SO.eyes = null;
+
+            if(actor_SO.hairstyle != null) 
+                portrait_SO.hairstyle = ResolvePortraitPart(PortraitPartType.Hairstyle,actor_SO.hairstyle.name);
+            else
+                portrait_SO.hairstyle = null;
+
+            if(actor_SO.body != null)
+                portrait_SO.body = ResolvePortraitPart(PortraitPartType.Skin,actor_SO.body.name);
+            else
+                portrait_SO.body = null;
+        }
+        public static PortraitPart_SO ResolvePortraitPart(PortraitPartType portraitPartType, string actorPartName)
+        {
+            // Step 1: Add the "PG_" prefix to the actorPartName
+            string expectedPortraitPartName = "PG_" + actorPartName;
+
+            // Now process the PortraitPartType
+            switch (portraitPartType)
+            {
+                case PortraitPartType.Accessory:
+                    expectedPortraitPartName = Regex.Replace(expectedPortraitPartName, @"(_0[1-9])$", match =>
+                    {
+                        return match.Value.Replace("0", "");
+                    });
+                    var newAccessory = SpriteManager.Instance.accessoryPortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
+                    if (newAccessory != null)
+                    {
+                        return newAccessory;
+                    }
+                    break;
+
+                case PortraitPartType.Eyes:
+                    var newEyes = SpriteManager.Instance.eyePortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
+                    if (newEyes != null)
+                    {
+                        return  newEyes;
+                    }
+                    break;
+
+                case PortraitPartType.Hairstyle:
+                    expectedPortraitPartName = Regex.Replace(expectedPortraitPartName, @"(_0[1-9])$", match =>
+                    {
+                        return match.Value.Replace("0", "");
+                    });
+                    var newHairstyle = SpriteManager.Instance.hairstylePortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
+                    if (newHairstyle != null)
+                    {
+                       return  newHairstyle;
+                    }
+                    break;
+
+                case PortraitPartType.Skin:
+                    expectedPortraitPartName = "PG_Skin" + actorPartName.Substring(4);
+                    expectedPortraitPartName = Regex.Replace(expectedPortraitPartName, @"(_0[1-9])$", match =>
+                    {
+                        return match.Value.Replace("0", "");
+                    });
+                    var newSkin = SpriteManager.Instance.bodyPortraitParts.Where(x => x.name == expectedPortraitPartName).FirstOrDefault();
+                    if (newSkin != null)
+                    {
+                        return  newSkin;                    
+                    }
+                    break;
+            }
+            return null;
+        }
         public static void BuildPortraitFromActorSO(ref Actor_SO actor_SO)
         {
             if(actor_SO.portrait_SO == null)
@@ -27,8 +105,8 @@ namespace FingTools.Internal{
                 AssetDatabase.CreateAsset(newPortrait, path);
                 
             }
-            actor_SO.portrait_SO.RefreshPortrait(actor_SO);
-            EditorUtility.SetDirty(actor_SO);
+            ResolvePortrait(actor_SO.portrait_SO,actor_SO);
+            EditorUtility.SetDirty(actor_SO.portrait_SO);
             AssetDatabase.SaveAssets();
         }        
         public static void UnzipUISprites(string zipFilePath, string spriteSize, bool enableMaxAssetsPerType, int maxAssetsPerType)

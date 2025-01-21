@@ -397,7 +397,8 @@ private string GetUniqueActorName(string baseName)
             // Save the updated NPC_SO
             EditorUtility.SetDirty(selectedActor.portrait_SO);
             AssetDatabase.SaveAssets();      
-            UpdateSpawnedActors();                         
+            UpdateSpawnedActors();         
+            
         }
         else
         {
@@ -425,7 +426,7 @@ private string GetUniqueActorName(string baseName)
             Selection.activeObject = newNPC;
 
             Debug.Log($"NPC {actorName} created at {path}");
-        }
+        }        
     }
 
         private void UpdateSpawnedActors()
