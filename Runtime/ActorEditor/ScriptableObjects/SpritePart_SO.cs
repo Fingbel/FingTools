@@ -1,13 +1,9 @@
 using UnityEngine;
 using UnityEngine.U2D.Animation;
 
-namespace FingTools.Internal
+public abstract class SpritePart_SO : ScriptableObject
 {
-[System.Serializable]
-public class SpritePart_SO : ScriptableObject
-{
-    public ActorPartType type;
     public Sprite[] sprites;
     public SpriteLibraryAsset spriteLibraryAsset; 
-} 
+
 }

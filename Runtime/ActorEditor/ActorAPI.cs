@@ -5,32 +5,20 @@ using UnityEngine;
 namespace FingTools{
 
     public enum CardinalDirection { E, N, W, S }
-
-    public enum LoopingAnimation
-    {
-        Fixed, Idle, Walking, Pushing,Sleeping, Sitting, Phoning,  Reading, BookTurning,GunIdling
-    }
-
-    public enum OneShotAnimation
-    {
-        Phone_Out,Phone_In, Picking, Gifting, Lifting, Throwing, Hitting, 
-        Punching, Stabbing,GunGrabbing,GunShooting, Hurting                
-    }
-
+    public enum LoopingAnimation {Fixed, Idle, Walking, Pushing,Sleeping, Sitting, Phoning,  Reading, BookTurning,GunIdling}
+    public enum OneShotAnimation {Phone_Out,Phone_In, Picking, Gifting, Lifting, Throwing, Hitting, Punching, Stabbing,GunGrabbing,GunShooting, Hurting}
     public enum ActorPartType {Accessories,Bodies,Outfits,Hairstyles,Eyes}
-
     public class ActorAPI : MonoBehaviour
     {
-        private ActorModelController modelController;
-
-    private void Awake() {
-            modelController = GetComponent<ActorModelController>();
+        public ActorModelController modelController;
+        private void Awake() 
+        {
+            modelController = GetComponent<ActorModelController>();  
         }
 
         /// <summary>
         /// Set the actor's current direction (North, South, East, West).
         /// </summary>
-
         public bool SetDirection(CardinalDirection direction)
         {
             if(modelController.CurrentDirection != direction)
@@ -43,11 +31,10 @@ namespace FingTools{
             else
             {                
                 return false;
-            }
-            
+            }            
         }
-        /// <summary>
 
+        /// <summary>
         /// Remove a body part from the actor, you only need to pass the ActorPartType of the part. 
         /// The Body part cannot be removed, use SetBodyPart directly instead.
         /// </summary>
@@ -65,16 +52,17 @@ namespace FingTools{
                 return false;
             }
         }
+
         /// <summary>
-        /// Equip a body part to the actor, you only need to pass the name of the part. 
+        /// Update a body part of the actor, you only need to pass the name of the part. 
         /// The easisest and safest way is to use the enums auto-generated at import. 
         /// Example : EquipBodyPart(AccessoriesAssets.Accessory_01_Ladybug_01.ToString());
         /// </summary>
         /// <param name="partName"></param>
         public bool EquipBodyPart(string partName)
         {
-            var spriteType = SpriteManager.Instance.GetSpriteTypeFromAssetName(partName);
-            var part = SpriteManager.Instance.GetSpritePart(spriteType, partName);
+            var spriteType = SpriteManager.Instance.GetActorSpriteTypeFromAssetName(partName);
+            var part = SpriteManager.Instance.GetActorSpritePart(spriteType, partName);
             if(part != null)
             {
                 modelController.UpdatePart(spriteType,part);    
@@ -89,9 +77,18 @@ namespace FingTools{
         }
 
         /// <summary>
+        /// Update the preset actor
+        /// </summary>
+        /// <param name="actor_SO"></param>
+        /// <returns></returns>
+        public bool LoadActor(Actor_SO actor_SO)
+        {
+            return modelController.ApplyPrebuiltLibraries(actor_SO);
+        }
+
+        /// <summary>
         ///  Set the actor to a new looping animation.
         /// </summary>
-
         public bool SetLoopingAnimation(LoopingAnimation animation)
         {            
             if(animation.ToString() != modelController.currentAnimation)
@@ -108,7 +105,6 @@ namespace FingTools{
         /// <summary>
         /// Play a one shot animation
         /// </summary>
-
         public bool PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
         {
             if(!modelController.isLocked)

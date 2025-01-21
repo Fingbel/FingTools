@@ -10,47 +10,89 @@ namespace FingTools.Internal
     public class SpriteLibraryBuilder : Editor
     {
         // Root folder where SpriteLibraries will be stored
-        private const string LibraryRootFolderName = "SpriteLibraries";
 
-        public static void BuildAllSpriteLibraries()
+        public static void BuildAllPortraitSpriteLibrairies()
         {
-            // Get all SpritePart_SO assets
-            string[] guids = AssetDatabase.FindAssets("t:SpritePart_SO");
+            string[] guids = AssetDatabase.FindAssets("t:PortraitPart_SO");
             foreach (string guid in guids)
             {
                 string spritePartPath = AssetDatabase.GUIDToAssetPath(guid);
-                SpritePart_SO spritePart = AssetDatabase.LoadAssetAtPath<SpritePart_SO>(spritePartPath);
+                PortraitPart_SO portraitSpritePart = AssetDatabase.LoadAssetAtPath<PortraitPart_SO>(spritePartPath);
+                SpriteLibraryAsset library = CreateInstance<SpriteLibraryAsset>();
+                AddPortraitSpritesToLibrary(portraitSpritePart,library);
 
-                if (spritePart != null)
+                // Create a folder for the CharSpriteType
+                string baseFolder = GetBaseFolder(spritePartPath, "FingTools");
+                string libraryFolder = $"{baseFolder}/{CharacterImporter.PortraitLibraryRootFolderName}/{portraitSpritePart.type}";
+
+                CreateFolderHierarchy(libraryFolder);
+
+                // Save the library in the designated folder
+                string libraryPath = $"{libraryFolder}/{portraitSpritePart.name}_Library.asset";
+                AssetDatabase.CreateAsset(library, libraryPath);
+
+                // Assign the library to the SpritePart_SO
+                portraitSpritePart.spriteLibraryAsset = AssetDatabase.LoadAssetAtPath<SpriteLibraryAsset>(libraryPath);
+                EditorUtility.SetDirty(portraitSpritePart);
+            }
+        }
+        public static void BuildAllActorSpriteLibrairies()
+        {
+            // Get all SpritePart_SO assets
+            string[] guids = AssetDatabase.FindAssets("t:ActorSpritePart_SO");
+            foreach (string guid in guids)
+            {
+                string spritePartPath = AssetDatabase.GUIDToAssetPath(guid);
+                ActorSpritePart_SO actorSpritePart = AssetDatabase.LoadAssetAtPath<ActorSpritePart_SO>(spritePartPath);
+
+                if (actorSpritePart != null)
                 {
                     // Create a new SpriteLibraryAsset
-                    SpriteLibraryAsset library = ScriptableObject.CreateInstance<SpriteLibraryAsset>();
+                    SpriteLibraryAsset library = CreateInstance<SpriteLibraryAsset>();
 
                     // Add sprites to the library
-                    AddSpritesToLibrary(spritePart, library);
+                    AddActorSpritesToLibrary(actorSpritePart, library);
 
                     // Create a folder for the CharSpriteType
                     string baseFolder = GetBaseFolder(spritePartPath, "FingTools");
-                    string libraryFolder = $"{baseFolder}/{LibraryRootFolderName}/{spritePart.type}";
+                    string libraryFolder = $"{baseFolder}/{CharacterImporter.ActorLibraryRootFolderName}/{actorSpritePart.type}";
 
                     // Ensure the subfolder exists
                     CreateFolderHierarchy(libraryFolder);
 
                     // Save the library in the designated folder
-                    string libraryPath = $"{libraryFolder}/{spritePart.name}_Library.asset";
+                    string libraryPath = $"{libraryFolder}/{actorSpritePart.name}_Library.asset";
                     AssetDatabase.CreateAsset(library, libraryPath);
 
                     // Assign the library to the SpritePart_SO
-                    spritePart.spriteLibraryAsset = AssetDatabase.LoadAssetAtPath<SpriteLibraryAsset>(libraryPath);
-                    EditorUtility.SetDirty(spritePart);
+                    actorSpritePart.spriteLibraryAsset = AssetDatabase.LoadAssetAtPath<SpriteLibraryAsset>(libraryPath);
+                    EditorUtility.SetDirty(actorSpritePart);
                 }
             }
 
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            
         }
 
-        private static void AddSpritesToLibrary(SpritePart_SO spritePart, SpriteLibraryAsset library)
+        private static void AddPortraitSpritesToLibrary(PortraitPart_SO portraitPart_SO, SpriteLibraryAsset library)
+        {
+            if (portraitPart_SO.sprites == null || portraitPart_SO.sprites.Length == 0)
+            {
+                Debug.LogWarning($"SpritePart_SO {portraitPart_SO.name} has no sprites assigned.");
+                return;
+            }
+            var portraitAnimationConfigs = new (string category,int spritesPerDirection,bool fixedDirection)[]
+            {
+                ("Talk",10,true),
+                ("Nod",10,true),
+                ("Shake",10,true)
+            };
+            int lastIndex = 0;
+            foreach (var (category, spritesPerDirection, fixedDirection) in portraitAnimationConfigs)
+            {
+                library = AddPortraitSpritesToLibrary(lastIndex, category, spritesPerDirection, library, portraitPart_SO, out lastIndex, fixedDirection);
+            }
+        }
+        private static void AddActorSpritesToLibrary(ActorSpritePart_SO spritePart, SpriteLibraryAsset library)
         {
             if (spritePart.sprites == null || spritePart.sprites.Length == 0)
             {
@@ -61,7 +103,7 @@ namespace FingTools.Internal
             int lastIndex = 0;
 
             // Animation configurations
-            var animationConfigs = new (string category, int spritesPerDirection, bool fixedDirection)[]
+            var actorAnimationConfigs = new (string category, int spritesPerDirection, bool fixedDirection)[]
             {
                 ("Fixed", 1, false),
                 ("Idle", 6, false),
@@ -87,18 +129,54 @@ namespace FingTools.Internal
                 ("Hurting", 3, false),
             };
 
-            foreach (var config in animationConfigs)
+            foreach (var (category, spritesPerDirection, fixedDirection) in actorAnimationConfigs)
             {
-                library = AddSpritesToLibrary(lastIndex, config.category, config.spritesPerDirection, library, spritePart, out lastIndex, config.fixedDirection);
+                library = AddActorSpritesToLibrary(lastIndex, category, spritesPerDirection, library, spritePart, out lastIndex, fixedDirection);
             }
         }
 
-        private static SpriteLibraryAsset AddSpritesToLibrary(
+        private static SpriteLibraryAsset AddActorSpritesToLibrary(
             int startIndex,
             string category,
             int spritesPerDirection,
             SpriteLibraryAsset library,
-            SpritePart_SO spritePart,
+            ActorSpritePart_SO spritePart,
+            out int nextIndex,
+            bool fixedDirection = false)
+        {
+            int index = startIndex;
+            var directions = Enum.GetNames(typeof(CardinalDirection));
+            if (fixedDirection)
+            {
+                directions = new string[] { CardinalDirection.S.ToString() };
+            }
+
+            foreach (var direction in directions)
+            {
+                for (int i = 0; i < spritesPerDirection; i++)
+                {
+                    if (index >= spritePart.sprites.Length)
+                    {
+                        Debug.LogError($"Index out of bounds for {spritePart.name} in {category}.");
+                        nextIndex = index;
+                        return library;
+                    }
+
+                    string label = $"{direction}_{i}";
+                    library.AddCategoryLabel(spritePart.sprites[index], category, label);
+                    index++;
+                }
+            }
+
+            nextIndex = index;
+            return library;
+        }
+        private static SpriteLibraryAsset AddPortraitSpritesToLibrary(
+            int startIndex,
+            string category,
+            int spritesPerDirection,
+            SpriteLibraryAsset library,
+            PortraitPart_SO spritePart,
             out int nextIndex,
             bool fixedDirection = false)
         {

@@ -10,13 +10,13 @@ namespace FingTools.Internal
         private const string GeneratedPath = "Assets/Resources/Fingtools/GeneratedAssetEnum.cs";
         public static void GenerateAssetEnum()
         {
-            string[] guids = AssetDatabase.FindAssets("t:SpritePart_SO");
+            string[] guids = AssetDatabase.FindAssets("t:ActorSpritePart_SO");
             Dictionary<ActorPartType,List<string>> assets = new();
 
             foreach (var guid in guids)
-            {
+            {                
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                SpritePart_SO spritePart = AssetDatabase.LoadAssetAtPath<SpritePart_SO>(path);
+                ActorSpritePart_SO spritePart = AssetDatabase.LoadAssetAtPath<ActorSpritePart_SO>(path);
 
                 if(!assets.ContainsKey(spritePart.type))
                 {                
@@ -41,7 +41,7 @@ namespace FingTools.Internal
             File.WriteAllText(GeneratedPath, output);
             AssetDatabase.Refresh();
 
-            Debug.Log("Asset enum generated at " + GeneratedPath);
+            //Debug.Log("Asset enum generated at " + GeneratedPath);
         }
     }
 }
