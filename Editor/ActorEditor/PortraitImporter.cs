@@ -38,6 +38,7 @@ namespace FingTools.Internal{
         }
         public static PortraitPart_SO ResolvePortraitPart(PortraitPartType portraitPartType, string actorPartName)
         {
+            if(string.IsNullOrEmpty(actorPartName)) return null;
             // Step 1: Add the "PG_" prefix to the actorPartName
             string expectedPortraitPartName = "PG_" + actorPartName;
 

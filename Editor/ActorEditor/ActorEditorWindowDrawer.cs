@@ -15,6 +15,7 @@ public partial class ActorEditorWindow : EditorWindow
     private PortraitPart_SO hairPortrait;
     private PortraitPart_SO eyesPortrait;
     private PortraitPart_SO accessoryPortrait ;
+    bool renaming = false;
     private void DrawPortrait()
     {                
         GUILayout.Label("Portrait Preview  : ") ;
@@ -124,35 +125,48 @@ public partial class ActorEditorWindow : EditorWindow
 
         // Actor Info
         GUILayout.Label("Actor Information", EditorStyles.boldLabel);
-        
         GUILayout.BeginHorizontal();
-
-            // Display current Actor name
-            GUILayout.Label("Current Name: " + selectedActor?.name, EditorStyles.label, GUILayout.Width(150));
-
+        // Display current Actor name
+        GUILayout.Label("Current Name: " + selectedActor?.name, EditorStyles.label, GUILayout.Width(200));        
+        if(!renaming)
+        {
+            if(GUILayout.Button("Rename"))
+            {
+                renaming = !renaming;
+            }
+        }
+        else
+        {            
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
             // Input field for new name    
-            tempActorName = EditorGUILayout.TextField(tempActorName);
-
-            // Checkmark button to confirm the name change
+            tempActorName = EditorGUILayout.TextField(selectedActor.name);
             if (GUILayout.Button("✔", GUILayout.Width(30)))
             {
                 actorName = tempActorName;            
                 
                 // Call the method to rename the asset
-                UpdateActorName();
+                renaming = !UpdateActorName();
                 tempActorName = string.Empty;
                 GUI.FocusControl(null);
-
                 AssetDatabase.SaveAssets();
                 EditorUtility.SetDirty(selectedActor);        
             }
-
+            if (GUILayout.Button("X", GUILayout.Width(30)))
+            {
+                renaming = false;
+                tempActorName = "";
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+        }
         GUILayout.EndHorizontal();
-
         GUILayout.Space(10);
-
+        GUILayout.BeginHorizontal();
         // Actor Preview
         GUILayout.Label("Actor Preview", EditorStyles.boldLabel);
+        GUILayout.EndHorizontal();
+
         Rect previewRect = GUILayoutUtility.GetRect(200, 200);
         DrawActorPreview(previewRect);
 

@@ -192,7 +192,7 @@ public partial class ActorEditorWindow : EditorWindow
         }
     }
 
-    private void UpdateActorName()
+    private bool UpdateActorName()
     {
         var actors = Resources.LoadAll<Actor_SO>("FingTools/Actors");
         foreach (var actorName in actors)
@@ -202,7 +202,7 @@ public partial class ActorEditorWindow : EditorWindow
                 EditorUtility.DisplayDialog("Error", "An Actor with this name already exists.", "OK");          
                 tempActorName = string.Empty;  
                 GUI.FocusControl(null);
-                return;
+                return false;
             }
         }
         if (selectedActor != null)
@@ -213,7 +213,9 @@ public partial class ActorEditorWindow : EditorWindow
             
             AssetDatabase.SaveAssets();
             EditorUtility.SetDirty(selectedActor);
+            
         }
+        return true;
     }
     
     
@@ -242,6 +244,7 @@ public partial class ActorEditorWindow : EditorWindow
         // Create a snapshot of the current data
         originalactorData = CreateSnapshot(actor);
         
+        renaming = false;
         Repaint();
     }
 
@@ -265,6 +268,11 @@ public partial class ActorEditorWindow : EditorWindow
         hairstyle = null;
         accessory = null;
 
+        bodyPortrait = null;
+        eyesPortrait = null;
+        hairPortrait = null;
+        accessoryPortrait = null;
+
         bodySheetIndex = -1;
         outfitSheetIndex = -1;
         eyesSheetIndex = -1;
@@ -285,7 +293,7 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
     string actorAssetPath = $"Assets/Resources/FingTools/Actors/{actorNameToUse}.asset";
     if (AssetDatabase.LoadAssetAtPath<ScriptableObject>(actorAssetPath) != null)
     {
-        EditorUtility.DisplayDialog("Error", "An Actor with this name already exists.", "OK");
+        EditorUtility.DisplayDialog("Error", "An Actor with this name already exists.", "OK");        
         return;
     }
 
@@ -311,7 +319,7 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
         npcSpawner.npcTemplate = newNPC; // Assign the new Actor_SO to the NPCSpawner
         EditorUtility.SetDirty(npcSpawner); // Mark the NPCSpawner as dirty to save changes
     }
-
+    renaming = false;
     // Refresh the AssetDatabase
     AssetDatabase.Refresh();
     OnActorAvailableUpdated?.Invoke();
@@ -349,10 +357,10 @@ private string GetUniqueActorName(string baseName)
         hairstyle = selectedActor.hairstyle;
         accessory = selectedActor.accessory;
 
-        bodyPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Skin,body.name);
-        eyesPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Eyes,eyes.name);
-        hairPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Hairstyle,hairstyle.name);
-        accessoryPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Accessory,accessory.name);
+        bodyPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Skin,body?.name);
+        eyesPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Eyes,eyes?.name);
+        hairPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Hairstyle,hairstyle?.name);
+        accessoryPortrait = PortraitImporter.ResolvePortraitPart(PortraitPartType.Accessory,accessory?.name);
 
         // Update sheet indexes
         bodySheetIndex = body != null ? bodySheets.IndexOf(body) : -1;
