@@ -39,7 +39,7 @@ public class CreateNewTiledMapWindow : EditorWindow
     private void OnGUI()
     {        
         GUILayout.Label("Create New Tiled Map", EditorStyles.boldLabel);
-        if(MapLoader.Instance != null) MapLoader.Instance.RefreshMapObjects();
+        if(MapLoader.Instance != null) MapLoader.RefreshMapObjects();
         if (!tiledProjectDetected)
         {
             EditorGUILayout.HelpBox("No Tiled project detected. Please create or open a Tiled project first.", MessageType.Warning);
@@ -71,22 +71,34 @@ public class CreateNewTiledMapWindow : EditorWindow
             return;
         }
 
-        string tilesetReferences = GenerateTilesetReferences();
-        string mapContent = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
-<map version=""1.11"" tiledversion=""1.11.0"" orientation=""orthogonal"" renderorder=""right-down"" width=""{width}"" height=""{height}"" tilewidth=""{tileSize}"" tileheight=""{tileSize}"" infinite=""0"" nextlayerid=""2"" nextobjectid=""1"">
-{tilesetReferences}
- <layer id=""1"" name=""Tile Layer 1"" width=""{width}"" height=""{height}"">
-  <data encoding=""csv"">
-{GenerateEmptyTiles(width, height)}
-  </data>
- </layer>
-</map>";
+        string mapContent = 
+        $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+        <map version=""1.11"" tiledversion=""1.11.0"" orientation=""orthogonal"" renderorder=""right-down"" width=""{width}"" height=""{height}"" tilewidth=""{tileSize}"" tileheight=""{tileSize}"" infinite=""0"" nextlayerid=""2"" nextobjectid=""1"">
+            {GenerateTilesetReferences()}
+            <layer id=""1"" name=""Ground"" width=""{width}"" height=""{height}"">
+            <data encoding=""csv"">
+            {GenerateEmptyTiles(width, height)}
+            </data>
+            </layer>
+            <layer id=""2"" name=""OverGround"" width=""{width}"" height=""{height}"">
+            <data encoding=""csv"">
+            {GenerateEmptyTiles(width, height)}
+            </data>
+            </layer>
+            <layer id=""3"" name=""AboveGround"" width=""{width}"" height=""{height}"">
+            <data encoding=""csv"">
+            {GenerateEmptyTiles(width, height)}
+            </data>
+            </layer>
+            <objectgroup id=""1"" name=""NPC""/>
+        </map>";
 
         File.WriteAllText(outputPath, mapContent);
         AssetDatabase.Refresh();
         Debug.Log($"New Tiled map created at: {outputPath}");
         MapManager.RefreshUniverse();
-        MapLoader.Instance.RefreshMapObjects();
+        MapLoader.RefreshMapObjects();
+        MapLoader.LoadMap(outputPath);
         TiledLinker.OpenTiledWithProjectAndMap(outputPath);
         Close();
     }
