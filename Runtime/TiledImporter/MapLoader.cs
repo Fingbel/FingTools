@@ -5,6 +5,7 @@ using System.Linq;
 using System.IO;
 using FingTools.Internal;
 using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 
 namespace FingTools
 {
@@ -59,20 +60,6 @@ public class MapLoader : MonoBehaviour
     }
     #endif
 
-    private void Awake() {
-        UnloadAllMaps();
-    }
-    public void UnloadAllMaps()
-    {
-        foreach(var map in spawnedMaps)
-        {
-            map.SetActive(false);
-        }
-        foreach(var world in spawnedWorlds)
-        {
-            world.SetActive(false);
-        }
-    }
     public static void LoadMap(string mapObjectName,bool isWorld = false)
     {
         mapObjectName = Path.GetFileNameWithoutExtension(mapObjectName);        
@@ -153,10 +140,12 @@ public class MapLoader : MonoBehaviour
         }
         #endif
     }
-    public void RefreshMapObjects()
+    public static void RefreshMapObjects()
     {
-        RefreshSpawnedWorldObjects(MapManager.Instance.existingWorlds);
-        RefreshSpawnedMapObjects(MapManager.Instance.existingMaps);
+        Instance.RefreshSpawnedWorldObjects(MapManager.Instance.existingWorlds);
+        Instance.RefreshSpawnedMapObjects(MapManager.Instance.existingMaps);
+        EditorUtility.SetDirty(Instance);
+        //EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
     private void RefreshSpawnedMapObjects(List<string> existingMaps)
@@ -245,6 +234,8 @@ public class MapLoader : MonoBehaviour
             var worldData = JsonUtility.FromJson<WorldData>(worldContent);
             mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
         }
+
+        
     }
 
     [System.Serializable]

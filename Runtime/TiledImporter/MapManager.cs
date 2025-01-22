@@ -40,7 +40,7 @@ public class MapManager : ScriptableObject
             #endif
         }
     }
-    public string _currentLoadedMapObject;
+    private string _currentLoadedMapObject;
     public bool _isCurrentLoadedMapObjectWorld;
     public static MapManager Instance
     {
