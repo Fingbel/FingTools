@@ -2,9 +2,11 @@ using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 #if UNITY_EDITOR
-using Unity.Plastic.Newtonsoft.Json.Linq;
 using UnityEditor;
 
 namespace FingTools.Internal{
@@ -91,22 +93,7 @@ public class TiledLinker
                 }
                 else
                 {
-                    if (File.Exists(sessionPath))
-                    {
-                        string sessionContent = File.ReadAllText(sessionPath);
-                        JObject sessionJson = JObject.Parse(sessionContent);
-                        string activeFile = sessionJson["activeFile"]?.ToString();
-                        if (!string.IsNullOrEmpty(activeFile))
-                        {
-                            string activeFilePath = Path.Combine(Application.dataPath, "FingTools", "Tiled", activeFile);
-                            if (!File.Exists(activeFilePath))
-                            {
-                                sessionJson["activeFile"] = "";
-                                sessionJson["openFiles"] = new JArray();
-                                File.WriteAllText(sessionPath, sessionJson.ToString());
-                            }
-                        }
-                    }
+                    CleanMaps(sessionPath);
                     OpenTiledWithProject(savedPath, projectPath);
                 }
             }
@@ -124,9 +111,12 @@ public class TiledLinker
     public static void OpenTiledWithProjectAndMap(string mapPath)
     {
         string tiledPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
-        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
+        string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", "TiledProject.tiled-project");
+        string sessionPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", "TiledProject.tiled-session");
+
         if (!string.IsNullOrEmpty(tiledPath) && File.Exists(tiledPath) && File.Exists(projectPath))
         {
+            CleanMaps(sessionPath);
             try
             {
                 Process.Start(tiledPath, $"\"{projectPath}\" \"{mapPath}\"");
@@ -139,6 +129,49 @@ public class TiledLinker
         else
         {
             Debug.LogError("Tiled executable path or project file is not set or invalid.");
+        }
+    }
+
+    private static void CleanMaps(string sessionPath)
+    {
+        if (File.Exists(sessionPath))
+        {
+            // Read the session file content
+            string sessionContent = File.ReadAllText(sessionPath);
+
+            // Update activeFile
+            string activeFileKey = "\"activeFile\":";
+            int activeFileIndex = sessionContent.IndexOf(activeFileKey, StringComparison.Ordinal);
+            if (activeFileIndex >= 0)
+            {
+                int start = sessionContent.IndexOf("\"", activeFileIndex + activeFileKey.Length) + 1;
+                int end = sessionContent.IndexOf("\"", start);
+                sessionContent = sessionContent.Remove(start, end - start)
+                                                .Insert(start, $"Tilemaps/{MapManager.Instance.LoadedMapObject}.tmx");
+            }
+
+            // Update openFiles
+            string openFilesKey = "\"openFiles\":";
+            int openFilesIndex = sessionContent.IndexOf(openFilesKey, StringComparison.Ordinal);
+            if (openFilesIndex >= 0)
+            {
+                int openFilesStart = sessionContent.IndexOf("[", openFilesIndex) + 1;
+                int openFilesEnd = sessionContent.IndexOf("]", openFilesStart);
+
+                // Format the list of maps
+                List<string> fileNames = MapManager.Instance.existingMaps
+                    .Where(map => !string.IsNullOrEmpty(map))
+                    .Select(map => $"\"Tilemaps/{Path.GetFileNameWithoutExtension(map)}.tmx\"")
+                    .ToList();
+                string maps = string.Join(",", fileNames);
+
+                // Replace openFiles content
+                sessionContent = sessionContent.Remove(openFilesStart, openFilesEnd - openFilesStart)
+                                                .Insert(openFilesStart, maps);
+            }
+
+            // Write the updated session content back to the file
+            File.WriteAllText(sessionPath, sessionContent);
         }
     }
 
