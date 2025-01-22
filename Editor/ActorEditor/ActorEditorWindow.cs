@@ -71,19 +71,15 @@ public partial class ActorEditorWindow : EditorWindow
     [MenuItem("FingTools/Actor Editor",true)]
     public static bool ValidateActorEditWindow()
     {
-        if(Directory.Exists("Assets/Resources/FingTools"))
-        {
-            var manager = Resources.Load<SpriteManager>("FingTools/SpriteManager");
-            if(manager?.HasAssetsImported() == true)
-            {
-                return true;
-            }
-        }
-        return false;
+        if(!Directory.Exists("Assets/Resources/FingTools"))
+            return false;
+        else
+            return false;
     }
 
     private void OnEnable()
     {
+        EditorUtility.DisplayProgressBar("Loading ","Loading character assets",0.5f);
         spriteManager = Resources.Load<SpriteManager>("FingTools/SpriteManager");
         if (spriteManager == null)
         {
@@ -100,6 +96,7 @@ public partial class ActorEditorWindow : EditorWindow
         }        
         EditorApplication.update += RefreshPortraitPreview;
         EditorApplication.update += RefreshActorPreview;
+        EditorUtility.ClearProgressBar();
     }
 
     private void OnDisable() {
