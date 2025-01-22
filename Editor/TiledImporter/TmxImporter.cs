@@ -1,13 +1,29 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using SuperTiled2Unity;
+using System.Linq;
+using UnityEngine;
+
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity.Editor;
 
 [AutoCustomTmxImporter()]
  public class TmxImporter : CustomTmxImporter
  {
+    private TmxAssetImportedArgs m_ImportedArgs;
+
     public override void TmxAssetImported(TmxAssetImportedArgs args)
     {
+        m_ImportedArgs = args;
+        var NPCSpawner = m_ImportedArgs.ImportedSuperMap.GetComponentsInChildren<SuperObjectLayer>().Where(o => o.m_TiledName == "NPCSpawner");
+        foreach(var spawner in NPCSpawner)
+        {
+            for(int i=0;i<spawner.transform.childCount;i++)
+            {
+                var obj = spawner.transform.GetChild(i).GetComponent<SuperObject>();
+                
+            }
+        }
         int tileSize;
         if (EditorPrefs.HasKey("TileSize"))
         {
@@ -35,12 +51,6 @@ using SuperTiled2Unity.Editor;
 
             // Force reimport to apply changes
             AssetDatabase.ImportAsset(importer.assetPath, ImportAssetOptions.ForceUpdate);
-
-            //Debug.Log($"Successfully updated Pixels Per Unit to {newValue} for {importer}");
-        }
-        else
-        {
-            //Debug.LogWarning("Property 'm_PixelsPerUnit' not found. Ensure the importer supports this property.");
         }
     }        
  }

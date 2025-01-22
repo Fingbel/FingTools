@@ -348,7 +348,7 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
     // If an NPCSpawner was passed, assign the new Actor_SO to its npcTemplate
     if (npcSpawner != null)
     {
-        npcSpawner.npcTemplate = newNPC; // Assign the new Actor_SO to the NPCSpawner
+        npcSpawner.npcActor = newNPC; // Assign the new Actor_SO to the NPCSpawner
         EditorUtility.SetDirty(npcSpawner); // Mark the NPCSpawner as dirty to save changes
     }
     renaming = false;

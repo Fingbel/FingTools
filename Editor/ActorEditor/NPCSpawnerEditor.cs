@@ -8,7 +8,7 @@ public class NPCSpawnerEditor : Editor {
     private SerializedProperty npcTemplateProperty;
 
     private void OnEnable() {
-        npcTemplateProperty = serializedObject.FindProperty("npcTemplate");
+        npcTemplateProperty = serializedObject.FindProperty("npcActor");
     }
     public override void OnInspectorGUI() {
         base.OnInspectorGUI();

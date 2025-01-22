@@ -183,8 +183,8 @@ public static class ST2ULinker
 
         // Modify the prefab replacements list
         bool prefabAdded = false;
-        string typeNameToAdd = "Model";
-        string prefabPath = "Packages/com.fingcorp.fingtools/Prefabs/Model.prefab";
+        string typeNameToAdd = "NPC";
+        string prefabPath = "Packages/com.fingcorp.fingtools/Prefabs/NPC.prefab";
 
         // Check if the prefab replacement already exists
         foreach (var replacement in settings.m_PrefabReplacements)
