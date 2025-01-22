@@ -3,12 +3,14 @@ using System.Linq;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
-
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+#if SUPER_TILED2UNITY_INSTALLED
+using SuperTiled2Unity.Editor;
+#endif
 
 namespace FingTools.Internal{
 public static class ST2ULinker
@@ -157,14 +159,82 @@ public static class ST2ULinker
         // Check the result
         if (addRequest.Status == StatusCode.Success)
         {
-            UnityEngine.Debug.Log("Package added successfully: " + superTiled2UnityGitUrl);
+            Debug.Log("Package added successfully: " + superTiled2UnityGitUrl);
         }
         else
         {
-            UnityEngine.Debug.LogError("Failed to add package: " + superTiled2UnityGitUrl);
+            Debug.LogError("Failed to add package: " + superTiled2UnityGitUrl);
         }
 
+    }    
+
+    [MenuItem("FingTools/DEBUG/ReplaceByPrefab")]
+    public static void ModifyPrefabReplacements()
+    {
+        #if SUPER_TILED2UNITY_INSTALLED
+        // Access the ST2USettings instance
+        ST2USettings settings = ST2USettings.instance;
+
+        // Ensure m_PrefabReplacements list is initialized
+        if (settings.m_PrefabReplacements == null)
+        {
+            settings.m_PrefabReplacements = new List<TypePrefabReplacement>();
+        }
+
+        // Modify the prefab replacements list
+        bool prefabAdded = false;
+        string typeNameToAdd = "Model";
+        string prefabPath = "Packages/com.fingcorp.fingtools/Prefabs/Model.prefab";
+
+        // Check if the prefab replacement already exists
+        foreach (var replacement in settings.m_PrefabReplacements)
+        {
+            if (replacement.m_TypeName == typeNameToAdd)
+            {
+                prefabAdded = true;
+                break;
+            }
+        }
+
+        if (!prefabAdded)
+        {
+            // Add the new prefab replacement
+            string prefabGuid = AssetDatabase.AssetPathToGUID(prefabPath);
+            settings.m_PrefabReplacements.Add(new TypePrefabReplacement
+            {
+                m_TypeName = typeNameToAdd,
+                m_Prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath)
+            });
+
+            // Use reflection to invoke SortPrefabReplacements
+            InvokeMethodUsingReflection(settings, "SortPrefabReplacements");
+
+            // Use reflection to invoke SaveSettings
+            InvokeMethodUsingReflection(settings, "SaveSettings");
+
+            // Refresh Asset Database
+            AssetDatabase.Refresh();
+
+        }
+        else
+        {
+            Debug.Log($"Prefab replacement for '{typeNameToAdd}' already exists.");
+        }
+        #endif
     }
+
+    #if SUPER_TILED2UNITY_INSTALLED
+    // Method to invoke a method on the ST2USettings instance using reflection
+    private static void InvokeMethodUsingReflection(ST2USettings settings, string methodName)
+    {
+        MethodInfo methodInfo = typeof(ST2USettings).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Instance);
+        
+        if (methodInfo != null)
+        {
+            methodInfo.Invoke(settings, null);
+        }
+    }
+    #endif
 }
 }
 

@@ -90,7 +90,7 @@ public class CreateNewTiledMapWindow : EditorWindow
             {GenerateEmptyTiles(width, height)}
             </data>
             </layer>
-            <objectgroup id=""1"" name=""NPC""/>
+            <objectgroup id=""1"" name=""NPC"" class=""NPCSpawner""/>
         </map>";
 
         File.WriteAllText(outputPath, mapContent);
