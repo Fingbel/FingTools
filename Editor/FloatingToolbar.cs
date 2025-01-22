@@ -11,10 +11,10 @@ using System.Linq;
 #if UNITY_EDITOR
 namespace FingTools.Tiled
 {
-[Overlay(typeof(EditorWindow), "FloatingToolbar", true)]
-public class FloatingToolbar : ToolbarOverlay
+[Overlay(typeof(EditorWindow), "FingToolbar", true)]
+public class FingToolbar : ToolbarOverlay
 {
-    FloatingToolbar() : base(ActorEditor.Id,MapSwitch.Id,NewMap.Id,OpenTiled.Id) { }
+    FingToolbar() : base(ActorEditor.Id,MapSwitch.Id,NewMap.Id,OpenTiled.Id) { }
 
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class MapSwitch : EditorToolbarButton
@@ -30,7 +30,7 @@ public class FloatingToolbar : ToolbarOverlay
             {        
                 MapManager.RefreshUniverse();
                 if(MapLoader.Instance != null) 
-                    MapLoader.Instance.RefreshMapObjects();
+                    MapLoader.RefreshMapObjects();
                 else
                     return;
                 string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
@@ -81,7 +81,7 @@ public class FloatingToolbar : ToolbarOverlay
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
             clicked += () =>{
                 if(MapLoader.Instance != null) 
-                    MapLoader.Instance.RefreshMapObjects();
+                    MapLoader.RefreshMapObjects();
                 else
                     return;
                 string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
@@ -128,7 +128,7 @@ public class FloatingToolbar : ToolbarOverlay
             clicked += () =>
             {
                 if(MapLoader.Instance != null) 
-                    MapLoader.Instance.RefreshMapObjects();
+                    MapLoader.RefreshMapObjects();
                 else
                     return;
                 bool tilesetDetected = File.Exists(Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project"));
