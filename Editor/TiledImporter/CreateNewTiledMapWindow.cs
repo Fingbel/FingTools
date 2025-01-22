@@ -34,18 +34,20 @@ public class CreateNewTiledMapWindow : EditorWindow
         tileSize = EditorPrefs.GetInt("TileSize", 16); // Default to 16 if not set
         string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
         tiledProjectDetected = File.Exists(projectPath);
+        MapManager.RefreshUniverse();
+        if(MapLoader.IsInitialized)
+            MapLoader.RefreshMapObjects();
     }
 
     private void OnGUI()
     {        
         GUILayout.Label("Create New Tiled Map", EditorStyles.boldLabel);
-        if(MapLoader.Instance != null) MapLoader.RefreshMapObjects();
         if (!tiledProjectDetected)
         {
             EditorGUILayout.HelpBox("No Tiled project detected. Please create or open a Tiled project first.", MessageType.Warning);
             return;
         }
-        MapManager.RefreshUniverse();
+        
         mapName = EditorGUILayout.TextField("Map Name:", mapName);
         width = EditorGUILayout.IntField("Map Width:", width);
         height = EditorGUILayout.IntField("Map Height:", height);

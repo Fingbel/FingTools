@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using Unity.EditorCoroutines.Editor;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -153,6 +154,7 @@ namespace FingTools.Internal
 
                 EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);
 #if SUPER_TILED2UNITY_INSTALLED
+        
                 TiledImporter.ImportAssets(selectedInteriorZipFile, selectedInteriorTilesets, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
 #endif
                 TiledImporter.GenerateTiledProjectFile(outputPath);

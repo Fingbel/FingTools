@@ -5,8 +5,9 @@ using System.Linq;
 using System.IO;
 using FingTools.Internal;
 using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
 using UnityEditor.SceneManagement;
-
+#endif
 namespace FingTools
 {
 public class MapLoader : MonoBehaviour
@@ -16,6 +17,26 @@ public class MapLoader : MonoBehaviour
     List<string> mapsInWorlds ;
     private GameObject mapHolder;
     private GameObject worldHolder;
+    public static bool IsInitialized 
+    {
+        get
+        {
+            if(_instance == null)
+            {
+                if (FindFirstObjectByType<MapLoader>() == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }}
     private static MapLoader _instance;
     public static MapLoader Instance 
     {
@@ -24,20 +45,13 @@ public class MapLoader : MonoBehaviour
             if (_instance == null)
             {
                 _instance = FindFirstObjectByType<MapLoader>();
-                if (_instance == null){
-                    if(EditorUtility.DisplayDialog("MissingMapLoader", "An action requiring a MapLoader has been detected and no MapLoader has been found in the active scene.",$"Add MapLoader to {SceneManager.GetActiveScene().name}","Cancel"))
-                    {
-                        GameObject mapManagerGameObject = new GameObject("MapLoader");                        
-                        _instance = mapManagerGameObject.AddComponent<MapLoader>();                             
-                        _instance.mapHolder = new GameObject("MapHolder");
-                        _instance.mapHolder.transform.SetParent(_instance.transform);
-                        _instance.worldHolder = new GameObject("WorldHolder");
-                        _instance.worldHolder.transform.SetParent(_instance.transform);
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                if (_instance == null){                    
+                    GameObject mapManagerGameObject = new GameObject("MapLoader");                        
+                    _instance = mapManagerGameObject.AddComponent<MapLoader>();                             
+                    _instance.mapHolder = new GameObject("MapHolder");
+                    _instance.mapHolder.transform.SetParent(_instance.transform);
+                    _instance.worldHolder = new GameObject("WorldHolder");
+                    _instance.worldHolder.transform.SetParent(_instance.transform);                                                            
                 }                
             }
             if (Application.isPlaying)
@@ -144,8 +158,9 @@ public class MapLoader : MonoBehaviour
     {
         Instance.RefreshSpawnedWorldObjects(MapManager.Instance.existingWorlds);
         Instance.RefreshSpawnedMapObjects(MapManager.Instance.existingMaps);
-        EditorUtility.SetDirty(Instance);
-        //EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        #if UNITY_EDITOR
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        #endif
     }
 
     private void RefreshSpawnedMapObjects(List<string> existingMaps)

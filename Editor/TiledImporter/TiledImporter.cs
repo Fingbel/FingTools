@@ -82,7 +82,8 @@ namespace FingTools.Internal
             #endif
 
             // Add new tilesets to all existing maps
-            AddTilesetsToExistingMaps(outputPath);
+            //TODO : This should be done not on import but when we open a map
+            EditorApplication.delayCall += () => AddTilesetsToExistingMaps(outputPath);
         }
 
         private static void UnzipInteriorAssets(string zipFilePath, string spriteSize, List<string> selectedInteriorTilesets, string outputPath,int pixelsPerUnit)

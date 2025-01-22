@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
-using SuperTiled2Unity;
 
 
 namespace FingTools.NodeEditor

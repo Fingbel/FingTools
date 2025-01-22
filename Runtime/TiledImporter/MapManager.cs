@@ -70,6 +70,10 @@ public class MapManager : ScriptableObject
     {
         RefreshMaps();
         RefreshWorlds();        
+        if(Instance.existingMaps.Count + Instance.existingWorlds.Count ==0)
+        {
+            Instance.LoadedMapObject = null;
+        }
     }
     
     private static void RefreshMaps()

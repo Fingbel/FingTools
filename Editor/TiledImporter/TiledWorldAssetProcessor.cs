@@ -14,7 +14,8 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
             {
                 Debug.Log($"World asset imported: {assetPath}");
                 MapManager.RefreshUniverse();
-                MapLoader.RefreshMapObjects();
+                if(MapLoader.IsInitialized)
+                    MapLoader.RefreshMapObjects();
             }            
         }
 
@@ -24,13 +25,15 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
             {
                 Debug.Log($"World asset deleted: {assetPath}");
                 MapManager.RefreshUniverse();
-                MapLoader.RefreshMapObjects();
+                if(MapLoader.IsInitialized)
+                    MapLoader.RefreshMapObjects();
             }
 
             if(assetPath.EndsWith(".tmx"))
             {
                 MapManager.RefreshUniverse();
-                MapLoader.RefreshMapObjects();
+                if(MapLoader.IsInitialized)
+                    MapLoader.RefreshMapObjects();
 
             }
         } 

@@ -5,9 +5,10 @@ using System.IO;
 using System.Collections.Generic;
 using System;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
+
 
 #if UNITY_EDITOR
+using UnityEditor.Experimental.GraphView;
 namespace FingTools.Internal
 {
 public partial class ActorEditorWindow : EditorWindow

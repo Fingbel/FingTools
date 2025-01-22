@@ -5,7 +5,9 @@ using FingTools.Internal;
 public class MapNodeEditor : GenericNodeEditor<NPCSpawner>
 {
     private Color mapGroupColor = new Color(0.3f, 0.6f, 1.0f, 0.15f);  // Semi-transparent blue
+    #if FINGDEBUG
     [MenuItem("FingTools/DEBUG/Node Editor")]
+    #endif
     public static void ShowWindow()
     {
         MapNodeEditor window = GetWindow<MapNodeEditor>(true);

@@ -14,12 +14,12 @@ public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
 
-    public static void CheckForTiled()
+    public static bool CheckForTiled()
     {
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
-        if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))
+        if (string.IsNullOrEmpty(savedPath) || !File.Exists(savedPath) || !IsValidTiledExecutable(savedPath))
         {
-            return;
+            return false;
         }
 
         string[] commonPaths =
@@ -39,15 +39,18 @@ public class TiledLinker
                 isTiledInstalled = true;
                 Debug.Log($"Tiled found at: {path}");
                 SaveTiledPath(path);
-                break;
+                return true;
             }
         }
 
         if (!isTiledInstalled)
-        {
-            Debug.LogWarning("Tiled is not installed or could not be found in common paths.");
-            PromptUserForTiledPath();
+        {                        
+            if(PromptUserForTiledPath())
+                return true;
+            else 
+                return false;
         }
+        return false;
     }
 
     [MenuItem("FingTools/Open Tiled", true)]
@@ -187,7 +190,7 @@ public class TiledLinker
         }
     }
     
-    private static void PromptUserForTiledPath()
+    private static bool PromptUserForTiledPath()
     {
         int option = EditorUtility.DisplayDialogComplex(
             "Tiled Not Found",
@@ -200,24 +203,26 @@ public class TiledLinker
         switch (option)
         {
             case 0: // Visit Tiled Website
-                Application.OpenURL("https://www.mapeditor.org/");
-                break;
+                Application.OpenURL("https://thorbjorn.itch.io/tiled");
+                return false;
+
             case 1: // Search for Tiled
                 string path = EditorUtility.OpenFilePanel("Select Tiled Executable", "", "exe");
                 if (!string.IsNullOrEmpty(path) && File.Exists(path) && IsValidTiledExecutable(path))
                 {
                     Debug.Log($"Tiled found at: {path}");
                     SaveTiledPath(path);
+                    return true;
                 }
                 else
-                {
-                    Debug.LogError("Invalid path or Tiled executable not found.");
+                {                    
+                    return false;
                 }
-                break;
-            case 2: // Cancel
-                Debug.Log("User cancelled the operation.");
-                return;
+
+            case 2:
+                return false;
         }
+        return false;
     }
 
     private static bool IsValidTiledExecutable(string path)
