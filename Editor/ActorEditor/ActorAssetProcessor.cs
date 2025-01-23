@@ -32,7 +32,7 @@ public class ActorPostProcessor : AssetPostprocessor
                 bool isDeleted = AssetDatabase.DeleteAsset(portraitPath);                
                 if(!isDeleted)
                 {
-                    Debug.LogError($"We failed to delete a portrait named :{fileName}, from {path}");
+                    Debug.Log($"Unable to delete a portrait named :{fileName}, from {path}");
                 }
             }
             }

@@ -106,7 +106,6 @@ public class MapLoader : MonoBehaviour
     private void AddMapObjectToScene(string mapPath)
     {
         #if UNITY_EDITOR
-        Debug.Log($"Loading map: {mapPath}");
         GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(mapPath);
         if (mapPrefab != null)
         {
