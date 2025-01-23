@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using Unity.EditorCoroutines.Editor;
 
 #if UNITY_EDITOR
 using UnityEditor;

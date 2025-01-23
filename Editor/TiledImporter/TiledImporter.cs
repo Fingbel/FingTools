@@ -2,12 +2,12 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.IO.Compression;
-using Unity.EditorCoroutines.Editor;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 #if UNITY_EDITOR
+using Unity.EditorCoroutines.Editor;
 namespace FingTools.Internal
 {
 
