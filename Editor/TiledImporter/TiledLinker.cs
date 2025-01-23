@@ -113,6 +113,7 @@ public class TiledLinker
 
     public static void OpenTiledWithProjectAndMap(string mapPath)
     {
+        Debug.Log(mapPath);
         string tiledPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
         string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", "TiledProject.tiled-project");
         string sessionPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", "TiledProject.tiled-session");

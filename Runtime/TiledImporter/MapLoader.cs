@@ -51,7 +51,10 @@ public class MapLoader : MonoBehaviour
                     _instance.mapHolder = new GameObject("MapHolder");
                     _instance.mapHolder.transform.SetParent(_instance.transform);
                     _instance.worldHolder = new GameObject("WorldHolder");
-                    _instance.worldHolder.transform.SetParent(_instance.transform);                                                            
+                    _instance.worldHolder.transform.SetParent(_instance.transform);      
+                    #if UNITY_EDITOR
+                    EditorUtility.SetDirty(mapManagerGameObject);
+                    #endif                                                      
                 }                
             }
             if (Application.isPlaying)

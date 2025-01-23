@@ -87,8 +87,13 @@ public class FingToolbar : ToolbarOverlay
                 if(!TiledLinker.CheckForTiled()) return;
                 if(!AssetChecker.MapLoaderInitRefresh()) return;
                 if(!AssetChecker.CheckForTilesets()) return;
-                if(!AssetChecker.CheckForMaps()) return;                                
-                TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
+                if(!AssetChecker.CheckForMaps()) return;           
+                MapLoader.RefreshMapObjects();
+                string loaded = MapManager.Instance.LoadedMapObject;
+                if(string.IsNullOrEmpty(loaded))
+                    TiledLinker.OpenTiled();
+                else
+                    TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
             };
         }
 
