@@ -224,6 +224,36 @@ public class TiledLinker
         }
         return false;
     }
+    [MenuItem("FingTools/DEBUG/Check Tiled is closed")]
+    public static bool CheckTiledProcess()
+    {
+        // Check if Tiled is running
+        Process[] tiledProcesses = Process.GetProcessesByName("Tiled");
+
+        if (tiledProcesses.Length > 0)
+        {            
+            if (EditorUtility.DisplayDialog(
+                "Tiled is Running",
+                "Tiled is currently running \n Please close Tiled to start importing assets. \n BEWARE : ALL UNSAVED CHANGED WILL BE LOST.",
+                
+                "Close Tiled and proceed",
+                "Cancel"))
+            {
+                // User chose to quit Tiled automatically
+                foreach (var process in tiledProcesses)
+                {
+                    if(process.HasExited)continue;
+                    process.Kill();
+                    process.WaitForExit();
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+            return true;
+    }
 
     private static bool IsValidTiledExecutable(string path)
     {
