@@ -121,18 +121,18 @@ namespace FingTools.Internal
         }
 
         private void DrawImportButton()
-        {
-            // Import button
-            EditorGUI.BeginDisabledGroup(
-                string.IsNullOrEmpty(selectedInteriorZipFile) ||
-                string.IsNullOrEmpty(selectedExteriorZipFile) ||
-                string.IsNullOrEmpty(selectedExteriorZipFile) && string.IsNullOrEmpty(selectedInteriorZipFile)
-            );
+        {            
             int installedInteriorTilesetsCount = availableInteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Interior"));
             int installedExteriorTilesetsCount = availableExteriorTilesets.Count(tileset => IsTilesetAlreadyImported(tileset, "Exterior"));
-            EditorGUILayout.LabelField("Total tilesets to be imported : " + (selectedInteriorTilesets.Count + selectedExteriorTilesets.Count - (installedInteriorTilesetsCount + installedExteriorTilesetsCount)));
-            if (GUILayout.Button("Import Assets", GUILayout.Height(40)))
+            
+            // Remove already installed tilesets from the selected lists
+            selectedInteriorTilesets = selectedInteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Interior")).ToList();
+            selectedExteriorTilesets = selectedExteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Exterior")).ToList();
+            
+            EditorGUI.BeginDisabledGroup( selectedExteriorTilesets.Count == 0 && selectedInteriorTilesets.Count == 0);
+            if (GUILayout.Button($"Import {selectedInteriorTilesets.Count + selectedExteriorTilesets.Count} Assets", GUILayout.Height(40)))
             {
+                if(!TiledLinker.CheckTiledProcess()) return;
                 int totalTilesetsToImport = selectedInteriorTilesets.Count + selectedExteriorTilesets.Count - (installedInteriorTilesetsCount + installedExteriorTilesetsCount);
                 if (totalTilesetsToImport > 10) // Adjust as needed
                 {
@@ -146,18 +146,13 @@ namespace FingTools.Internal
                     {
                         return;
                     }
-                }
-
-                // Remove already installed tilesets from the selected lists
-                selectedInteriorTilesets = selectedInteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Interior")).ToList();
-                selectedExteriorTilesets = selectedExteriorTilesets.Where(tileset => !IsTilesetAlreadyImported(tileset, "Exterior")).ToList();
+                }               
 
                 EditorUtility.DisplayProgressBar("Importing Tilesets", $"Processing tilesets", 0.5f);
 #if SUPER_TILED2UNITY_INSTALLED
         
                 TiledImporter.ImportAssets(selectedInteriorZipFile, selectedInteriorTilesets, selectedExteriorZipFile, selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes);
 #endif
-                TiledImporter.GenerateTiledProjectFile(outputPath);
                 EditorPrefs.SetInt("TileSize", int.Parse(validSizes[selectedSizeIndex]));
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
