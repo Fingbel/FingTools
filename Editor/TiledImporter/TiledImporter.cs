@@ -5,6 +5,8 @@ using System.IO.Compression;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+
 
 #if UNITY_EDITOR
 using Unity.EditorCoroutines.Editor;
@@ -58,6 +60,9 @@ namespace FingTools.Internal
             // Step 2: Adjust settings and generate TSX files
             yield return EditorCoroutineUtility.StartCoroutineOwnerless(AdjustAndGenerateTSXFiles(selectedInteriorTilesets, outputPath, selectedSizeIndex, validSizes, "Interior"));
             yield return EditorCoroutineUtility.StartCoroutineOwnerless(AdjustAndGenerateTSXFiles(selectedExteriorTilesets, outputPath, selectedSizeIndex, validSizes, "Exterior"));
+
+            yield return EditorCoroutineUtility.StartCoroutineOwnerless(InjectCollisionData(outputPath,selectedInteriorTilesets,"Interior"));
+            yield return EditorCoroutineUtility.StartCoroutineOwnerless(InjectCollisionData(outputPath,selectedExteriorTilesets,"Exterior"));
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
@@ -66,6 +71,69 @@ namespace FingTools.Internal
             yield return EditorCoroutineUtility.StartCoroutineOwnerless(AddTilesetsToExistingMapsCoroutine(outputPath,selectedExteriorTilesets,false));
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        public static IEnumerator InjectCollisionData(string outputPath,List<string> selectedTilesets,string artType)
+        {            
+            foreach(var tileset in selectedTilesets)
+            {
+                string tilesetPath = Path.Combine(outputPath, "Tilesets", artType,Path.GetFileNameWithoutExtension(tileset) + ".tsx");
+                
+                string path = Path.Combine("Packages", "com.fingcorp.fingtools", "Editor", "CollisionData",artType);
+                Debug.Log(tileset);
+                GenerateTSXWithCollisionData(tilesetPath,Path.Combine(path,Path.GetFileNameWithoutExtension(tileset)+".xml"));
+            }
+            yield return null;
+        }
+        public static void GenerateTSXWithCollisionData(string userTsxFilePath, string customXmlCollisionFilePath)
+        {
+            // Check if the custom collision XML file exists
+            if (!File.Exists(customXmlCollisionFilePath))
+            {
+                Debug.LogError($"Custom collision data file not found: {customXmlCollisionFilePath}");
+                return;
+            }
+
+            // Load the custom collision data XML file
+            XmlDocument customXmlDoc = new XmlDocument();
+            customXmlDoc.Load(customXmlCollisionFilePath);
+
+            // Load the user .tsx file where we will inject the collision data
+            XmlDocument userTsxDoc = new XmlDocument();
+            userTsxDoc.Load(userTsxFilePath);
+
+            // Get the <tileset> element from the user .tsx file
+            XmlElement tilesetElement = (XmlElement)userTsxDoc.SelectSingleNode("tileset");
+
+            // Loop through all <tile> elements in the custom XML and inject their collision data
+            XmlNodeList tileNodes = customXmlDoc.SelectNodes("//tile");
+            foreach (XmlNode tileNode in tileNodes)
+            {
+                int tileId = int.Parse(tileNode.Attributes["id"].Value);
+
+                // Create a new <tile> element for the user .tsx file
+                XmlElement tileElement = userTsxDoc.CreateElement("tile");
+                tileElement.SetAttribute("id", tileId.ToString());
+
+                // Check if the tile has a <objectgroup> (collision data) in the custom XML
+                XmlNode objectGroupNode = tileNode.SelectSingleNode("objectgroup");
+                if (objectGroupNode != null)
+                {
+                    // Clone the <objectgroup> and append it to the new <tile> element
+                    XmlNode clonedObjectGroup = userTsxDoc.ImportNode(objectGroupNode, true);
+                    tileElement.AppendChild(clonedObjectGroup);
+                }
+
+                // Append the new <tile> element to the <tileset> element
+                tilesetElement.AppendChild(tileElement);
+            }
+
+            // Save the modified .tsx file with injected collision data
+            userTsxDoc.Save(userTsxFilePath);
+
+            // Refresh the Unity asset database to reflect changes
+            UnityEditor.AssetDatabase.Refresh();
+            Debug.Log("Injected collision data into the .tsx file.");
         }
 
         // Coroutine for unzipping interior assets
