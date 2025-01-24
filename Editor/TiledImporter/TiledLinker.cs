@@ -5,6 +5,8 @@ using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Xml;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -13,7 +15,53 @@ namespace FingTools.Internal{
 public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
+    public static void CheckForNPCAttribute(string xmlFilePath)
+    {        
+        // Load the XML document
+        XmlDocument doc = new XmlDocument();
+        doc.Load(xmlFilePath);
 
+        // Find the objectgroup named "NPC"
+        XmlNode npcGroup = null;
+        foreach (XmlNode node in doc.GetElementsByTagName("objectgroup"))
+        {
+            if (node.Attributes["name"]?.Value == "NPC")
+            {
+                npcGroup = node;
+                break;
+            }
+        }
+
+        if (npcGroup == null)
+        {
+            // No objectgroup with the name "NPC" found
+            Console.WriteLine("No 'NPC' objectgroup found.");
+            return;
+        }
+
+        // Iterate over all objects in the NPC objectgroup
+        foreach (XmlNode objectNode in npcGroup.SelectNodes("object"))
+        {
+            // Check if the object already has a "type" attribute
+            XmlAttribute typeAttribute = objectNode.Attributes["type"];
+
+            if (typeAttribute == null || typeAttribute.Value != "NPC")
+            {
+                // Add the type="NPC" attribute if not present
+                if (typeAttribute == null)
+                {
+                    typeAttribute = doc.CreateAttribute("type");
+                    objectNode.Attributes.Append(typeAttribute);
+                }
+                typeAttribute.Value = "NPC";
+
+                Console.WriteLine($"Added type='NPC' to object with id={objectNode.Attributes["id"].Value}");
+            }
+        }
+
+        // Save the modified XML back to the file
+        doc.Save(xmlFilePath);
+    }
     public static bool CheckForTiled()
     {
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
