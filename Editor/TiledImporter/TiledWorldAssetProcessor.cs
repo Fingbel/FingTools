@@ -12,33 +12,39 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
         {
             if (assetPath.EndsWith(".world"))
             {
-                Debug.Log($"World asset imported: {assetPath}");
-                MapManager.RefreshUniverse();
-                if(MapLoader.IsInitialized)
-                    MapLoader.RefreshMapObjects();
-            }            
-        }
+               Refresh(assetPath);
+            }
+                if (assetPath.EndsWith(".tmx"))
+                {
+                    TiledLinker.CheckForNPCAttribute(assetPath);
+                    Refresh(assetPath);
+                }
+                    
+            }
 
         foreach (string assetPath in deletedAssets)
         {
             if (assetPath.EndsWith(".world"))
             {
-                Debug.Log($"World asset deleted: {assetPath}");
-                MapManager.RefreshUniverse();
-                if(MapLoader.IsInitialized)
-                    MapLoader.RefreshMapObjects();
+                Refresh(assetPath);
             }
 
             if(assetPath.EndsWith(".tmx"))
-            {
-                MapManager.RefreshUniverse();
-                if(MapLoader.IsInitialized)
-                    MapLoader.RefreshMapObjects();
+            {                
+                TiledLinker.CheckForNPCAttribute(assetPath);
+                Refresh(assetPath);
 
             }
         } 
         
     }
-}
+
+        private static void Refresh(string assetPath)
+        {
+            MapManager.RefreshUniverse();
+            if (MapLoader.IsInitialized)
+                MapLoader.RefreshMapObjects();
+        }
+    }
 }
 #endif

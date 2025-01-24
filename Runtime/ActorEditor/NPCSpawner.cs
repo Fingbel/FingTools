@@ -6,9 +6,7 @@ namespace FingTools.Internal
     public class NPCSpawner : MonoBehaviour
     {
         public Actor_SO npcActor;
-        private readonly int defaultSpriteIndex = 3;        
-        float pixelsPerUnit;
-                
+        private readonly int defaultSpriteIndex = 3;                        
         #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
