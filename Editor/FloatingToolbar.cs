@@ -93,7 +93,10 @@ public class FingToolbar : ToolbarOverlay
                 if(string.IsNullOrEmpty(loaded))
                     TiledLinker.OpenTiled();
                 else
-                    TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
+                    if(MapManager.Instance.IsLoadedMapObjectAWorld)
+                        TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tiledworlds\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
+                    else
+                        TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
             };
         }
 
