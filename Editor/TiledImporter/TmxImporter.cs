@@ -1,8 +1,5 @@
 #if UNITY_EDITOR
 using UnityEditor;
-using SuperTiled2Unity;
-using System.Linq;
-using UnityEngine;
 
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity.Editor;
@@ -15,15 +12,6 @@ using SuperTiled2Unity.Editor;
     public override void TmxAssetImported(TmxAssetImportedArgs args)
     {
         m_ImportedArgs = args;
-        var NPCSpawner = m_ImportedArgs.ImportedSuperMap.GetComponentsInChildren<SuperObjectLayer>().Where(o => o.m_TiledName == "NPCSpawner");
-        foreach(var spawner in NPCSpawner)
-        {
-            for(int i=0;i<spawner.transform.childCount;i++)
-            {
-                var obj = spawner.transform.GetChild(i).GetComponent<SuperObject>();
-                
-            }
-        }
         int tileSize;
         if (EditorPrefs.HasKey("TileSize"))
         {
