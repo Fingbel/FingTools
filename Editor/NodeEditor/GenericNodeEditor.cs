@@ -8,6 +8,7 @@ namespace FingTools.NodeEditor
 {
     public abstract class GenericNodeEditor<T> : EditorWindow
 {
+    protected string _name;
     protected Vector2 panOffset;
     protected float zoom = 1.0f;
     private bool isDraggingNode = false;
@@ -381,11 +382,11 @@ namespace FingTools.NodeEditor
 
     private string GetSaveFilePath()
     {
-        if(!Directory.Exists($"{Application.dataPath}/Editor/"))
+        if(!Directory.Exists($"{Application.dataPath}/FingTools/NodeData/"))
         {
-            Directory.CreateDirectory($"{Application.dataPath}/Editor/");
+            Directory.CreateDirectory($"{Application.dataPath}/FingTools/NodeData/");
         }
-        return $"{Application.dataPath}/Editor/NodePositions.json";
+        return $"{Application.dataPath}/FingTools/NodeData/{_name}Data.json";
     }
 
 }

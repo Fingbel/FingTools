@@ -32,17 +32,17 @@ public class MapNodeEditor : GenericNodeEditor<NPCSpawner>
     {
         panOffset.x = 0;
         panOffset.y = 0;
+        _name = "MapNode";
     }
 
     protected override void LoadGroups()
     {
         groups.Clear();
 
-        // Find all DoorSpawner instances in the scene
+        // Find all "MapSpawner" instances in the scene
         NPCSpawner[] spawners = FindObjectsByType<NPCSpawner>(FindObjectsSortMode.None);
         foreach (var spawner in spawners)
         {
-            Debug.Log(spawner.name);
             // Find the map name by climbing up the hierarchy
             string mapName = GetMapName(spawner.transform);
 
