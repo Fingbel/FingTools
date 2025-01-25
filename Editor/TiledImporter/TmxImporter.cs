@@ -29,8 +29,9 @@ public class TmxImporter : CustomTmxImporter
             UpdatePPU(args.AssetImporter, tileSize);        
         string tempMapName = map.name;
         EditorApplication.delayCall += () =>
-        {
+        {            
             NPCManager.RefreshNPCSpawners();
+            MapManager.RefreshUniverse();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         };

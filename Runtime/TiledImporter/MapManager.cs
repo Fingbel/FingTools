@@ -9,6 +9,7 @@ namespace FingTools.Internal
 {
 public class MapManager : ScriptableObject
 {
+    public static Action OnUniverseRefresh;
     public List<string> existingMaps = new List<string>();
     public List<string> existingWorlds = new List<string>();
     public Dictionary<string, List<string>> worldMaps = new();
@@ -90,6 +91,7 @@ public class MapManager : ScriptableObject
         {
             Instance.LoadedMapObject = null;
         }
+        OnUniverseRefresh?.Invoke();
     }
     public static void RefreshWorldMaps()
     {       

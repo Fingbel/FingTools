@@ -62,7 +62,6 @@ public class NPCManager : ScriptableObject {
         GameObject map = null;
         if(MapManager.IsMapPartOfWorld(mapName))
         {
-            Debug.Log($"Map {mapName} is part of a world");
             var world =  MapLoader.Instance.SpawnedWorlds.FirstOrDefault(world => world.name == MapManager.GetWorldFromMap(mapName));
             map = world.transform.Find(mapName).gameObject;
         }

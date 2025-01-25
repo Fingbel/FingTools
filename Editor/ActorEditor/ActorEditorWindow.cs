@@ -364,6 +364,7 @@ public static void CreateNewActor(string _actorName, NPCSpawner npcSpawner = nul
         npcSpawner.npcActor = newNPC; // Assign the new Actor_SO to the NPCSpawner
         EditorUtility.SetDirty(npcSpawner); // Mark the NPCSpawner as dirty to save changes
         NPCManager.RefreshNPCSpawners(); // Refresh the NPCSpawners in the scene
+        MapManager.RefreshUniverse(); // Refresh the universe to update the NPCSpawners
     }
        
     // Refresh the AssetDatabase
