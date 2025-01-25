@@ -80,20 +80,22 @@ public class NPCSpawnerWindow : EditorWindow
             }
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            if (GUILayout.Button("Select", GUILayout.ExpandWidth(false)))
+            GUIContent buttonContent = new GUIContent(EditorGUIUtility.IconContent("d_Search Icon").image, "View");
+            if (GUILayout.Button(buttonContent, GUILayout.Width(30), GUILayout.Height(30)))
             {
                 if (spawner != null)
                 {
                     //Here we should make sur the spawned is on the currently loaded map, otherwise we should load it
                     if (MapManager.Instance.LoadedMapObject != spawner.transform.parent.parent.parent.name)
                     {                            
-                        
-                        MapLoader.LoadMap(spawner.transform.parent.parent.parent.parent.name, true);                           
-                        MapLoader.LoadMap(spawner.transform.parent.parent.parent.name, false);
+                        if(isWorld)
+                            MapLoader.LoadMap(spawner.transform.parent.parent.parent.parent.name, isWorld);  
+                        else
+                            MapLoader.LoadMap(spawner.transform.parent.parent.parent.name, isWorld);
                         
                     }
                     // Select the GameObject
-                    Selection.activeGameObject = spawner.gameObject;
+                    //Selection.activeGameObject = spawner.gameObject;
                     SceneView sceneView = SceneView.lastActiveSceneView;
                     // Create bounds around the object and focus
                     if (sceneView != null)
