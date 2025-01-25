@@ -10,6 +10,18 @@ namespace FingTools.Internal
 {
 public partial class ActorEditorWindow : EditorWindow
 {
+    public static ActorEditorWindow Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = GetWindow<ActorEditorWindow>();
+            }
+            return _instance;
+        }
+    }
+    public static ActorEditorWindow _instance;
     public static event Action OnActorAvailableUpdated;
     public static event Action<Actor_SO> OnActorUpdated;
     private string actorName;
@@ -54,7 +66,7 @@ public partial class ActorEditorWindow : EditorWindow
     {
         ActorEditorWindow window = GetWindow<ActorEditorWindow>(true);
         window.titleContent = new GUIContent(_actorName);
-        window.CreateNewActor(_actorName,npcSpawner);        
+        CreateNewActor(_actorName,npcSpawner,true);        
         window.Show();
     }
 
@@ -315,8 +327,7 @@ public partial class ActorEditorWindow : EditorWindow
         Repaint();
     }
 
-    
-private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
+public static void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null,bool openWindow = true)
 {    
     // Define the default name
     string actorNameToUse = GetUniqueActorName(_actorName);
@@ -324,7 +335,7 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
     // Check if an Actor with the generated name already exists
     string actorAssetPath = $"Assets/Resources/FingTools/Actors/{actorNameToUse}.asset";
     if (AssetDatabase.LoadAssetAtPath<ScriptableObject>(actorAssetPath) != null)
-    {
+    {        
         EditorUtility.DisplayDialog("Error", "An Actor with this name already exists.", "OK");        
         return;
     }
@@ -337,14 +348,16 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
     // Save the NPC asset
     AssetDatabase.CreateAsset(newNPC, actorAssetPath);
     AssetDatabase.SaveAssets();
-
-    // Set the newly created NPC as the selected NPC
-    selectedActor = newNPC;
-    selectedActor.name = actorNameToUse;    
-    tempActorName = string.Empty; // Clear the input field
-    GUI.FocusControl(null);
-    ClearActorData(_actorName);
-
+    if(openWindow)
+    {
+        Instance.selectedActor = newNPC;
+        Instance.selectedActor.name = actorNameToUse;    
+        Instance.tempActorName = string.Empty; // Clear the input field
+        Instance.renaming = false;
+        GUI.FocusControl(null);
+        Instance.ClearActorData(_actorName);
+        SetActorToPreview(newNPC);
+    }   
     // If an NPCSpawner was passed, assign the new Actor_SO to its npcTemplate
     if (npcSpawner != null)
     {
@@ -352,15 +365,13 @@ private void CreateNewActor(string _actorName, NPCSpawner npcSpawner = null)
         EditorUtility.SetDirty(npcSpawner); // Mark the NPCSpawner as dirty to save changes
         NPCManager.RefreshNPCSpawners(); // Refresh the NPCSpawners in the scene
     }
-    renaming = false;
-
-    
+       
     // Refresh the AssetDatabase
     AssetDatabase.Refresh();
     OnActorAvailableUpdated?.Invoke();
 }
 
-private string GetUniqueActorName(string baseName)
+private static string GetUniqueActorName(string baseName)
 {
     int index = 1;
     string uniqueName = baseName;
