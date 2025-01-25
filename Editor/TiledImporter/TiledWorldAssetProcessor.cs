@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEngine;
 
 #if UNITY_EDITOR
 namespace FingTools.Internal
@@ -14,11 +13,13 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
             {
                Refresh(assetPath);
             }
-                if (assetPath.EndsWith(".tmx"))
-                {
-                    TiledLinker.CheckForNPCAttribute(assetPath);
-                    Refresh(assetPath);
-                }
+            if (assetPath.EndsWith(".tmx"))
+            {
+                TiledLinker.CheckForNPCAttribute(assetPath);                    
+                Refresh(assetPath);                     
+                AssetDatabase.SaveAssets();          
+                AssetDatabase.Refresh();               
+            }
                     
             }
 
@@ -31,9 +32,8 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
 
             if(assetPath.EndsWith(".tmx"))
             {                
-                TiledLinker.CheckForNPCAttribute(assetPath);
                 Refresh(assetPath);
-
+                
             }
         } 
         

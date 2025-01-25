@@ -11,7 +11,9 @@ using UnityEditor.SceneManagement;
 namespace FingTools
 {
 public class MapLoader : MonoBehaviour
-{
+{   
+    public List<GameObject> SpawnedMaps => spawnedMaps;
+    public List<GameObject> SpawnedWorlds => spawnedWorlds;
     [SerializeField] private List<GameObject> spawnedMaps = new();
     [SerializeField] private List<GameObject> spawnedWorlds = new();
     List<string> mapsInWorlds ;

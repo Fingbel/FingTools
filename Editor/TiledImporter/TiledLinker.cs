@@ -18,7 +18,7 @@ public class TiledLinker
     public static void CheckForNPCAttribute(string xmlFilePath)
     {        
         // Load the XML document
-        XmlDocument doc = new XmlDocument();
+        XmlDocument doc = new ();
         doc.Load(xmlFilePath);
 
         // Find the objectgroup named "NPC"
@@ -35,7 +35,6 @@ public class TiledLinker
         if (npcGroup == null)
         {
             // No objectgroup with the name "NPC" found
-            Console.WriteLine("No 'NPC' objectgroup found.");
             return;
         }
 
@@ -54,8 +53,6 @@ public class TiledLinker
                     objectNode.Attributes.Append(typeAttribute);
                 }
                 typeAttribute.Value = "NPC";
-
-                Console.WriteLine($"Added type='NPC' to object with id={objectNode.Attributes["id"].Value}");
             }
         }
 

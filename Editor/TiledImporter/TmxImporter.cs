@@ -1,17 +1,21 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEngine;
+using FingTools.Internal;
+
 
 #if SUPER_TILED2UNITY_INSTALLED
 using SuperTiled2Unity.Editor;
 
 [AutoCustomTmxImporter()]
- public class TmxImporter : CustomTmxImporter
+public class TmxImporter : CustomTmxImporter
  {
     private TmxAssetImportedArgs m_ImportedArgs;
 
     public override void TmxAssetImported(TmxAssetImportedArgs args)
     {
-        m_ImportedArgs = args;
+        var map = args.ImportedSuperMap;
+        
         int tileSize;
         if (EditorPrefs.HasKey("TileSize"))
         {
@@ -23,6 +27,13 @@ using SuperTiled2Unity.Editor;
         }
         if(args.AssetImporter.PixelsPerUnit != tileSize)
             UpdatePPU(args.AssetImporter, tileSize);        
+        string tempMapName = map.name;
+        EditorApplication.delayCall += () =>
+        {
+            NPCManager.Instance.RefreshNPCSpawners(tempMapName);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        };
     }
 
     public static void UpdatePPU(TmxAssetImporter importer,int pixelsPerUnit)
