@@ -59,8 +59,19 @@ public class NPCManager : ScriptableObject {
         {
             npcSpawnerList.spawners.Clear();
         }
-            
-        var map = MapLoader.Instance.SpawnedMaps.FirstOrDefault(map => Path.GetFileNameWithoutExtension(map.name) == mapName);
+        GameObject map = null;
+        if(MapManager.IsMapPartOfWorld(mapName))
+        {
+            Debug.Log($"Map {mapName} is part of a world");
+            var world =  MapLoader.Instance.SpawnedWorlds.FirstOrDefault(world => world.name == MapManager.GetWorldFromMap(mapName));
+            map = world.transform.Find(mapName).gameObject;
+        }
+        else
+        {
+            map = MapLoader.Instance.SpawnedMaps.FirstOrDefault(map => Path.GetFileNameWithoutExtension(map.name) == mapName);
+        }
+        
+        
         for(int i = 0; i < map.transform.GetChild(0).childCount; i++)
         {
             if(map.transform.GetChild(0).GetChild(i).name == "NPC")

@@ -116,7 +116,7 @@ public class TiledLinker
             string sessionPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-session");
             if (File.Exists(projectPath))
             {
-                if (MapManager.Instance.NoMaps())
+                if (!MapManager.Instance.HasMaps())
                 {
                     int option = EditorUtility.DisplayDialogComplex(
                         "No Maps Found",

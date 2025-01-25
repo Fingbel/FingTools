@@ -193,7 +193,7 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
         foreach (string worldPath in MapManager.Instance.existingWorlds)
         {
             string worldContent = File.ReadAllText(worldPath);
-            var worldData = JsonUtility.FromJson<MapLoader.WorldData>(worldContent);
+            var worldData = JsonUtility.FromJson<WorldData>(worldContent);
             mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
         }        
         Dictionary<GUIContent,string> mapContents = new ();

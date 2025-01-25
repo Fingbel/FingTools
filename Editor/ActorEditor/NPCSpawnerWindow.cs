@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace FingTools.Internal
 {
@@ -46,8 +45,43 @@ public class NPCSpawnerWindow : EditorWindow
             GUILayout.BeginVertical();
             foreach (var spawner in mapEntry.Value)
             {
+                if(spawner == null)
+                {
+                    continue;
+                }
                 GUILayout.BeginHorizontal();
-                EditorGUILayout.ObjectField(spawner, typeof(NPCSpawner), false, GUILayout.Width(150));
+                GUILayout.Space(40);
+                if(GUILayout.Button("O",GUILayout.ExpandWidth(false),GUILayout.Width(20)))
+                {
+                    if (spawner != null)
+                    {
+                        //Here we should make sur the spawned is on the currently loaded map, otherwise we should load it
+                        if(MapManager.Instance.LoadedMapObject != spawner.transform.parent.parent.parent.name)
+                        {
+                            MapManager.RefreshUniverse();
+                            if(MapManager.IsMapPartOfWorld(spawner.transform.parent.parent.parent.name))
+                            {
+                                MapLoader.LoadMap(spawner.transform.parent.parent.parent.parent.name,true);
+                            }
+                            else
+                            {
+                                MapLoader.LoadMap(spawner.transform.parent.parent.parent.name,false);                            
+                            }
+                        }
+                        // Select the GameObject
+                        Selection.activeGameObject = spawner.gameObject;                       
+                        SceneView sceneView = SceneView.lastActiveSceneView;
+                        // Create bounds around the object and focus
+                        if (sceneView != null)
+                        {
+                            sceneView.pivot = spawner.transform.position;
+
+                            // Repaint to reflect changes
+                            sceneView.Repaint();
+                        }
+                    }
+                }
+                EditorGUILayout.LabelField(spawner.name, GUILayout.Width(70));
                 EditorGUILayout.ObjectField(spawner.npcActor, typeof(Actor_SO), false,GUILayout.Width(150));
 
                 if(spawner.npcActor != null)
