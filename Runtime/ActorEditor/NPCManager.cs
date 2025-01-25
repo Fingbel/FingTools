@@ -9,7 +9,7 @@ namespace FingTools.Internal
 {
 public class NPCManager : ScriptableObject {
 
-    public Dictionary<string,List<NPCSpawnerData>> npcSpawners = new();
+    public List<NPCSpawnerList> npcSpawners = new();
     public static NPCManager Instance{
         get{
             if(_instance == null){
@@ -31,60 +31,79 @@ public class NPCManager : ScriptableObject {
         }
     }
     private static NPCManager _instance;    
-    public void RefreshNPCSpawners(string mapName)
-    {        
-        Debug.Log(mapName);
-        Debug.Log(MapManager.Instance.existingMaps.First());
-        if(!MapManager.Instance.existingMaps.Any(map => Path.GetFileNameWithoutExtension(map) == Path.GetFileNameWithoutExtension(mapName)))
+    [MenuItem("FingTools/Refresh NPC Spawners")]
+    public static void RefreshNPCSpawners()
+    {
+        Instance.npcSpawners.Clear();
+        foreach (var map in MapManager.Instance.existingMaps)
+        {
+            Instance.AddAllNPCSpawnersFromMap(map);
+        }
+    }
+    private void AddAllNPCSpawnersFromMap(string mapName)
+    {               
+        mapName = Path.GetFileNameWithoutExtension(mapName);
+        if(!MapManager.Instance.existingMaps.Any(map => Path.GetFileNameWithoutExtension(map) == mapName))
         {
             Debug.LogWarning("Map "+mapName+" is not existing in the universe, cannot refresh NPC Spawners");
             return;
         }
-        if(!npcSpawners.ContainsKey(mapName))        
-            npcSpawners.Add(mapName,new List<NPCSpawnerData>());
-        else
-            npcSpawners[mapName].Clear();
-            
-        foreach(var map in MapLoader.Instance.SpawnedMaps)
+
+        var npcSpawnerList = npcSpawners.FirstOrDefault(n => n.mapName == mapName);
+        if (npcSpawnerList == null)
         {
-            if(map.name == Path.GetFileNameWithoutExtension(mapName))
+            npcSpawnerList = new NPCSpawnerList(mapName);
+            npcSpawners.Add(npcSpawnerList);
+        }
+        else
+        {
+            npcSpawnerList.spawners.Clear();
+        }
+            
+        var map = MapLoader.Instance.SpawnedMaps.FirstOrDefault(map => Path.GetFileNameWithoutExtension(map.name) == mapName);
+        for(int i = 0; i < map.transform.GetChild(0).childCount; i++)
+        {
+            if(map.transform.GetChild(0).GetChild(i).name == "NPC")
             {
-                Debug.Log($"Found map {map.name} with {map.transform.childCount} children");
-                for(int i = 0; i < map.transform.GetChild(0).childCount; i++)
+                for(int j = 0; j < map.transform.GetChild(0).GetChild(i).childCount; j++)
                 {
-                    if(map.transform.GetChild(0).GetChild(i).name == "NPC")
+                    Transform spawner = map.transform.GetChild(0).GetChild(i).GetChild(j);
+                    if(spawner.GetComponent<NPCSpawner>() != null)
                     {
-                        Debug.Log("Found NPC layer");
-                        for(int j = 0; j < map.transform.GetChild(0).GetChild(i).childCount; j++)
-                        {
-                            Transform spawner = map.transform.GetChild(0).GetChild(i).GetChild(j);
-                            if(spawner.GetComponent<NPCSpawner>() != null)
-                            {
-                                NPCSpawner npcSpawner = spawner.GetComponent<NPCSpawner>();
-                                npcSpawners[mapName].Add(new NPCSpawnerData(npcSpawner.name,mapName,spawner.position,npcSpawner));
-                            }
-                        }
+                        NPCSpawner npcSpawner = spawner.GetComponent<NPCSpawner>();                                 
+                        npcSpawnerList.spawners.Add(new NPCSpawnerData(npcSpawner.name,spawner.position,npcSpawner.npcActor));
                     }
                 }
             }
-        } 
+        }
         EditorUtility.SetDirty(this);                   
     }
-    }
-
+}
+[System.Serializable]
 public class NPCSpawnerData
 {
-    public string name{get;private set;}
-    public string mapName{get;private set;}
-    public Vector2 position{get;private set;}
-    public NPCSpawner nPCSpawner{get;private set;}
+    public string name;
+    public Vector2 position;
+    public Actor_SO actor_SO;
 
-    public NPCSpawnerData(string name, string mapName, Vector2 position, NPCSpawner nPCSpawner)
+    public NPCSpawnerData(string name, Vector2 position,Actor_SO actor_SO)
     {
         this.name = name;
+        this.position = position;    
+        this.actor_SO = actor_SO ?? null;
+
+    }
+}
+[System.Serializable]
+public class NPCSpawnerList
+{
+    public string mapName;
+    [SerializeField]public List<NPCSpawnerData> spawners;
+
+    public NPCSpawnerList(string mapName)
+    {
         this.mapName = mapName;
-        this.position = position;
-        this.nPCSpawner = nPCSpawner;
+        this.spawners = new List<NPCSpawnerData>();
     }
 }
 }

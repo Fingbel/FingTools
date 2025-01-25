@@ -19,8 +19,7 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
                 Refresh(assetPath);                     
                 AssetDatabase.SaveAssets();          
                 AssetDatabase.Refresh();               
-            }
-                    
+            }                    
             }
 
         foreach (string assetPath in deletedAssets)

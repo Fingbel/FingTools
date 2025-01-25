@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEditor;
+using System;
 
 namespace FingTools.Internal
 {
+    [Serializable]
     public class NPCSpawner : MonoBehaviour
     {       
-        public Actor_SO npcActor;
+        [SerializeField]public Actor_SO npcActor;
         private readonly int defaultSpriteIndex = 3;                        
         #if UNITY_EDITOR
         private void OnDrawGizmos()

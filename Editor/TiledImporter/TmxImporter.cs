@@ -30,7 +30,7 @@ public class TmxImporter : CustomTmxImporter
         string tempMapName = map.name;
         EditorApplication.delayCall += () =>
         {
-            NPCManager.Instance.RefreshNPCSpawners(tempMapName);
+            NPCManager.RefreshNPCSpawners();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         };
