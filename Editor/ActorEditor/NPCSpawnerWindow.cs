@@ -3,13 +3,13 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace FingTools.Internal
 {
 public class NPCSpawnerWindow : EditorWindow
 {
     private Vector2 scrollPosition;
-    private Dictionary<string, bool> foldouts = new Dictionary<string, bool>();
     public static NPCSpawnerWindow Instance
     {
         get
@@ -22,7 +22,7 @@ public class NPCSpawnerWindow : EditorWindow
         }
     }
     public static NPCSpawnerWindow _instance;
-    private Dictionary<string, List<NPCSpawner>> npcSpawnersByMap = new Dictionary<string, List<NPCSpawner>>();
+    
     private List<string> mapsInWorlds = new List<string>();
     private List<string> mapsOutWorlds = new List<string>();
 
@@ -33,15 +33,18 @@ public class NPCSpawnerWindow : EditorWindow
     }
 
     private void OnEnable()
-    {        
-        SetAllFoldouts(true);
-        MapManager.OnUniverseRefresh += GatherNPCSpawners;
+    {                
+        MapManager.RefreshUniverse();        
+        NPCManager.RefreshNPCSpawners();  
+        NPCLoader.GatherNPCSpawners();
+        SortMaps();              
+        MapManager.OnUniverseRefresh += NPCLoader.GatherNPCSpawners;
         MapManager.OnUniverseRefresh += SortMaps;
-        MapManager.RefreshUniverse();
-    }        
+    }
+
     private void OnDisable()
     {
-        MapManager.OnUniverseRefresh -= GatherNPCSpawners;
+        MapManager.OnUniverseRefresh -= NPCLoader.GatherNPCSpawners;
         MapManager.OnUniverseRefresh -= SortMaps;
     }
 
@@ -61,46 +64,17 @@ public class NPCSpawnerWindow : EditorWindow
             GUILayout.Label("World: "+kvp.Key, new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold });
             
             foreach (var map in kvp.Value)
-            {
-                // Manage foldout state per map
-                bool isFolded = true;
-                if(foldouts.ContainsKey(map))
-                {
-                    isFolded = foldouts[map];
-                }              
-
-                bool newFoldout = EditorGUILayout.Foldout(isFolded, "Map: "+ Path.GetFileNameWithoutExtension(map),true);
-                if (newFoldout != isFolded)
-                {
-                    foldouts[map] = newFoldout; // Update foldout state
-                }
-                
-                if (newFoldout)
-                {
-                    DrawSpawners(Path.GetFileNameWithoutExtension(map), true);
-                }
+            {                                       
+                DrawSpawners(Path.GetFileNameWithoutExtension(map), true);                
             }
             DrawSeparator();
         }
         GUILayout.Label("Maps outside worlds", new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold });
         foreach (var map in mapsOutWorlds)
         {
-            // Manage foldout state for maps outside worlds
-            bool isFolded = true;
-            if(foldouts.ContainsKey(map))
-            {
-                isFolded = foldouts[map];
-            }              
-                
-            bool newFoldout = EditorGUILayout.Foldout(isFolded, "Map: "+ Path.GetFileNameWithoutExtension(map),true);
-            if (newFoldout != isFolded)
-            {
-                foldouts[map] = newFoldout; // Update foldout state
-            }
-            if (newFoldout)
-            {
-                DrawSpawners(map, false);
-            }
+            
+            DrawSpawners(map, false);
+            
         }
         GUILayout.EndVertical();
         EditorGUILayout.EndScrollView();
@@ -109,7 +83,7 @@ public class NPCSpawnerWindow : EditorWindow
     private static void DrawSpawners(string mapEntry,bool isWorld)
     {
         GUILayout.BeginVertical();
-        foreach (var spawner in Instance.npcSpawnersByMap[mapEntry])
+        foreach (var spawner in NPCLoader.NPCSpawnersByMap?[mapEntry])
         {
             if (spawner == null)
             {
@@ -148,13 +122,13 @@ public class NPCSpawnerWindow : EditorWindow
                 spawner.npcActor = newactor;
                 EditorUtility.SetDirty(spawner);
             }
-            if (GUILayout.Button("Select Actor",GUILayout.Height(20),GUILayout.ExpandWidth(false)))
-            {
+            // if (GUILayout.Button("Select Actor",GUILayout.Height(20),GUILayout.ExpandWidth(false)))
+            // {
 
-            }
+            // }
             if (spawner.npcActor != null)
             {
-                if (GUILayout.Button("Edit Actor",GUILayout.Height(20), GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button($"Edit {spawner.npcActor.name}",GUILayout.Height(20), GUILayout.ExpandWidth(false)))
                 {
                     ActorEditorWindow.SetActorToPreview(spawner.npcActor);
                 }
@@ -166,7 +140,7 @@ public class NPCSpawnerWindow : EditorWindow
             }
             else
             {
-                if (GUILayout.Button("Create Actor",GUILayout.Height(20),GUILayout.ExpandWidth(false)))
+                if (GUILayout.Button("Create New Actor",GUILayout.Height(20),GUILayout.ExpandWidth(false)))
                 {
                     ActorEditorWindow.CreateNewActor(spawner.name, spawner, false);
                     EditorUtility.SetDirty(spawner);
@@ -186,20 +160,12 @@ public class NPCSpawnerWindow : EditorWindow
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
         GUILayout.Space(after);
     }     
-    private void SetAllFoldouts(bool state)
-    {
-        // Set all foldout states to the same value
-        foreach (var key in foldouts.Keys.ToList())
-        {
-            foldouts[key] = state;
-        }
-        Repaint(); // Optional if you want to explicitly refresh the UI
-    }
+    
     private static void SortMaps()
     {
         Instance.mapsInWorlds.Clear();
         Instance.mapsOutWorlds.Clear();
-        foreach (var map in Instance.npcSpawnersByMap.Keys)
+        foreach (var map in NPCLoader.NPCSpawnersByMap.Keys)
         {
             if (MapManager.IsMapPartOfWorld(map))
             {
@@ -209,21 +175,6 @@ public class NPCSpawnerWindow : EditorWindow
             {
                 Instance.mapsOutWorlds.Add(map);
             }
-        }
-    }
-    private static void GatherNPCSpawners()
-    {
-        Instance.npcSpawnersByMap.Clear();
-        var npcSpawners = FindObjectsByType<NPCSpawner>(FindObjectsInactive.Include,FindObjectsSortMode.None);
-
-        foreach (var spawner in npcSpawners)
-        {
-            string mapName = spawner.transform.parent.parent.parent.name;
-            if (!Instance.npcSpawnersByMap.ContainsKey(mapName))
-            {
-                Instance.npcSpawnersByMap[mapName] = new List<NPCSpawner>();
-            }
-            Instance.npcSpawnersByMap[mapName].Add(spawner);
         }
     }
 }

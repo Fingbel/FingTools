@@ -27,14 +27,17 @@ public class TmxImporter : CustomTmxImporter
         }
         if(args.AssetImporter.PixelsPerUnit != tileSize)
             UpdatePPU(args.AssetImporter, tileSize);        
-        string tempMapName = map.name;
-        EditorApplication.delayCall += () =>
-        {            
-            NPCManager.RefreshNPCSpawners();
-            MapManager.RefreshUniverse();
+    
+                   
+        EditorApplication.delayCall += () => 
+        {
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            MapManager.RefreshUniverse();                     
+            NPCManager.RefreshNPCSpawners(); 
         };
+        
+        
     }
 
     public static void UpdatePPU(TmxAssetImporter importer,int pixelsPerUnit)

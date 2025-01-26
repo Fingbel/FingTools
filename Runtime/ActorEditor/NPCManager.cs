@@ -10,6 +10,7 @@ namespace FingTools.Internal
 public class NPCManager : ScriptableObject {
 
     public List<NPCSpawnerList> npcSpawners = new();
+    public static List<Actor_SO> availableActors = new();
     public static NPCManager Instance{
         get{
             if(_instance == null){
@@ -30,7 +31,18 @@ public class NPCManager : ScriptableObject {
             return _instance;
         }
     }
+    
+
     private static NPCManager _instance;    
+    public static void RefreshAvailableActors()
+    {
+        availableActors.Clear();
+        var actorSOs = Resources.LoadAll<Actor_SO>("FingTools/Actors");
+        foreach (var actorSO in actorSOs)
+        {
+            availableActors.Add(actorSO);
+        }
+    }
     [MenuItem("FingTools/Refresh NPC Spawners")]
     public static void RefreshNPCSpawners()
     {
