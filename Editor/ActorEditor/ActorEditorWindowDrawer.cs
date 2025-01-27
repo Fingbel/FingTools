@@ -90,9 +90,9 @@ public partial class ActorEditorWindow : EditorWindow
     private void DrawActorPreview(Rect rect)
     {
         if (body != null) DrawSprite(body,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
-        if (outfit != null) DrawSprite(outfit,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
-        if (eyes != null) DrawSprite(eyes,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
         if (hairstyle != null) DrawSprite(hairstyle,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+        if (outfit != null) DrawSprite(outfit,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
+        if (eyes != null) DrawSprite(eyes,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);        
         if (accessory != null) DrawSprite(accessory,globalIndex+ actorAnimationDelta+currentActorFrame, rect,0);
     }   
     private static void DrawSprite(SpritePart_SO part, int spriteIndex, Rect rect, int localIndex = 3)
