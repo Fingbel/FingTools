@@ -5,6 +5,8 @@ using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Xml;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -13,13 +15,56 @@ namespace FingTools.Internal{
 public class TiledLinker
 {
     private const string TiledPathKey = "TiledExecutablePath";
+    public static void CheckForNPCAttribute(string xmlFilePath)
+    {        
+        // Load the XML document
+        XmlDocument doc = new ();
+        doc.Load(xmlFilePath);
 
-    public static void CheckForTiled()
+        // Find the objectgroup named "NPC"
+        XmlNode npcGroup = null;
+        foreach (XmlNode node in doc.GetElementsByTagName("objectgroup"))
+        {
+            if (node.Attributes["name"]?.Value == "NPC")
+            {
+                npcGroup = node;
+                break;
+            }
+        }
+
+        if (npcGroup == null)
+        {
+            // No objectgroup with the name "NPC" found
+            return;
+        }
+
+        // Iterate over all objects in the NPC objectgroup
+        foreach (XmlNode objectNode in npcGroup.SelectNodes("object"))
+        {
+            // Check if the object already has a "type" attribute
+            XmlAttribute typeAttribute = objectNode.Attributes["type"];
+
+            if (typeAttribute == null || typeAttribute.Value != "NPC")
+            {
+                // Add the type="NPC" attribute if not present
+                if (typeAttribute == null)
+                {
+                    typeAttribute = doc.CreateAttribute("type");
+                    objectNode.Attributes.Append(typeAttribute);
+                }
+                typeAttribute.Value = "NPC";
+            }
+        }
+
+        // Save the modified XML back to the file
+        doc.Save(xmlFilePath);
+    }
+    public static bool CheckForTiled()
     {
         string savedPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
-        if (!string.IsNullOrEmpty(savedPath) && File.Exists(savedPath) && IsValidTiledExecutable(savedPath))
+        if (string.IsNullOrEmpty(savedPath) || !File.Exists(savedPath) || !IsValidTiledExecutable(savedPath))
         {
-            return;
+            return false;
         }
 
         string[] commonPaths =
@@ -39,15 +84,18 @@ public class TiledLinker
                 isTiledInstalled = true;
                 Debug.Log($"Tiled found at: {path}");
                 SaveTiledPath(path);
-                break;
+                return true;
             }
         }
 
         if (!isTiledInstalled)
-        {
-            Debug.LogWarning("Tiled is not installed or could not be found in common paths.");
-            PromptUserForTiledPath();
+        {                        
+            if(PromptUserForTiledPath())
+                return true;
+            else 
+                return false;
         }
+        return false;
     }
 
     [MenuItem("FingTools/Open Tiled", true)]
@@ -68,7 +116,7 @@ public class TiledLinker
             string sessionPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-session");
             if (File.Exists(projectPath))
             {
-                if (MapManager.Instance.NoMaps())
+                if (!MapManager.Instance.HasMaps())
                 {
                     int option = EditorUtility.DisplayDialogComplex(
                         "No Maps Found",
@@ -110,6 +158,7 @@ public class TiledLinker
 
     public static void OpenTiledWithProjectAndMap(string mapPath)
     {
+        Debug.Log(mapPath);
         string tiledPath = EditorPrefs.GetString(TiledPathKey, string.Empty);
         string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", "TiledProject.tiled-project");
         string sessionPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", "TiledProject.tiled-session");
@@ -187,7 +236,7 @@ public class TiledLinker
         }
     }
     
-    private static void PromptUserForTiledPath()
+    private static bool PromptUserForTiledPath()
     {
         int option = EditorUtility.DisplayDialogComplex(
             "Tiled Not Found",
@@ -200,24 +249,56 @@ public class TiledLinker
         switch (option)
         {
             case 0: // Visit Tiled Website
-                Application.OpenURL("https://www.mapeditor.org/");
-                break;
+                Application.OpenURL("https://thorbjorn.itch.io/tiled");
+                return false;
+
             case 1: // Search for Tiled
                 string path = EditorUtility.OpenFilePanel("Select Tiled Executable", "", "exe");
                 if (!string.IsNullOrEmpty(path) && File.Exists(path) && IsValidTiledExecutable(path))
                 {
                     Debug.Log($"Tiled found at: {path}");
                     SaveTiledPath(path);
+                    return true;
                 }
                 else
-                {
-                    Debug.LogError("Invalid path or Tiled executable not found.");
+                {                    
+                    return false;
                 }
-                break;
-            case 2: // Cancel
-                Debug.Log("User cancelled the operation.");
-                return;
+
+            case 2:
+                return false;
         }
+        return false;
+    }
+    [MenuItem("FingTools/DEBUG/Check Tiled is closed")]
+    public static bool CheckTiledProcess()
+    {
+        // Check if Tiled is running
+        Process[] tiledProcesses = Process.GetProcessesByName("Tiled");
+
+        if (tiledProcesses.Length > 0)
+        {            
+            if (EditorUtility.DisplayDialog(
+                "Tiled is Running",
+                "Tiled is currently running \n Please close Tiled to start importing assets. \n BEWARE : ALL UNSAVED CHANGED WILL BE LOST.",
+                
+                "Close Tiled and proceed",
+                "Cancel"))
+            {
+                // User chose to quit Tiled automatically
+                foreach (var process in tiledProcesses)
+                {
+                    if(process.HasExited)continue;
+                    process.Kill();
+                    process.WaitForExit();
+                }
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+            return true;
     }
 
     private static bool IsValidTiledExecutable(string path)

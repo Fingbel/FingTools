@@ -22,31 +22,40 @@ public static class ST2ULinker
     internal static void GenerateTSXFile(string fileName, string tilesetName, string tileSet, int width, int height, int tileSize)
     {
         // Calculate tile count based on the image size and tile size
-        int tileCount = width * height / (tileSize * tileSize);
+        int tileCount = (width * height) / (tileSize * tileSize);
 
         // Define the TSX file content
-        string content =
-            $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            $"<tileset version=\"1.10\" tiledversion=\"1.11.0\" name=\"{tilesetName}\" " +
-            $"tilewidth=\"{tileSize}\" tileheight=\"{tileSize}\" tilecount=\"{tileCount}\" columns=\"{width / tileSize}\">\n" +
-            $" <image source=\"{tileSet}\" width=\"{width}\" height=\"{height}\"/>\n" +
-            $"</tileset>";
+        string content = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        $"<tileset version=\"1.10\" tiledversion=\"1.11.0\" name=\"{tilesetName}\" " +
+                        $"tilewidth=\"{tileSize}\" tileheight=\"{tileSize}\" tilecount=\"{tileCount}\" columns=\"{width / tileSize}\">\n" +
+                        $" <image source=\"{tileSet}\" width=\"{width}\" height=\"{height}\"/>\n" +
+                        $"</tileset>";
 
-        // Define the file path in the Unity project's directory
-        string filePath = Path.Combine(Application.dataPath, "..", fileName);
+        // Make sure fileName is a valid path and starts with "Assets/"
+        if (!fileName.StartsWith("Assets"))
+        {
+            fileName = Path.Combine("Assets", fileName); // Prepend "Assets" if it's missing
+        }
+
+        // Ensure the directory exists
+        string directoryPath = Path.GetDirectoryName(fileName);
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
 
         try
         {
             // Write the content to the file
-            File.WriteAllText(filePath, content);
-
+            File.WriteAllText(fileName, content);
+            
             // Notify the user that the file was successfully created
-            UnityEngine.Debug.Log($"TSX file generated at: {filePath}");
+            //Debug.Log($"TSX file generated at: {fileName}");
         }
         catch (IOException e)
         {
             // Handle any potential file write errors
-            UnityEngine.Debug.LogError($"Failed to generate TSX file: {e.Message}");
+            UnityEngine.Debug.LogError($"Failed to generate TSX file at {fileName}: {e.Message}");
         }
     }
     internal static void AutoFixTextures(string tilesetPath)

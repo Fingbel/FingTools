@@ -3,19 +3,41 @@ using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using FingTools.Internal;
 using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
 using UnityEditor.SceneManagement;
-
-namespace FingTools
+#endif
+namespace FingTools.Internal
 {
 public class MapLoader : MonoBehaviour
-{
+{   
+    public List<GameObject> SpawnedMaps => spawnedMaps;
+    public List<GameObject> SpawnedWorlds => spawnedWorlds;
     [SerializeField] private List<GameObject> spawnedMaps = new();
     [SerializeField] private List<GameObject> spawnedWorlds = new();
-    List<string> mapsInWorlds ;
+    //private List<string> mapsInWorlds  = new();
     private GameObject mapHolder;
     private GameObject worldHolder;
+    public static bool IsInitialized 
+    {
+        get
+        {
+            if(_instance == null)
+            {
+                if (FindFirstObjectByType<MapLoader>() == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }}
     private static MapLoader _instance;
     public static MapLoader Instance 
     {
@@ -24,20 +46,16 @@ public class MapLoader : MonoBehaviour
             if (_instance == null)
             {
                 _instance = FindFirstObjectByType<MapLoader>();
-                if (_instance == null){
-                    if(EditorUtility.DisplayDialog("MissingMapLoader", "An action requiring a MapLoader has been detected and no MapLoader has been found in the active scene.",$"Add MapLoader to {SceneManager.GetActiveScene().name}","Cancel"))
-                    {
-                        GameObject mapManagerGameObject = new GameObject("MapLoader");                        
-                        _instance = mapManagerGameObject.AddComponent<MapLoader>();                             
-                        _instance.mapHolder = new GameObject("MapHolder");
-                        _instance.mapHolder.transform.SetParent(_instance.transform);
-                        _instance.worldHolder = new GameObject("WorldHolder");
-                        _instance.worldHolder.transform.SetParent(_instance.transform);
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                if (_instance == null){                    
+                    GameObject mapManagerGameObject = new GameObject("MapLoader");                        
+                    _instance = mapManagerGameObject.AddComponent<MapLoader>();                             
+                    _instance.mapHolder = new GameObject("MapHolder");
+                    _instance.mapHolder.transform.SetParent(_instance.transform);
+                    _instance.worldHolder = new GameObject("WorldHolder");
+                    _instance.worldHolder.transform.SetParent(_instance.transform);      
+                    #if UNITY_EDITOR
+                    EditorUtility.SetDirty(mapManagerGameObject);
+                    #endif                                                      
                 }                
             }
             if (Application.isPlaying)
@@ -62,12 +80,14 @@ public class MapLoader : MonoBehaviour
 
     public static void LoadMap(string mapObjectName,bool isWorld = false)
     {
+        if(MapManager.Instance.LoadedMapObject == mapObjectName) return;
         mapObjectName = Path.GetFileNameWithoutExtension(mapObjectName);        
+
         Instance.spawnedMaps.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));
         Instance.spawnedWorlds.Where(x => x.name != mapObjectName).ToList().ForEach(x => x.SetActive(false));        
         if(isWorld)
         {
-            GameObject world = Instance.spawnedWorlds.FirstOrDefault(x => x.name == mapObjectName);
+            GameObject world = Instance.spawnedWorlds.FirstOrDefault(x => x.name == mapObjectName);            
             if(world != null)
             {
                 world.SetActive(true);
@@ -92,7 +112,6 @@ public class MapLoader : MonoBehaviour
     private void AddMapObjectToScene(string mapPath)
     {
         #if UNITY_EDITOR
-        Debug.Log($"Loading map: {mapPath}");
         GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(mapPath);
         if (mapPrefab != null)
         {
@@ -144,8 +163,9 @@ public class MapLoader : MonoBehaviour
     {
         Instance.RefreshSpawnedWorldObjects(MapManager.Instance.existingWorlds);
         Instance.RefreshSpawnedMapObjects(MapManager.Instance.existingMaps);
-        EditorUtility.SetDirty(Instance);
-        //EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        #if UNITY_EDITOR
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        #endif
     }
 
     private void RefreshSpawnedMapObjects(List<string> existingMaps)
@@ -163,58 +183,53 @@ public class MapLoader : MonoBehaviour
                 spawnedMaps.Add(map);            
             }
         }
-
+        List<GameObject> mapToRemove = new();
         // Remove maps that are no longer in the existingMaps list
         foreach(var map in spawnedMaps.Where(x => !existingMaps.Any(y => Path.GetFileNameWithoutExtension(y) == x.name)).ToList())
         {
             DestroyImmediate(map);
-            spawnedMaps.Remove(map);
+            mapToRemove.Add(map);            
         }
 
         // Remove maps that are now part of a world
-        foreach(var map in spawnedMaps.Where(x => mapsInWorlds.Contains(x.name)).ToList())
+        foreach(var map in spawnedMaps)
         {
-            DestroyImmediate(map);
-            spawnedMaps.Remove(map);
+            if(MapManager.IsMapPartOfWorld(map.name))
+            {
+                DestroyImmediate(map);
+                mapToRemove.Add(map);
+            }
         }
+        foreach(var map in mapToRemove)
+        {
+            spawnedMaps.Remove(map);
+        }   
 
         // Load maps that are in the existingMaps list but not in the spawnedMaps list
         foreach(var map in existingMaps.Where(x => !spawnedMaps.Any(y => y.name == Path.GetFileNameWithoutExtension(x))))
         {
-            //filter out maps that are already in a world
-            if(mapsInWorlds.Contains(Path.GetFileNameWithoutExtension(map)))
+            if(!MapManager.IsMapPartOfWorld(Path.GetFileNameWithoutExtension(map)))
             {
-                continue;
+                AddMapObjectToScene(map);
             }
-            AddMapObjectToScene(map);            
         }
     }
 
     private void RefreshSpawnedWorldObjects(List<string> existingWorlds)
     {
         spawnedWorlds.Clear();
-        mapsInWorlds = new List<string>();
         if(worldHolder == null)
         {
             worldHolder = transform.Find("WorldHolder").gameObject;
         }
+        
+        // Add all worlds to the spawnedWorlds list
         for(int i = Instance.worldHolder.transform.childCount - 1; i >= 0; i--)
         {
             GameObject world = worldHolder.transform.GetChild(i).gameObject;
             if(world != null)
             {
-                spawnedWorlds.Add(world);
-                // Inspect the world to find maps it contains
-                foreach (var worldPath in existingWorlds)
-                {
-                    if (Path.GetFileNameWithoutExtension(worldPath) == world.name)
-                    {
-                        string worldContent = File.ReadAllText(worldPath);
-                        var worldData = JsonUtility.FromJson<WorldData>(worldContent);
-                        mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
-                        break;
-                    }
-                }
+                spawnedWorlds.Add(world);                
             }
         }
 
@@ -224,36 +239,13 @@ public class MapLoader : MonoBehaviour
             DestroyImmediate(world);
             spawnedWorlds.Remove(world);
         }
-
         // Load worlds that are in the existingWorlds list but not in the spawnedWorlds list
         foreach(var world in existingWorlds.Where(x => !spawnedWorlds.Any(y => y.name == Path.GetFileNameWithoutExtension(x))))
         {
             AddWorldObjectToScene(world);
-            // Parse the world file to get the maps it contains
-            string worldContent = File.ReadAllText(world);
-            var worldData = JsonUtility.FromJson<WorldData>(worldContent);
-            mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
         }
-
-        
     }
 
-    [System.Serializable]
-    public class WorldData
-    {
-        public List<MapData> maps;
-        public bool onlyShowAdjacentMaps;
-        public string type;
-    }
-
-    [System.Serializable]
-    public class MapData
-    {
-        public string fileName;
-        public int height;
-        public int width;
-        public int x;
-        public int y;
-    }
+    
 }
 }

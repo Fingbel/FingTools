@@ -1,5 +1,4 @@
 using UnityEditor;
-using UnityEngine;
 
 #if UNITY_EDITOR
 namespace FingTools.Internal
@@ -12,30 +11,39 @@ public class TiledWorldAssetProcessor : AssetPostprocessor
         {
             if (assetPath.EndsWith(".world"))
             {
-                Debug.Log($"World asset imported: {assetPath}");
-                MapManager.RefreshUniverse();
-                MapLoader.RefreshMapObjects();
-            }            
-        }
+               Refresh(assetPath);
+            }
+            if (assetPath.EndsWith(".tmx"))
+            {
+                TiledLinker.CheckForNPCAttribute(assetPath);                    
+                Refresh(assetPath);                     
+                AssetDatabase.SaveAssets();          
+                AssetDatabase.Refresh();               
+            }                    
+            }
 
         foreach (string assetPath in deletedAssets)
         {
             if (assetPath.EndsWith(".world"))
             {
-                Debug.Log($"World asset deleted: {assetPath}");
-                MapManager.RefreshUniverse();
-                MapLoader.RefreshMapObjects();
+                Refresh(assetPath);
             }
 
             if(assetPath.EndsWith(".tmx"))
-            {
-                MapManager.RefreshUniverse();
-                MapLoader.RefreshMapObjects();
-
+            {                
+                Refresh(assetPath);
+                
             }
         } 
         
     }
-}
+
+        private static void Refresh(string assetPath)
+        {
+            MapManager.RefreshUniverse();
+            if (MapLoader.IsInitialized)
+                MapLoader.RefreshMapObjects();
+        }
+    }
 }
 #endif

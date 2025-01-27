@@ -2,7 +2,9 @@
     "name": "com.FingbelActorEditor.RunTime",
     "rootNamespace": "",
     "references": [
-        "GUID:41524c21c95e5fe4dbc5b48bd21995a4"
+        "GUID:41524c21c95e5fe4dbc5b48bd21995a4",
+        "GUID:e5870a2afeb86184b83934c4447d2d3f",
+        "GUID:06e56dbbb8dec4d43a0b85b0fe0dd0ca"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -11,6 +13,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.seanba.super-tiled2unity",
+            "expression": "2.2.4",
+            "define": "SUPER_TILED2UNITY_INSTALLED"
+        }
+    ],
     "noEngineReferences": false
 }

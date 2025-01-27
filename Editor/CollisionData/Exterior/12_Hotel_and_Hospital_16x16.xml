@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tileset version="1.11" tiledversion="1.11.0" name="12_Hotel_and_Hospital_16x16.png" tilewidth="16" tileheight="16" tilecount="1984" columns="32">
+ <image source="../../Art/Exterior/12_Hotel_and_Hospital_16x16.png" width="512" height="992"/>
+ <tile id="1669">
+  <objectgroup draworder="index" id="2">
+   <object id="3" x="3.875" y="1" width="8.25" height="15"/>
+  </objectgroup>
+ </tile>
+ <tile id="1698">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="3" y="0" width="10" height="15"/>
+  </objectgroup>
+ </tile>
+ <tile id="1701">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="3" y="0" width="10" height="15"/>
+  </objectgroup>
+ </tile>
+ <tile id="1825">
+  <objectgroup draworder="index" id="2">
+   <object id="1" x="0" y="0" width="16" height="11.9375"/>
+  </objectgroup>
+ </tile>
+</tileset>

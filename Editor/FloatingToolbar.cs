@@ -7,62 +7,64 @@ using System.Collections.Generic;
 using System.IO;
 using FingTools.Internal;
 using System.Linq;
+using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
+
 namespace FingTools.Tiled
 {
 [Overlay(typeof(EditorWindow), "FingToolbar", true)]
 public class FingToolbar : ToolbarOverlay
-{
-    FingToolbar() : base(ActorEditor.Id,MapSwitch.Id,NewMap.Id,OpenTiled.Id) { }
+{ 
+    
+    FingToolbar() : base(ActorEditor.Id,MapToolsGroup.Id,NewMap.Id,OpenTiled.Id) 
+    {
+        
+    }   
+    [EditorToolbarElement("MapTools/MapToolsGroup", typeof(EditorWindow))]
+    public class MapToolsGroup : VisualElement
+    {
+        public const string Id = "MapTools/MapToolsGroup";
+
+        public MapToolsGroup()
+        {
+            // Create and add MapSwitch
+            var mapSwitch = new MapSwitch();
+            Add(mapSwitch);
+
+            // Create and add CurrentMapLabel
+            var mapLabel = new CurrentMapLabel();
+            Add(mapLabel);
+
+           
+
+            // Optional: Add spacing or layout customization
+            style.flexDirection = FlexDirection.Row; // Horizontal layout
+            style.alignItems = Align.Center;         // Center align elements
+            style.paddingLeft = 5;
+            style.paddingRight = 5;
+        }
+    } 
 
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class MapSwitch : EditorToolbarButton
     {
         public const string Id = "SwitchMap";
-
+        
         public MapSwitch()
         {
             text = "SwitchMap";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/switchMap.png");
             
             clicked += () =>
-            {        
+            {
                 MapManager.RefreshUniverse();
-                if(MapLoader.Instance != null) 
-                    MapLoader.RefreshMapObjects();
-                else
-                    return;
-                string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
-                bool tiledProjectFileDetected = File.Exists(projectPath);
-                bool mapDetected = MapManager.Instance.HasMaps();
-                // Check if Tiled project is detected
-                if(!tiledProjectFileDetected)
-                {
-                    if(EditorUtility.DisplayDialog("Map Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
-                    {
-                            TiledImporterEditorWindow.ShowWindow();
-                            return;
-                    }
-                    return;
-                }                
-                else
-                {                    
-                    if(mapDetected)
-                    {
-                        ShowSearchWindow();
-                    }
-                    else
-                    {
-                        if(EditorUtility.DisplayDialog("Map Loader", "No Tiled maps have been created yet, would you like to create one ?", "Yes", "No"))
-                        {
-                            CreateNewTiledMapWindow.ShowWindow();
-                        };              
-                    }
-                }                
+                if (!AssetChecker.MapLoaderInitRefresh()) return;
+                if (!AssetChecker.CheckForTiledProject()) return;
+                if(!AssetChecker.CheckForMaps()) return;
+                ShowSearchWindow();
             };
-        }
-
+        }          
         private string ShowSearchWindow()
         {
             var searchWindow = ScriptableObject.CreateInstance<MapSearchWindow>();
@@ -70,6 +72,7 @@ public class FingToolbar : ToolbarOverlay
             return "";
         }
     }
+
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class OpenTiled : EditorToolbarButton
     {
@@ -77,45 +80,28 @@ public class FingToolbar : ToolbarOverlay
 
         public OpenTiled()
         {
-            text = "Tiled";
+            text = "Open Map";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
-            clicked += () =>{
-                if(MapLoader.Instance != null) 
-                    MapLoader.RefreshMapObjects();
+            clicked += () =>
+            {
+                if(!TiledLinker.CheckForTiled()) return;
+                if(!AssetChecker.MapLoaderInitRefresh()) return;
+                if(!AssetChecker.CheckForTilesets()) return;
+                if(!AssetChecker.CheckForMaps()) return;           
+                MapLoader.RefreshMapObjects();
+                string loaded = MapManager.Instance.LoadedMapObject;
+                if(string.IsNullOrEmpty(loaded))
+                    TiledLinker.OpenTiled();
                 else
-                    return;
-                string projectPath = Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project");
-                bool tilesetDetected = File.Exists(projectPath);
-                bool mapDetected = MapManager.Instance.HasMaps();
-                if(!tilesetDetected)
-                {
-                    if(EditorUtility.DisplayDialog("Tiled Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
-                    {
-                            TiledImporterEditorWindow.ShowWindow();
-                            return;
-                    }
-                    return;
-                }
-                else
-                {
-                    if(mapDetected)
-                    {
-                        TiledLinker.CheckForTiled();
-                        TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\"+MapManager.Instance.LoadedMapObject+".tmx");
-                    }
+                    if(MapManager.Instance.IsLoadedMapObjectAWorld)
+                        TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tiledworlds\\" + MapManager.Instance.LoadedMapObject + ".world");                
                     else
-                    {
-                        if(EditorUtility.DisplayDialog("Map Loader", "No Tiled maps have been created yet, would you like to create one ?", "Yes", "No"))
-                        {
-                            CreateNewTiledMapWindow.ShowWindow();
-                        };              
-                    }
-                    
-                }
-                    
-                };
+                        TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
+            };
         }
-    }
+
+            
+        }
     [EditorToolbarElement(Id, typeof(EditorWindow))]
     class NewMap : EditorToolbarButton
     {
@@ -127,23 +113,9 @@ public class FingToolbar : ToolbarOverlay
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/newMap.png");
             clicked += () =>
             {
-                if(MapLoader.Instance != null) 
-                    MapLoader.RefreshMapObjects();
-                else
-                    return;
-                bool tilesetDetected = File.Exists(Path.Combine(Application.dataPath, "FingTools", "Tiled", $"TiledProject.tiled-project"));
-                if(!tilesetDetected)
-                {
-                    if(EditorUtility.DisplayDialog("Map Loader", "No tilesets have been imported yet, would you like to import some ?", "Yes", "No"))
-                    {
-                            TiledImporterEditorWindow.ShowWindow();
-                            return;
-                    }
-                }
-                else
-                {
-                    CreateNewTiledMapWindow.ShowWindow();
-                }
+                if(!AssetChecker.MapLoaderInitRefresh()) return;
+                if(!AssetChecker.CheckForTilesets()) return;            
+                CreateNewTiledMapWindow.ShowWindow();
             };
         }
     }
@@ -157,21 +129,50 @@ public class FingToolbar : ToolbarOverlay
         {
             text = "ActorEditor";
             icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/actor-logo.png");
-            clicked += () => {
-                if(Directory.Exists("Assets/Resources/FingTools"))
-                {
-                    var manager = Resources.Load<SpriteManager>("FingTools/SpriteManager");
-                    if(manager?.HasAssetsImported() == true)
-                    {
-                        ActorEditorWindow.ShowWindow();
-                        return;
-                    }
-                }              
-                if(EditorUtility.DisplayDialog("Actor Editor", "No character assets have been imported yet. Would you like to import assets now?", "Yes", "No"))
-                {
-                    CharacterImporterEditorWindow.ShowWindow();
-                };
+            clicked += () =>
+            {
+                if(!AssetChecker.CheckForSpriteManager()) return;
+                ActorEditorWindow.ShowWindow();
             };
+        }
+
+            
+        }
+    [EditorToolbarElement(Id,typeof(EditorWindow))]
+    public class CurrentMapLabel : VisualElement
+    {
+         public const string Id = "MapLabel";
+
+        private Label mapLabel;
+        private bool ShouldShowButton(string mapLabel)
+        {
+            return !string.IsNullOrEmpty(mapLabel);
+        }
+        public CurrentMapLabel()
+        {
+            // Initialize the label
+            mapLabel = new Label("No Map Selected");
+            mapLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            mapLabel.style.paddingLeft = 10;
+            mapLabel.style.paddingRight = 10;
+            Add(mapLabel);
+
+            // Subscribe to a change event (this could be your custom logic)
+            EditorApplication.update += UpdateMapName;
+        }
+
+        private void UpdateMapName()
+        {
+            string currentMapName = MapManager.Instance.LoadedMapObject; 
+            style.display = ShouldShowButton(currentMapName) ? DisplayStyle.Flex : DisplayStyle.None;
+            
+            mapLabel.text = currentMapName;             
+        }
+
+        ~CurrentMapLabel()
+        {
+            // Unsubscribe to prevent memory leaks
+            EditorApplication.update -= UpdateMapName;
         }
     }
 
@@ -192,7 +193,7 @@ public class MapSearchWindow : ScriptableObject, ISearchWindowProvider
         foreach (string worldPath in MapManager.Instance.existingWorlds)
         {
             string worldContent = File.ReadAllText(worldPath);
-            var worldData = JsonUtility.FromJson<MapLoader.WorldData>(worldContent);
+            var worldData = JsonUtility.FromJson<WorldData>(worldContent);
             mapsInWorlds.AddRange(worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)));
         }        
         Dictionary<GUIContent,string> mapContents = new ();

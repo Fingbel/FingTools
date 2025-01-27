@@ -2,13 +2,17 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 using System.IO;
+using System.Linq;
+using System;
 
 namespace FingTools.Internal
 {
 public class MapManager : ScriptableObject
 {
+    public static Action OnUniverseRefresh;
     public List<string> existingMaps = new List<string>();
     public List<string> existingWorlds = new List<string>();
+    public Dictionary<string, List<string>> worldMaps = new();
     private static MapManager _instance;
     public string LoadedMapObject{
         get{
@@ -42,6 +46,7 @@ public class MapManager : ScriptableObject
     }
     private string _currentLoadedMapObject;
     public bool _isCurrentLoadedMapObjectWorld;
+
     public static MapManager Instance
     {
         get
@@ -66,13 +71,43 @@ public class MapManager : ScriptableObject
             return _instance;
         }
     }
-    public static void RefreshUniverse()
+    public static bool IsMapPartOfWorld(string name)
     {
-        RefreshMaps();
-        RefreshWorlds();        
+        foreach (var world in Instance.worldMaps)
+        {
+            if(world.Value.Contains(name))
+            {
+                return true;
+            }
+        }
+        return false;
     }
-    
-    private static void RefreshMaps()
+    public static void RefreshUniverse()
+    {        
+        RefreshWorlds();      
+        RefreshMaps();  
+        RefreshWorldMaps();
+        if(Instance.existingMaps.Count + Instance.existingWorlds.Count ==0)
+        {
+            Instance.LoadedMapObject = null;
+        }
+        OnUniverseRefresh?.Invoke();
+    }
+    public static void RefreshWorldMaps()
+    {       
+        _instance.worldMaps.Clear();
+        foreach (var worldPath in _instance.existingWorlds)
+        {
+            string worldContent = File.ReadAllText(worldPath);
+            var worldData = JsonUtility.FromJson<WorldData>(worldContent);
+            var worldName = Path.GetFileNameWithoutExtension(worldPath);
+            if(!_instance.worldMaps.ContainsKey(worldName))
+            {
+                _instance.worldMaps.Add(worldName,worldData.maps.Select(m => Path.GetFileNameWithoutExtension(m.fileName)).ToList());
+            }
+        }
+    }
+        private static void RefreshMaps()
     {
 #if UNITY_EDITOR
         Instance.existingMaps.Clear();
@@ -87,6 +122,7 @@ public class MapManager : ScriptableObject
                 {
                     Instance.existingMaps.Add(path);
                 }
+                
             }
         }
 #endif
@@ -106,6 +142,10 @@ public class MapManager : ScriptableObject
                 {
                     Instance.existingWorlds.Add(path);
                 }
+                if(!Instance.worldMaps.ContainsKey(path))
+                {
+                    Instance.worldMaps.Add(path,new List<string>());
+                }
             }
         }
         #endif
@@ -115,9 +155,39 @@ public class MapManager : ScriptableObject
         return existingMaps.Count > 0;
     }
 
-    public bool NoMaps()
+    public bool HasWorlds()
     {
-        return existingMaps.Count == 0;
+        return existingWorlds.Count > 0;
+    }   
+
+    public static string GetWorldFromMap(string mapName)
+    {
+        foreach (var world in Instance.worldMaps)
+        {
+            if(world.Value.Contains(mapName))
+            {
+                return world.Key;
+            }
+        }
+        return null;
     }
-}
+    }
+    [System.Serializable]
+    public class WorldData
+    {
+        public List<MapData> maps;
+        public bool onlyShowAdjacentMaps;
+        public string type;
+    }
+
+    [System.Serializable]
+    public class MapData
+    {
+        public string fileName;
+        public int height;
+        public int width;
+        public int x;
+        public int y;
+    }
+
 }
