@@ -415,6 +415,11 @@ public partial class ActorEditorWindow : EditorWindow
             // Save modifications Button
             if (GUILayout.Button("Save Changes", GUILayout.Height(30), GUILayout.Width(120)))
             {
+                if(Application.isPlaying)
+                {
+                    EditorUtility.DisplayDialog("Error", "Cannot save changes while in Play Mode", "OK");
+                    return;
+                }
                 if (body != null)
                     SaveActor();
                 else

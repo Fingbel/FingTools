@@ -65,6 +65,7 @@ public class NPCSpawnerWindow : EditorWindow
             
             foreach (var map in kvp.Value)
             {                                       
+                GUILayout.Label("Map: "+map, new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold });
                 DrawSpawners(Path.GetFileNameWithoutExtension(map), true);                
             }
             DrawSeparator();
@@ -72,7 +73,7 @@ public class NPCSpawnerWindow : EditorWindow
         GUILayout.Label("Maps outside worlds", new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold });
         foreach (var map in mapsOutWorlds)
         {
-            
+            GUILayout.Label("Map: "+map, new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold });
             DrawSpawners(map, false);
             
         }
@@ -122,15 +123,12 @@ public class NPCSpawnerWindow : EditorWindow
                 spawner.npcActor = newactor;
                 EditorUtility.SetDirty(spawner);
             }
-            // if (GUILayout.Button("Select Actor",GUILayout.Height(20),GUILayout.ExpandWidth(false)))
-            // {
-
-            // }
             if (spawner.npcActor != null)
             {
                 if (GUILayout.Button($"Edit {spawner.npcActor.name}",GUILayout.Height(20), GUILayout.ExpandWidth(false)))
                 {
                     ActorEditorWindow.SetActorToPreview(spawner.npcActor);
+                    
                 }
                 if (GUILayout.Button("X", GUILayout.Width(20), GUILayout.Height(20),GUILayout.ExpandWidth(false)))
                 {

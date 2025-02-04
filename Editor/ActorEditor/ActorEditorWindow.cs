@@ -347,7 +347,6 @@ public static void CreateNewActor(string _actorName, NPCSpawner npcSpawner = nul
 
     // Save the NPC asset
     AssetDatabase.CreateAsset(newNPC, actorAssetPath);
-    AssetDatabase.SaveAssets();
     if(openWindow)
     {
         Instance.selectedActor = newNPC;
@@ -367,6 +366,7 @@ public static void CreateNewActor(string _actorName, NPCSpawner npcSpawner = nul
     }
        
     // Refresh the AssetDatabase
+    AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
     OnActorAvailableUpdated?.Invoke();
 }
