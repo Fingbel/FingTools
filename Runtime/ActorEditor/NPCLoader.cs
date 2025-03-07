@@ -68,7 +68,7 @@ public class NPCLoader : MonoBehaviour {
             _npcSpawnersByMap[mapName].Add(spawner);
         }
     }
-
+    #if UNITY_EDITOR
     [MenuItem("FingTools/Testing Get Unassigned Actors ")]
     public static void RefreshAssignedActors()
     {
@@ -102,4 +102,5 @@ public class NPCLoader : MonoBehaviour {
             }
         }
     }
+    #endif
 }

@@ -2,11 +2,10 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System;
 
 namespace FingTools.Internal
 {
+#if UNITY_EDITOR
 public class NPCSpawnerWindow : EditorWindow
 {
     private Vector2 scrollPosition;
@@ -176,4 +175,5 @@ public class NPCSpawnerWindow : EditorWindow
         }
     }
 }
+#endif
 }

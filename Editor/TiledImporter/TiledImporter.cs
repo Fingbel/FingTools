@@ -90,7 +90,7 @@ namespace FingTools.Internal
             // Check if the custom collision XML file exists
             if (!File.Exists(customXmlCollisionFilePath))
             {
-                Debug.LogError($"Custom collision data file not found: {customXmlCollisionFilePath}");
+                Debug.LogWarning($"Custom collision data file not found: {customXmlCollisionFilePath}");
                 return;
             }
 

@@ -43,6 +43,7 @@ public class NPCManager : ScriptableObject {
             availableActors.Add(actorSO);
         }
     }
+    #if UNITY_EDITOR
     [MenuItem("FingTools/Refresh NPC Spawners")]
     public static void RefreshNPCSpawners()
     {
@@ -52,6 +53,7 @@ public class NPCManager : ScriptableObject {
             Instance.AddAllNPCSpawnersFromMap(map);
         }
     }
+    
     private void AddAllNPCSpawnersFromMap(string mapName)
     {               
         mapName = Path.GetFileNameWithoutExtension(mapName);
@@ -100,6 +102,7 @@ public class NPCManager : ScriptableObject {
         }
         EditorUtility.SetDirty(this);                   
     }
+    #endif
 }
 [System.Serializable]
 public class NPCSpawnerData
