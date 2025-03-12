@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using FingTools.Internal;
 using UnityEngine;
 
@@ -101,6 +102,20 @@ namespace FingTools{
                 return false;
             }
         }   
+
+        /// <summary>
+        /// Retrieve all the bodypart names , entry are null for missing parts
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<ActorPartType,string> GetBodyPartNamesDict()
+        {
+            Dictionary<ActorPartType,string> dict = new();
+            foreach(ActorPartType bodypart in Enum.GetValues(typeof(ActorPartType)))
+            {
+                dict.Add(bodypart,modelController.GetBodyPartName(bodypart));
+            }
+            return dict;
+        }
 
         /// <summary>
         /// Play a one shot animation

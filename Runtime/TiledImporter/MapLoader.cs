@@ -60,7 +60,7 @@ public class MapLoader : MonoBehaviour
             }
             if (Application.isPlaying)
             {
-                DontDestroyOnLoad(Instance);
+                DontDestroyOnLoad(_instance);
             }
             return _instance;
         }

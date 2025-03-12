@@ -52,6 +52,18 @@ namespace FingTools.Internal
             }
             lastCurrentDirection = CardinalDirection.S;
         }
+        public string GetBodyPartName(ActorPartType actorPartType)
+        {
+            switch(actorPartType)
+            {
+                case ActorPartType.Accessories: return actor_SO.accessory?.name.ToString();
+                case ActorPartType.Outfits: return actor_SO.outfit?.name.ToString();
+                case ActorPartType.Eyes: return actor_SO.eyes.name?.ToString();
+                case ActorPartType.Bodies: return actor_SO.body.name?.ToString();
+                case ActorPartType.Hairstyles: return actor_SO.hairstyle?.name.ToString();
+            }
+            return null;
+        }
         private void Update()
         {
             if (actor_SO != null && isActive)
