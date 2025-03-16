@@ -14,7 +14,7 @@ namespace FingTools.Internal
         [SerializeField] private SpritePartController accessorySpriteController;
 
         private Dictionary<ActorPartType, SpritePartController> partControllers = new();
-        private Dictionary<ActorPartType, SpritePart_SO> partDIct = new();
+        private Dictionary<ActorPartType, SpritePart_SO> partDictionary = new();
         private float maxAnimationTick = 0.13f;
         private float animationTick;
         private int currentAnimationFrame;        
@@ -57,11 +57,11 @@ namespace FingTools.Internal
         {
             switch(actorPartType)
             {
-                case ActorPartType.Accessories: return partDIct[ActorPartType.Accessories]?.name.ToString();
-                case ActorPartType.Outfits: return partDIct[ActorPartType.Outfits]?.name.ToString();
-                case ActorPartType.Eyes: return partDIct[ActorPartType.Eyes]?.ToString();
-                case ActorPartType.Bodies: return partDIct[ActorPartType.Bodies]?.ToString();
-                case ActorPartType.Hairstyles: return partDIct[ActorPartType.Hairstyles]?.name.ToString();
+                case ActorPartType.Accessories: return partDictionary[ActorPartType.Accessories]?.name.ToString();
+                case ActorPartType.Outfits: return partDictionary[ActorPartType.Outfits]?.name.ToString();
+                case ActorPartType.Eyes: return partDictionary[ActorPartType.Eyes]?.ToString();
+                case ActorPartType.Bodies: return partDictionary[ActorPartType.Bodies]?.ToString();
+                case ActorPartType.Hairstyles: return partDictionary[ActorPartType.Hairstyles]?.name.ToString();
             }
             return null;
         }
@@ -158,11 +158,11 @@ namespace FingTools.Internal
             outfitSpriteController?.UpdateLibrary(actorSO.outfit?.spriteLibraryAsset ?? null);
             eyeSpriteController?.UpdateLibrary(actorSO.eyes?.spriteLibraryAsset ?? null);
             accessorySpriteController?.UpdateLibrary(actorSO.accessory?.spriteLibraryAsset ?? null);
-            partDIct.Add(ActorPartType.Accessories,actor_SO.accessory);
-            partDIct.Add(ActorPartType.Hairstyles,actor_SO.hairstyle);
-            partDIct.Add(ActorPartType.Outfits,actor_SO.outfit);
-            partDIct.Add(ActorPartType.Eyes,actor_SO.eyes);
-            partDIct.Add(ActorPartType.Bodies,actor_SO.body);
+            partDictionary.Add(ActorPartType.Accessories,actor_SO.accessory);
+            partDictionary.Add(ActorPartType.Hairstyles,actor_SO.hairstyle);
+            partDictionary.Add(ActorPartType.Outfits,actor_SO.outfit);
+            partDictionary.Add(ActorPartType.Eyes,actor_SO.eyes);
+            partDictionary.Add(ActorPartType.Bodies,actor_SO.body);
             return true;
         }
 
@@ -172,19 +172,19 @@ namespace FingTools.Internal
             switch (type)
             {
             case ActorPartType.Accessories:
-                partDIct[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Accessories] = spritePart;
                 break;
             case ActorPartType.Outfits:
-                partDIct[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Accessories] = spritePart;
                 break;
             case ActorPartType.Eyes:
-                partDIct[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Accessories] = spritePart;
                 break;
             case ActorPartType.Bodies:
-                partDIct[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Accessories] = spritePart;
                 break;
             case ActorPartType.Hairstyles:
-                partDIct[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Accessories] = spritePart;
                 break;
             }
         }
