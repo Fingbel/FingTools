@@ -57,11 +57,11 @@ namespace FingTools.Internal
         {
             switch(actorPartType)
             {
-                case ActorPartType.Accessories: return partDictionary[ActorPartType.Accessories]?.name.ToString();
-                case ActorPartType.Outfits: return partDictionary[ActorPartType.Outfits]?.name.ToString();
-                case ActorPartType.Eyes: return partDictionary[ActorPartType.Eyes]?.ToString();
-                case ActorPartType.Bodies: return partDictionary[ActorPartType.Bodies]?.ToString();
-                case ActorPartType.Hairstyles: return partDictionary[ActorPartType.Hairstyles]?.name.ToString();
+                case ActorPartType.Accessories: return partDictionary[ActorPartType.Accessories]?.name;
+                case ActorPartType.Outfits: return partDictionary[ActorPartType.Outfits]?.name;
+                case ActorPartType.Eyes: return partDictionary[ActorPartType.Eyes]?.name;
+                case ActorPartType.Bodies: return partDictionary[ActorPartType.Bodies]?.name;
+                case ActorPartType.Hairstyles: return partDictionary[ActorPartType.Hairstyles]?.name;
             }
             return null;
         }
@@ -175,16 +175,16 @@ namespace FingTools.Internal
                 partDictionary[ActorPartType.Accessories] = spritePart;
                 break;
             case ActorPartType.Outfits:
-                partDictionary[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Outfits] = spritePart;
                 break;
             case ActorPartType.Eyes:
-                partDictionary[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Eyes] = spritePart;
                 break;
             case ActorPartType.Bodies:
-                partDictionary[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Bodies] = spritePart;
                 break;
             case ActorPartType.Hairstyles:
-                partDictionary[ActorPartType.Accessories] = spritePart;
+                partDictionary[ActorPartType.Hairstyles] = spritePart;
                 break;
             }
         }
