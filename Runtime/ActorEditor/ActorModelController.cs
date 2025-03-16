@@ -163,6 +163,24 @@ namespace FingTools.Internal
         public void UpdatePart(ActorPartType type, ActorSpritePart_SO spritePart) 
         {
             partControllers[type].UpdateLibrary(spritePart?.spriteLibraryAsset ?? null);
+            switch (type)
+            {
+            case ActorPartType.Accessories:
+                actor_SO.accessory = spritePart;
+                break;
+            case ActorPartType.Outfits:
+                actor_SO.outfit = spritePart;
+                break;
+            case ActorPartType.Eyes:
+                actor_SO.eyes = spritePart;
+                break;
+            case ActorPartType.Bodies:
+                actor_SO.body = spritePart;
+                break;
+            case ActorPartType.Hairstyles:
+                actor_SO.hairstyle = spritePart;
+                break;
+            }
         }
 
         //Maybe we should implement a state machine to handle animations
