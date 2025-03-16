@@ -134,5 +134,24 @@ namespace FingTools{
                 return false;
             }            
         }        
+        
+    public int GetAssetId<T>(Dictionary<ActorPartType, string> dict, ActorPartType partType) where T : struct, Enum
+    {
+        if (dict.TryGetValue(partType, out var name) && Enum.TryParse(name, true, out T asset))
+        {
+            return Convert.ToInt32(asset);
+        }
+        return -1;
     }
+
+        public class ActorOutfit 
+    {
+        public int accessoriesAsset;
+        public int outfitsAsset;
+        public int bodiesAsset;
+        public int hairstylesAsset;
+        public int eyesAsset;
+    }
+    }
+    
 }
