@@ -143,14 +143,14 @@ namespace FingTools{
         }
         return -1;
     }
-
-        public class ActorOutfit 
+    [Serializable]
+    public class ActorOutfit 
     {
-        public int accessoriesAsset;
-        public int outfitsAsset;
-        public int bodiesAsset;
-        public int hairstylesAsset;
-        public int eyesAsset;
+        [SerializeField]public int accessoriesAsset;
+        [SerializeField]public int outfitsAsset;
+        [SerializeField]public int bodiesAsset;
+        [SerializeField]public int hairstylesAsset;
+        [SerializeField]public int eyesAsset;
     }
     }
     
