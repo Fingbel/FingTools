@@ -82,17 +82,28 @@ public class CreateNewTiledMapWindow : EditorWindow
             {GenerateEmptyTiles(width, height)}
             </data>
             </layer>
+
             <layer id=""2"" name=""OverGround"" width=""{width}"" height=""{height}"">
             <data encoding=""csv"">
             {GenerateEmptyTiles(width, height)}
             </data>
             </layer>
-            <layer id=""3"" name=""AboveGround"" width=""{width}"" height=""{height}"">
+
+            <layer id=""3"" name=""OverGround2"" width=""{width}"" height=""{height}"">
             <data encoding=""csv"">
             {GenerateEmptyTiles(width, height)}
             </data>
             </layer>
+
+            <layer id=""3"" name=""OverPlayer"" width=""{width}"" height=""{height}"">
+            <data encoding=""csv"">
+            {GenerateEmptyTiles(width, height)}
+            </data>
+            </layer>
+
             <objectgroup id=""1"" name=""NPC"" class=""NPCSpawner""/>
+            <objectgroup id=""1"" name=""Teleporters"" class=""""/>
+            <objectgroup id=""1"" name=""Landings"" class=""""/>
         </map>";
 
         File.WriteAllText(outputPath, mapContent);
