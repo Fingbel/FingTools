@@ -26,7 +26,9 @@ namespace FingTools.Internal
         public float MaxAnimationTick { get => maxAnimationTick; set => maxAnimationTick = value; }
         private Dictionary<string, (int spritesPerDirection, bool fixedDirection)> animationConfigMap;
         private Action onAnimationCompleteCallback;
+        private Action onAnimationMiddleCallback;
         private string baseAnimationName;
+        private float baseAnimationTick;
         public bool isLocked = false;
 
         
@@ -104,9 +106,17 @@ namespace FingTools.Internal
             // Update the current animation frame, wrapping around
             currentAnimationFrame = (currentAnimationFrame + 1) % config.spritesPerDirection;
 
+            // Trigger callback when reaching the middle of the animation
+            if (currentAnimationFrame >= config.spritesPerDirection / 2)
+            {
+                onAnimationMiddleCallback?.Invoke();
+                onAnimationMiddleCallback = null;
+            }
+
             if (currentAnimationFrame >= config.spritesPerDirection - 1)
             {
-                onAnimationCompleteCallback?.Invoke(); // Trigger the callback   
+                onAnimationCompleteCallback?.Invoke(); // Trigger the callback
+                onAnimationCompleteCallback = null;
             }
         }
 
@@ -197,17 +207,21 @@ namespace FingTools.Internal
             currentAnimation = animation.ToString();
         }
 
-        public void PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
+        public void PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,float animationSpeed = 1f,Action onAnimationComplete = null,Action onAnimationMiddle = null)
         {
             if (isLocked) return;
             isLocked = locked;
             baseAnimationName = currentAnimation.ToString();
+            baseAnimationTick = MaxAnimationTick;
+            MaxAnimationTick *= animationSpeed;
             currentAnimationFrame = 0;
             currentAnimation = animation.ToString();
+            onAnimationMiddleCallback += onAnimationMiddle;
             onAnimationCompleteCallback += onAnimationComplete;
             onAnimationCompleteCallback += () => 
             {
                 currentAnimation = baseAnimationName;
+                maxAnimationTick = baseAnimationTick;
                 isLocked = false;
                 onAnimationCompleteCallback = null;
             };

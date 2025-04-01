@@ -120,11 +120,11 @@ namespace FingTools{
         /// <summary>
         /// Play a one shot animation
         /// </summary>
-        public bool PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,Action onAnimationComplete = null)
+        public bool PlayOneShotAnimation(OneShotAnimation animation, bool locked = false,float animationSpeed = 1f,Action onAnimationComplete = null,Action onAnimationMiddle = null)
         {
             if(!modelController.isLocked)
             {
-                modelController.PlayOneShotAnimation(animation,locked,onAnimationComplete);
+                modelController.PlayOneShotAnimation(animation,locked,animationSpeed,onAnimationComplete,onAnimationMiddle);
                 return true;
                 
             }
