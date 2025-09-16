@@ -80,13 +80,14 @@ public partial class ActorEditorWindow : EditorWindow
         }
     }
 
-    [MenuItem("FingTools/Actor Editor",true)]
-    public static bool ValidateActorEditWindow()
-    {
-        if(!Directory.Exists("Assets/Resources/FingTools"))
-            return false;
-        else
-            return false;
+        [MenuItem("FingTools/Actor Editor", true)]
+        public static bool ValidateActorEditWindow()
+        {
+            // if(!Directory.Exists("Assets/Resources/FingTools"))
+            //     return false;
+            // else
+            //     return false;
+        return true;
     }
 
     private void OnEnable()
