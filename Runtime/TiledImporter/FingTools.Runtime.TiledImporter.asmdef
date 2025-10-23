@@ -1,5 +1,5 @@
 {
-    "name": "com.FingbelTiledImporter.RunTime",
+    "name": "FingTools.Runtime.TiledImporter",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
