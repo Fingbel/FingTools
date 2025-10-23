@@ -115,7 +115,7 @@ namespace FingTools.Internal.Editor
                 return;
             }
 
-            string path = $"Assets/MapData/NavGrids/{mapName}_NavGrid.asset";
+            string path = $"Assets/Resources/NavGrids/{mapName}_NavGrid.asset";
             var grid = AssetDatabase.LoadAssetAtPath<NavGrid>(path);
             if (grid == null)
             {

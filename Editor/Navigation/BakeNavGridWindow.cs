@@ -252,23 +252,23 @@ namespace FingTools.Internal.Editor
 
             EditorUtility.ClearProgressBar();
 
-            string rootFolder = "Assets/MapData";
-            string folder = "Assets/MapData/NavGrids";
-            // ensure parent folders exist (create recursively if necessary)
-            if (!AssetDatabase.IsValidFolder("Assets/MapData"))
+            // Save the NavGrid into Resources so it can be loaded at runtime via Resources.Load
+            string resourcesRoot = "Assets/Resources";
+            string resourcesFolder = "Assets/Resources/NavGrids";
+            if (!AssetDatabase.IsValidFolder(resourcesRoot))
             {
-                AssetDatabase.CreateFolder("Assets", "MapData");
+                AssetDatabase.CreateFolder("Assets", "Resources");
             }
-            if (!AssetDatabase.IsValidFolder(folder))
+            if (!AssetDatabase.IsValidFolder(resourcesFolder))
             {
-                AssetDatabase.CreateFolder(rootFolder, "NavGrids");
+                AssetDatabase.CreateFolder(resourcesRoot, "NavGrids");
             }
             // use forward slashes for AssetDatabase paths
-            string path = Path.Combine(folder, selectedMap.name + "_NavGrid.asset").Replace("\\", "/");
+            string path = Path.Combine(resourcesFolder, selectedMap.name + "_NavGrid.asset").Replace("\\", "/");
             AssetDatabase.CreateAsset(asset, path);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            EditorUtility.DisplayDialog("Bake complete", $"NavGrid saved to {path}", "OK");
+            EditorUtility.DisplayDialog("Bake complete", $"NavGrid saved to {path} (Resources)", "OK");
         }
 
         // New overload that supports collider-first mode
@@ -441,11 +441,12 @@ namespace FingTools.Internal.Editor
                 }
             }
 
-            string rootFolder = "Assets/MapData";
-            string folder = "Assets/MapData/NavGrids";
-            if (!AssetDatabase.IsValidFolder("Assets/MapData")) AssetDatabase.CreateFolder("Assets", "MapData");
-            if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder(rootFolder, "NavGrids");
-            string path = Path.Combine(folder, mapObject.name + "_NavGrid.asset").Replace("\\", "/");
+            // Save the NavGrid into Resources so it can be loaded at runtime via Resources.Load
+            string resourcesRoot = "Assets/Resources";
+            string resourcesFolder = "Assets/Resources/NavGrids";
+            if (!AssetDatabase.IsValidFolder(resourcesRoot)) AssetDatabase.CreateFolder("Assets", "Resources");
+            if (!AssetDatabase.IsValidFolder(resourcesFolder)) AssetDatabase.CreateFolder(resourcesRoot, "NavGrids");
+            string path = Path.Combine(resourcesFolder, mapObject.name + "_NavGrid.asset").Replace("\\", "/");
             AssetDatabase.CreateAsset(asset, path);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
