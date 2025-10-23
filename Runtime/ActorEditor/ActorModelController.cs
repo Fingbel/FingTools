@@ -162,17 +162,19 @@ namespace FingTools.Internal
                 Debug.LogWarning($"An Actor has not been assigned to the object: {transform.parent?.name}", this);
                 return false;
             }
-            // Assign prebuilt libraries to sprite controllers
+            // Assign prebuilt libraries to sprite controllers (use method parameter and overwrite existing entries)
             bodySpriteController?.UpdateLibrary(actorSO.body?.spriteLibraryAsset);
             hairstyleSpriteController?.UpdateLibrary(actorSO.hairstyle?.spriteLibraryAsset ?? null);
             outfitSpriteController?.UpdateLibrary(actorSO.outfit?.spriteLibraryAsset ?? null);
             eyeSpriteController?.UpdateLibrary(actorSO.eyes?.spriteLibraryAsset ?? null);
             accessorySpriteController?.UpdateLibrary(actorSO.accessory?.spriteLibraryAsset ?? null);
-            partDictionary.Add(ActorPartType.Accessories,actor_SO.accessory);
-            partDictionary.Add(ActorPartType.Hairstyles,actor_SO.hairstyle);
-            partDictionary.Add(ActorPartType.Outfits,actor_SO.outfit);
-            partDictionary.Add(ActorPartType.Eyes,actor_SO.eyes);
-            partDictionary.Add(ActorPartType.Bodies,actor_SO.body);
+
+            // Use indexer to set or overwrite entries instead of Add to avoid ArgumentException when called multiple times
+            partDictionary[ActorPartType.Accessories] = actorSO.accessory;
+            partDictionary[ActorPartType.Hairstyles] = actorSO.hairstyle;
+            partDictionary[ActorPartType.Outfits] = actorSO.outfit;
+            partDictionary[ActorPartType.Eyes] = actorSO.eyes;
+            partDictionary[ActorPartType.Bodies] = actorSO.body;
             return true;
         }
 
