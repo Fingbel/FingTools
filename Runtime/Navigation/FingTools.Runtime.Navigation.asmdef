@@ -1,0 +1,16 @@
+{
+    "name": "Navigation",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e5870a2afeb86184b83934c4447d2d3f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

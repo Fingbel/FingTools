@@ -36,6 +36,13 @@ public class FingToolbar : ToolbarOverlay
             var mapLabel = new CurrentMapLabel();
             Add(mapLabel);
 
+            // NavGrid overlay toggle
+            var overlayToggle = new Button(() => {
+                FingTools.Internal.Editor.NavGridSceneOverlay.Toggle();
+            }) { text = "NavGrid" };
+            overlayToggle.style.marginLeft = 6;
+            Add(overlayToggle);
+
            
 
             // Optional: Add spacing or layout customization
@@ -54,8 +61,6 @@ public class FingToolbar : ToolbarOverlay
         public MapSwitch()
         {
             text = "SwitchMap";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/switchMap.png");
-            
             clicked += () =>
             {
                 MapManager.RefreshUniverse();
@@ -64,6 +69,11 @@ public class FingToolbar : ToolbarOverlay
                 if(!AssetChecker.CheckForMaps()) return;
                 ShowSearchWindow();
             };
+            // delay icon load to attach time (avoid Unity API from loading thread)
+            this.RegisterCallback<AttachToPanelEvent>(evt => {
+                if (icon == null)
+                    icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/switchMap.png");
+            });
         }          
         private string ShowSearchWindow()
         {
@@ -81,7 +91,6 @@ public class FingToolbar : ToolbarOverlay
         public OpenTiled()
         {
             text = "Open Map";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
             clicked += () =>
             {
                 if(!TiledLinker.CheckForTiled()) return;
@@ -98,6 +107,10 @@ public class FingToolbar : ToolbarOverlay
                     else
                         TiledLinker.OpenTiledWithProjectAndMap("Assets\\FingTools\\Tiled\\Tilemaps\\" + MapManager.Instance.LoadedMapObject + ".tmx");                
             };
+            this.RegisterCallback<AttachToPanelEvent>(evt => {
+                if (icon == null)
+                    icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/tiled-logo.png");
+            });
         }
 
             
@@ -110,13 +123,16 @@ public class FingToolbar : ToolbarOverlay
         public NewMap()
         {
             text = "New Map";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/newMap.png");
             clicked += () =>
             {
                 if(!AssetChecker.MapLoaderInitRefresh()) return;
                 if(!AssetChecker.CheckForTilesets()) return;            
                 CreateNewTiledMapWindow.ShowWindow();
             };
+            this.RegisterCallback<AttachToPanelEvent>(evt => {
+                if (icon == null)
+                    icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/newMap.png");
+            });
         }
     }
     
@@ -128,12 +144,15 @@ public class FingToolbar : ToolbarOverlay
         public ActorEditor()
         {
             text = "ActorEditor";
-            icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/actor-logo.png");
             clicked += () =>
             {
                 if(!AssetChecker.CheckForSpriteManager()) return;
                 ActorEditorWindow.ShowWindow();
             };
+            this.RegisterCallback<AttachToPanelEvent>(evt => {
+                if (icon == null)
+                    icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.fingcorp.fingtools/Media/Icons/actor-logo.png");
+            });
         }
 
             
@@ -150,29 +169,28 @@ public class FingToolbar : ToolbarOverlay
         }
         public CurrentMapLabel()
         {
-            // Initialize the label
+            // Create label element but delay runtime-dependent initialization
             mapLabel = new Label("No Map Selected");
             mapLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             mapLabel.style.paddingLeft = 10;
             mapLabel.style.paddingRight = 10;
             Add(mapLabel);
 
-            // Subscribe to a change event (this could be your custom logic)
-            EditorApplication.update += UpdateMapName;
+            // Subscribe when attached to panel to ensure main-thread safe API usage
+            this.RegisterCallback<AttachToPanelEvent>(evt => {
+                EditorApplication.update += UpdateMapName;
+            });
+            this.RegisterCallback<DetachFromPanelEvent>(evt => {
+                EditorApplication.update -= UpdateMapName;
+            });
         }
 
         private void UpdateMapName()
         {
+            if (MapManager.Instance == null) return;
             string currentMapName = MapManager.Instance.LoadedMapObject; 
             style.display = ShouldShowButton(currentMapName) ? DisplayStyle.Flex : DisplayStyle.None;
-            
             mapLabel.text = currentMapName;             
-        }
-
-        ~CurrentMapLabel()
-        {
-            // Unsubscribe to prevent memory leaks
-            EditorApplication.update -= UpdateMapName;
         }
     }
 
